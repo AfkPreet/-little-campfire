@@ -1,0 +1,24 @@
+{
+  "name": "little-campfire",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 4173",
+    "typecheck": "tsc --noEmit",
+    "shots": "node scripts/shots.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@fontsource/baloo-2": "5.3.0",
+    "@fontsource/patrick-hand": "5.3.0",
+    "phaser": "3.90.0"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  }
+}

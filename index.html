@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <title>Little Campfire</title>
+    <meta name="description" content="A tiny, cozy camping trip." />
+    <meta name="theme-color" content="#2F3558" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Little Campfire" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Little Campfire" />
+    <meta property="og:description" content="A tiny, cozy camping trip." />
+    <meta property="og:image" content="./social.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background: #2f3558;
+        overscroll-behavior: none;
+        touch-action: none;
+        -webkit-user-select: none;
+        user-select: none;
+        -webkit-touch-callout: none;
+        -webkit-tap-highlight-color: transparent;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        position: fixed;
+        inset: 0;
+      }
+      #game {
+        position: absolute;
+        inset: 0;
+      }
+      #game canvas {
+        display: block;
+        touch-action: none;
+      }
+      #safe-probe {
+        position: fixed;
+        inset: 0;
+        visibility: hidden;
+        pointer-events: none;
+        padding-top: env(safe-area-inset-top);
+        padding-right: env(safe-area-inset-right);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+      }
+      #splash {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 18px;
+        background: radial-gradient(ellipse at 50% 70%, #5b5e86 0%, #2f3558 70%);
+        color: #f6efe6;
+        font-family: 'Baloo 2', system-ui, sans-serif;
+        transition: opacity 0.6s ease;
+        z-index: 10;
+      }
+      #splash .ember {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        background: radial-gradient(circle, #ffd59a 0%, #f29e6b 55%, rgba(242, 158, 107, 0) 72%);
+        animation: breathe 2.4s ease-in-out infinite;
+      }
+      #splash .bar {
+        width: 140px;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(246, 239, 230, 0.18);
+        overflow: hidden;
+      }
+      #splash .bar i {
+        display: block;
+        height: 100%;
+        width: 0%;
+        border-radius: 3px;
+        background: #ffd59a;
+        transition: width 0.2s ease;
+      }
+      @keyframes breathe {
+        0%,
+        100% {
+          transform: scale(1);
+          opacity: 0.85;
+        }
+        50% {
+          transform: scale(1.25);
+          opacity: 1;
+        }
+      }
+      #rotate {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        background: radial-gradient(ellipse at 50% 60%, #5b5e86 0%, #2f3558 75%);
+        z-index: 20;
+        padding: 24px;
+        box-sizing: border-box;
+      }
+      body.portrait #rotate {
+        display: flex;
+      }
+      #rotate .card {
+        background: #f6efe6;
+        border-radius: 20px;
+        padding: 28px 26px 22px;
+        box-shadow: 0 4px 12px rgba(74, 66, 80, 0.15);
+        text-align: center;
+        max-width: 280px;
+        font-family: 'Baloo 2', system-ui, sans-serif;
+        color: #4a4250;
+      }
+      #rotate canvas {
+        width: 120px;
+        height: 120px;
+        animation: tilt 2.6s ease-in-out infinite;
+        transform-origin: 50% 80%;
+      }
+      #rotate p {
+        margin: 10px 0 0;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      @keyframes tilt {
+        0%,
+        100% {
+          transform: rotate(0deg);
+        }
+        35%,
+        65% {
+          transform: rotate(-16deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="safe-probe"></div>
+    <div id="game"></div>
+    <div id="splash"><div class="ember"></div><div class="bar"><i id="splash-bar"></i></div></div>
+    <div id="rotate">
+      <div class="card">
+        <canvas id="rotate-hero" width="240" height="240"></canvas>
+        <p>Turn your device sideways</p>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
