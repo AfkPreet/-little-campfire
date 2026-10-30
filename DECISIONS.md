@@ -78,3 +78,16 @@ Process: four independent concepts (Eastern Himalaya, Western Ghats, Meghalaya, 
 ### Accents (spec: every accent logged)
 
 All 74 accents from WORLD.md section 8 were added to `ACCENTS` in `src/palette.ts` with their exact names and hexes; every one is at or below 40% HSB saturation (verified by script at M0). One of my own engine values failed the check (night water tint `#3F4670`, 43.7%) and was changed to the world's night-lake colour `#4E5A7A` (36.1%). The spec-locked night sky top `#2F3558` (46.6%) is a lighting key, not an accent, and stays as specified.
+
+## 5. Build process and integration (M0 → M1)
+
+| Area | Chosen | Rejected | Why |
+| --- | --- | --- | --- |
+| Who builds what | Lead writes the engine spine, systems, scenes and integration; parallel agents build art modules (landscape, cast, guardian, props, icons) and the audio engine against fixed API contracts, each followed by review | One agent per milestone; lead writes everything | Art is the bulk of the work and parallelises cleanly by file; contracts keep it coherent |
+| Lazy world scenes | Camp, Shop, Title, Intro and the style board load lazily in Boot (skipped entirely in previews) | Eager registration of every scene | A half-finished art module can only break its own scene, never the previews other modules use; smaller first bundle |
+| Iteration screenshots | `scripts/shot.mjs` renders at 1x; milestone shots (`npm run shots`) at 2x | 2x everywhere | Software WebGL on a loaded 4-core box managed ~1 frame per 2 s at 2x |
+| Shared dev server | `NO_HMR=1` (no live reload) for the screenshot server | Default HMR | Every edit reloaded every agent's open page mid-screenshot |
+| Shop layout | Catalog card sits between the HUD's top and bottom rows; 2 rows of item cards per page on short screens, 3 on tall | Full-height catalog | The HUD (money, time, backpack, journal) must stay visible in the shop |
+| Long tab labels | Auto-shrink a label to fit its tab | Abbreviating "Fishing"/"Kitchen" | Spec strings stay literal; narrow iPad catalog still fits six tabs |
+| Interrupted agents | Agents write a compiling first version within their first steps, then improve in place | Plan-then-write | The usage limit cut agents off three times; incremental files survive |
+| Deploy route | Vercel via the connected Vercel account (git-based deploy of the GitHub repo) if available, else `npx vercel --prod` | Only the CLI | The CLI needs an interactive login in this environment |
