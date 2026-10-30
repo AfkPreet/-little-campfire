@@ -174,7 +174,7 @@ export default function preview(scene: Phaser.Scene): void {
   ground(scene, 20, W - 20, rowY[1]);
 
   // Row 3: walk strip (6 hop phases) + rain.
-  const wGap = 74;
+  const wGap = 82;
   for (let i = 0; i < 6; i++) {
     const x = 60 + i * wGap;
     const h = make(x, rowY[2], s);
@@ -238,7 +238,7 @@ export default function preview(scene: Phaser.Scene): void {
   ground(scene, 20, lx + 50, rowY[3]);
 
   // Real camp size with a 104 px height marker.
-  const mx = W - 150;
+  const mx = W - 190;
   const g = scene.add.graphics();
   g.lineStyle(2, hexToInt(shade(A['gurans'], 0.1)), 0.9);
   g.lineBetween(mx - 70, rowY[3], mx - 70, rowY[3] - 104);
@@ -250,8 +250,8 @@ export default function preview(scene: Phaser.Scene): void {
   real.setTier('glowing');
   real.setExpression('happy');
   real.autoQuirk = true;
-  const real2 = make(mx + 90, rowY[3], 1);
+  const real2 = make(mx + 120, rowY[3], 1);
   real2.setTier('cozy');
   real2.setPose('sit');
-  label(scene, mx + 40, rowY[3] + 16, 'real size');
+  label(scene, mx + 60, rowY[3] + 16, 'real size');
 }

@@ -228,9 +228,34 @@ export default function preview(scene: Phaser.Scene): void {
   };
   relight();
   // Game-clock seconds since the beat started (screenshot scripts wait on it).
-  const win = window as unknown as { __pvT?: number };
+  const win = window as unknown as { __pvT?: number; __pvPause?: (on: boolean) => void };
   const t0 = scene.time.now;
   win.__pvT = 0;
+  let paused = false;
+  win.__pvPause = (on: boolean) => {
+    paused = on;
+  };
+  // &fixed=1: every rendered frame advances exactly 1/60 s (deterministic screenshots on slow GPUs).
+  if (anyParam('fixed')) {
+    const loop = scene.game.loop as unknown as {
+      raf: { stop(): void; start(cb: (t: number) => void, forceSetTimeOut: boolean, delay: number): void };
+      step(t: number): void;
+      lastTime: number;
+      forceSetTimeOut: boolean;
+      _target: number;
+    };
+    let vt = loop.lastTime;
+    loop.raf.stop();
+    loop.raf.start(
+      () => {
+        if (paused) return;
+        vt += 1000 / 60;
+        loop.step(vt);
+      },
+      loop.forceSetTimeOut,
+      loop._target,
+    );
+  }
   scene.events.on(Phaser.Scenes.Events.UPDATE, (t: number, d: number) => {
     win.__pvT = (scene.time.now - t0) / 1000;
     rain.update(d / 1000);

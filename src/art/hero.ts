@@ -63,14 +63,14 @@ export const EAR_POS = {
 
 /** Doko item slots in doko-local coords (stem foot u, v; lean in degrees). Order = fill order. */
 export const DOKO_SLOTS: { u: number; v: number; a: number }[] = [
-  { u: -9, v: -17, a: -12 }, // 1 grass tuft
-  { u: -1, v: -18, a: 6 }, // 2 gurans puff
-  { u: -17, v: -16, a: -30 }, // 3 fern curl
-  { u: 6, v: -19, a: 14 }, // 4 butter primula
-  { u: -13, v: -18, a: -4 }, // 5 lavender sprig
+  { u: -8, v: -17, a: -10 }, // 1 grass tuft
+  { u: -15, v: -17, a: -26 }, // 2 gurans puff
+  { u: -20, v: -15, a: -42 }, // 3 fern curl
+  { u: -1, v: -19, a: 6 }, // 4 butter primula
+  { u: -10, v: -18, a: -4 }, // 5 lavender sprig
 ];
 /** The Moon Scale rides at the front of the bouquet. */
-export const SCALE_SLOT = { u: -4, v: -19, a: -16 };
+export const SCALE_SLOT = { u: -5, v: -19, a: -14 };
 
 export const HERO_ITEMS = ['hero_item_grass', 'hero_item_gurans', 'hero_item_fern', 'hero_item_primula', 'hero_item_lavender'] as const;
 
@@ -311,20 +311,24 @@ export function drawEyes(ctx: Ctx, kind: EyeKind): void {
         eyeHappy(ctx, e.x, e.y + 1.2, 10, 2.4);
         break;
       case 'half':
+        // Drowsy: heavy lids leave a soft crescent of eye below a dipping lid line.
         withState(ctx, () => {
           ctx.beginPath();
-          ctx.rect(e.x - 8, e.y - 0.6, 16, 10);
+          ctx.moveTo(e.x - 7, e.y - 0.4);
+          ctx.quadraticCurveTo(e.x, e.y + 3.4, e.x + 7, e.y - 0.4);
+          ctx.lineTo(e.x + 7, e.y + 9);
+          ctx.lineTo(e.x - 7, e.y + 9);
+          ctx.closePath();
           ctx.clip();
-          eyeOval(ctx, e.x, e.y, 4.5, 6);
+          eyeOval(ctx, e.x, e.y + 0.6, 4.5, 5.6, 0.01);
         });
-        // Remove the upper highlight; add a small low one.
-        dot(ctx, e.x + 1.4, e.y + 1.5, 1.2, P.cream);
+        dot(ctx, e.x + 1.6, e.y + 3.6, 1, P.cream);
         ctx.strokeStyle = P.ink;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = 2.1;
         ctx.lineCap = 'round';
         ctx.beginPath();
-        ctx.moveTo(e.x - 5.4, e.y - 0.2);
-        ctx.quadraticCurveTo(e.x, e.y - 1.8, e.x + 5.4, e.y - 0.2);
+        ctx.moveTo(e.x - 5.3, e.y - 0.1);
+        ctx.quadraticCurveTo(e.x, e.y + 3.6, e.x + 5.3, e.y - 0.1);
         ctx.stroke();
         break;
     }
@@ -504,7 +508,18 @@ export function drawNamlo(ctx: Ctx): void {
   ctx.strokeStyle = JUTE;
   ctx.lineWidth = 7;
   ctx.stroke();
-  // A lighter woven stripe and 2 stitch dots.
+  // Woven ticks across the band, a lighter stripe and 2 stitch dots.
+  ctx.strokeStyle = rgba(line, 0.32);
+  ctx.lineWidth = 1;
+  for (let i = 1; i < 9; i++) {
+    const a = a0 + ((a1 - a0) * i) / 9;
+    const c = Math.cos(a);
+    const sn = Math.sin(a);
+    ctx.beginPath();
+    ctx.moveTo(c * 27.6 - sn * 1.2, -60 + sn * 27.6 + c * 1.2);
+    ctx.lineTo(c * 33.6 + sn * 1.2, -60 + sn * 33.6 - c * 1.2);
+    ctx.stroke();
+  }
   ctx.beginPath();
   ctx.arc(0, -60, 31.8, a0 + 0.05, a1 - 0.05);
   ctx.strokeStyle = rgba(tint(JUTE, 0.5), 0.8);
@@ -844,6 +859,16 @@ function ghumUnderside(c: Ctx): void {
 }
 
 export function drawGhum(ctx: Ctx): void {
+  // Soft ink-tinted shade the brim casts on the head and doko.
+  withState(ctx, () => {
+    ctx.translate(0, 4);
+    ctx.beginPath();
+    ghumUnderside(ctx);
+    ctx.strokeStyle = rgba(P.ink, 0.1);
+    ctx.lineWidth = 9;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  });
   ctx.beginPath();
   ghumPath(ctx);
   ctx.fillStyle = lGrad(ctx, -20, -112, -40, -50, [
@@ -870,7 +895,16 @@ export function drawGhum(ctx: Ctx): void {
     ctx.translate(0, -2.6);
     ctx.stroke();
     ctx.translate(0, 2.6);
-    // 4 diagonal weave lines.
+    // Fine cane texture, then 4 diagonal weave lines.
+    ctx.strokeStyle = rgba(GHUM_LINE, 0.16);
+    ctx.lineWidth = 0.9;
+    for (let k = 0; k < 14; k++) {
+      const x = 10 - k * 5.4;
+      ctx.beginPath();
+      ctx.moveTo(x + 14, -112);
+      ctx.lineTo(x - 20, -46);
+      ctx.stroke();
+    }
     ctx.strokeStyle = rgba(GHUM_LINE, 0.4);
     ctx.lineWidth = 1.3;
     for (const t of [0.18, 0.38, 0.58, 0.78]) {

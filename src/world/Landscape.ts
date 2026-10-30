@@ -222,7 +222,7 @@ export class Landscape {
   img(key: string, x: number, y: number, f: number, d: number, ox = 0, oy = 0, scaleMul = 1): Img {
     const o = this.cont ? new Phaser.GameObjects.Image(this.scene, 0, y, key) : this.scene.add.image(0, y, key);
     o.setOrigin(ox, oy).setScale(scaleMul * K);
-    if (!this.cont) o.setScrollFactor(f, f).setDepth(d);
+    if (!this.cont) o.setScrollFactor(f, 1).setDepth(d);
     o.x = x - this.vx * f;
     this.list.push({ o, d });
     return o;

@@ -8,7 +8,11 @@ const [query = 'scene=styleboard', out = 'shots/tmp.png', vp = 'ipad', extra = '
 const server = await startServer('dev');
 const browser = await launch();
 try {
-  const { page, errors, context } = await openGame(browser, server.base, query, VIEWPORTS[vp] || VIEWPORTS.ipad);
+  // Iteration shots render at 1x by default (4x cheaper on software WebGL);
+  // set SHOT_SCALE=2 for Retina detail. Milestone shots (shots.mjs) use 2x.
+  const base = VIEWPORTS[vp] || VIEWPORTS.ipad;
+  const viewport = { ...base, deviceScaleFactor: Number(process.env.SHOT_SCALE || 1) };
+  const { page, errors, context } = await openGame(browser, server.base, query, viewport, { timeout: 90000 });
   if (Number(extra) > 0) await page.waitForTimeout(Number(extra));
   mkdirSync(path.dirname(out), { recursive: true });
   await page.screenshot({ path: out });

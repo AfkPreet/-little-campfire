@@ -27,7 +27,6 @@ export default function preview(scene: Phaser.Scene): void {
   const land = new Landscape(scene, { worldW: CAMP.worldW });
   const cam = scene.cameras.main;
   const x = Number(anyParam('x') ?? 900);
-  cam.setBounds(0, 0, CAMP.worldW, 720);
   cam.scrollX = Math.max(0, Math.min(CAMP.worldW - l.w, x));
   land.applyLight(light);
   land.setSkyOpen(Number(anyParam('open') ?? 0));

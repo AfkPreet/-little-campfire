@@ -70,7 +70,8 @@ function mkPose(over: Partial<Record<ChName, Trip>>): Float32Array {
 }
 
 const SIT: Partial<Record<ChName, Trip>> = {
-  pc: [0, 0, -4],
+  pc: [0, 0, -5],
+  pcs: [1.03, 0.96, 0],
   footL: [17, -5, -78],
   footR: [27, -6, -70],
   pawL: [5, -22, 0],
@@ -81,7 +82,7 @@ const POSES: Record<BasePose, Float32Array> = {
   stand: mkPose({}),
   sit: mkPose(SIT),
   rest: mkPose({ ...SIT, pc: [0, 0, -7], doko: [DOKO_POS.x + 2, DOKO_POS.y + 1, DOKO_POS.a - 6] }),
-  read: mkPose({ ...SIT, pawL: [12, -23, 0], pawR: [30, -22, 0] }),
+  read: mkPose({ ...SIT, book: [17, -31, -6], pawL: [6, -28, 0], pawR: [29, -28, 0] }),
   eat: mkPose({ ...SIT, pawL: [11, -40, 0], pawR: [22, -39, 0], held: [16, -42, 0] }),
   fish: mkPose({ pc: [0, 0, -3], footL: [14, 6, 52], footR: [25, 7, 44], pawL: [16, -28, 0], pawR: [26, -21, 0] }),
   hold: mkPose({ pawL: [23, -31, 0], pawR: [39, -31, 0] }),
@@ -95,12 +96,12 @@ const POSES: Record<BasePose, Float32Array> = {
     footR: [12, -1, 0],
   }),
   nap: mkPose({
-    pc: [46, -24, -80],
-    doko: [38, -36, 96],
-    earL: [EAR_POS.far.x, EAR_POS.far.y + 2, -44],
-    earR: [EAR_POS.near.x, EAR_POS.near.y + 2, -18],
-    pawL: [24, -22, 0],
-    pawR: [30, -48, 0],
+    pc: [31, -17, -62],
+    doko: [38, -22, 80],
+    earL: [EAR_POS.far.x, EAR_POS.far.y + 2, -40],
+    earR: [EAR_POS.near.x, EAR_POS.near.y + 2, -16],
+    pawL: [23, -25, 0],
+    pawR: [30, -7, 0],
     footL: [-10, -2, -20],
     footR: [16, -2, -30],
   }),
@@ -239,6 +240,7 @@ export class Hero extends Rig {
   private napLayer = false;
   private layerEars = false;
   private layered = false;
+  private layerFeet = false;
 
   /** Auto-play the haymaker while idle (style boards turn this off). */
   autoQuirk = true;
@@ -306,7 +308,7 @@ export class Hero extends Rig {
 
     // Props.
     this.mk('held', 'hero_item_gurans', 'hero_book', pc, 0, 0).setOrigin(0.5).setVisible(false);
-    this.mk('book', 'hero_book', 'hero_book', pc, 0, 0).setVisible(false);
+    this.mk('book', 'hero_book', 'hero_book', pc, 0, 0).setVisible(false).setScale(1.2 * K);
     this.rodC = new Phaser.GameObjects.Container(scene, 22, -24);
     this.rodC.setVisible(false);
     pc.add(this.rodC);
@@ -397,14 +399,25 @@ export class Hero extends Rig {
     return this;
   }
 
-  /** Unfold/fold the ghum with a bounce (0.6 s). */
-  setRain(on: boolean): this {
+  /**
+   * Unfold/fold the ghum with a bounce (0.6 s). Snaps instantly when called
+   * during the first moments after spawn (a scene that starts in rain).
+   */
+  setRain(on: boolean, instant = this.t < 0.25): this {
     if (on === this.rainOn) return this;
     this.rainOn = on;
     if (on) {
       this.img.ghum.setVisible(true);
       this.earsFront = true;
       this.relayer();
+    }
+    if (instant) {
+      this.rainT = on ? 1 : 0;
+      if (!on) {
+        this.img.ghum.setVisible(false);
+        this.earsFront = false;
+        this.relayer();
+      }
     }
     return this;
   }
@@ -418,8 +431,9 @@ export class Hero extends Rig {
     if (changed) {
       const prev = this.nItems;
       this.nItems = this.cap;
-      for (let i = prev; i < this.nItems; i++) this.popT[i] = prev === 0 ? 1 : 0;
-      if (this.nItems > prev && prev > 0) this.dokoKick(30);
+      const quiet = prev === 0 || this.t < 0.25;
+      for (let i = prev; i < this.nItems; i++) this.popT[i] = quiet ? 1 : 0;
+      if (this.nItems > prev && !quiet) this.dokoKick(30);
     }
     this.refreshSlots();
     this.img.earFlower.setVisible(t === 'blissful' || this.expression === 'blissful');
@@ -454,7 +468,7 @@ export class Hero extends Rig {
     this.scaleOn = on;
     this.img.scale.setVisible(on);
     this.img.dokoGlow.setVisible(on);
-    if (on) {
+    if (on && this.t >= 0.25) {
       this.popT[5] = 0;
       this.dokoKick(30);
     }
@@ -939,7 +953,7 @@ export class Hero extends Rig {
         this.pageT += dt;
         const pf = this.pageT % 7;
         const sq = pf > 6.6 ? Math.sin(((pf - 6.6) / 0.4) * Math.PI) : 0;
-        this.img.book.setScale(K * (1 - 0.35 * sq), K);
+        this.img.book.setScale(1.2 * K * (1 - 0.35 * sq), 1.2 * K);
       }
     }
 
@@ -1040,7 +1054,7 @@ export class Hero extends Rig {
       const life = this.puffKind === 'bang' ? 0.75 : 1.7;
       const s = outBack(seg(t, 0, 0.22), 2.6);
       im.setVisible(true);
-      im.setPosition(f * 20, -118 - 6 * seg(t, 0, life) + this.inner.y);
+      im.setPosition(f * 26, -124 - 6 * seg(t, 0, life) + this.inner.y);
       im.setScale(K * s);
       im.setAlpha(1 - seg(t, life - 0.25, life));
       if (t >= life) {
@@ -1092,6 +1106,9 @@ export class Hero extends Rig {
     this.setP(im.held, 'held');
     this.rodC.setVisible(ROD_POSES.has(this.pose));
     im.book.setVisible(this.basePose === 'read');
+    const napK = this.basePose === 'nap' ? 0.8 : 1;
+    if (this.dokoC.scaleX !== napK) this.dokoC.setScale(napK);
+    im.namlo.setVisible(this.basePose !== 'nap');
 
     // Face.
     const bp = this.basePose;
@@ -1144,14 +1161,19 @@ export class Hero extends Rig {
   private relayer(): void {
     const im = this.img;
     const nap = this.basePose === 'nap';
-    if (this.layered && this.earsFront === this.layerEars && nap === this.napLayer) return;
+    const feetFront = SITTING.has(this.basePose);
+    if (this.layered && this.earsFront === this.layerEars && nap === this.napLayer && feetFront === this.layerFeet) return;
     this.layered = true;
     this.layerEars = this.earsFront;
     this.napLayer = nap;
+    this.layerFeet = feetFront;
     const order: (Img | Box)[] = [];
     if (!nap) order.push(this.dokoC);
     if (!this.earsFront) order.push(im.earFlower, im.earL, im.earR);
-    order.push(im.body, im.footL, im.footR, im.namlo, this.faceC);
+    if (!feetFront) order.push(im.footL, im.footR);
+    order.push(im.body);
+    if (feetFront) order.push(im.footL, im.footR);
+    order.push(im.namlo, this.faceC);
     if (nap) order.push(this.dokoC);
     order.push(im.held, im.book, this.rodC, im.pluck, im.pawL, im.pawR, im.ghum);
     if (this.earsFront) order.push(im.earFlower, im.earL, im.earR);
