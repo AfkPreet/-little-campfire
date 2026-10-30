@@ -220,9 +220,10 @@ function bushLoop(scene: Phaser.Scene, ticks: Tickable[]): void {
     b.reset();
     b.peek(true);
     b.lookAt(l.w);
-    await new Promise((r) => scene.time.delayedCall(3200, r));
+    const fast = anyParam('fast') === '1';
+    await new Promise((r) => scene.time.delayedCall(fast ? 1200 : 3200, r));
     await b.hide();
-    await new Promise((r) => scene.time.delayedCall(7000, r));
+    await new Promise((r) => scene.time.delayedCall(fast ? 1200 : 7000, r));
     await b.emerge();
     await new Promise((r) => scene.time.delayedCall(1800, r));
     void cycle();

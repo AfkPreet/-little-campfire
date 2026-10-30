@@ -408,6 +408,7 @@ export class BudBush extends Phaser.GameObjects.Container {
   private buds: Img[] = [];
   private peekC: Phaser.GameObjects.Container;
   private peekEyes: Img;
+  private peekEyesX = 0;
   private peekParts: Img[] = [];
   private hideC: Phaser.GameObjects.Container;
   private hideEye: Img;
@@ -446,6 +447,7 @@ export class BudBush extends Phaser.GameObjects.Container {
     this.peekParts.push(this.img('blush', 6, -27, 6, -27, this.peekC, -hx, -hy));
     this.peekParts.push(this.img('crown', -3, -42, -3, -42, this.peekC, -hx, -hy));
     this.peekEyes = this.img('eyes', 6, -34.5, 6, -34.5, this.peekC, -hx, -hy);
+    this.peekEyesX = this.peekEyes.x;
     this.peekParts.push(this.peekEyes);
     this.peekC.setAlpha(0).setVisible(false);
 
@@ -669,9 +671,7 @@ export class BudBush extends Phaser.GameObjects.Container {
         g = Phaser.Math.Clamp(Math.abs(dx) / 160, 0, 1);
       }
       this.glance += (g - this.glance) * Math.min(1, dt * 5);
-      this.peekEyes.x = (this.peekEyes.getData('bx') ?? this.peekEyes.x) as number;
-      if (this.peekEyes.getData('bx') === undefined) this.peekEyes.setData('bx', this.peekEyes.x);
-      this.peekEyes.x = (this.peekEyes.getData('bx') as number) + this.glance * 1.3;
+      this.peekEyes.x = this.peekEyesX + this.glance * 1.3;
       // Gentle bob.
       if (!this.scene.tweens.isTweening(this.peekC)) this.peekC.y = PEEK.y + Math.sin(this.t * 1.6) * 0.8;
     } else if (this.st === 'hidden') {

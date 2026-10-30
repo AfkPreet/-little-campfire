@@ -8,7 +8,7 @@ import { Baker, Ctx, artRng, fbm, grain, roundRectPath, smoothClosed, softShadow
 import { A, P, mix, rgba, shade, tint } from '@/palette';
 import { CAMP } from '@/data/camp';
 import { BAND, BX0, shoreBackY, shoreRightX } from './landscape-geo';
-import { dir, litCircle } from './landscape-util';
+import { dir, litCrescent } from './landscape-util';
 
 const SUN: [number, number] = dir(1, -0.55);
 
@@ -363,9 +363,9 @@ const TREE_DEFS = [
   {
     x: 1840,
     limbs: [
-      [1828, 598, 1818, 520, 1782, 430, 1760, 250, 30, 12],
-      [1846, 598, 1856, 500, 1832, 400, 1846, 230, 28, 12],
-      [1842, 520, 1852, 470, 1866, 412, 1890, 376, 14, 6],
+      [1826, 600, 1806, 520, 1790, 440, 1752, 236, 46, 16],
+      [1848, 600, 1866, 512, 1824, 404, 1850, 216, 40, 15],
+      [1844, 528, 1854, 474, 1862, 414, 1892, 374, 20, 7],
     ] as Limb[],
     domes: [
       [1752, 46, 104],
@@ -378,9 +378,9 @@ const TREE_DEFS = [
   {
     x: 1990,
     limbs: [
-      [1998, 596, 2012, 500, 2042, 420, 2050, 240, 28, 12],
-      [1982, 596, 1972, 500, 1994, 400, 1978, 226, 26, 12],
-      [1986, 512, 1978, 462, 1966, 410, 1946, 378, 13, 6],
+      [2000, 600, 2020, 510, 2040, 430, 2054, 230, 44, 16],
+      [1980, 600, 1962, 512, 2002, 404, 1976, 212, 40, 15],
+      [1986, 520, 1978, 466, 1966, 414, 1944, 376, 19, 7],
     ] as Limb[],
     domes: [
       [2046, 40, 106],
@@ -491,14 +491,17 @@ function bakeTrees(b: Baker): void {
       smoothClosed(
         ctx,
         [
-          [t.x - 34, 600],
-          [t.x - 16, 584],
-          [t.x - 2, 560],
-          [t.x + 14, 582],
-          [t.x + 32, 600],
-          [t.x, 604],
+          [t.x - 50, 600],
+          [t.x - 30, 593],
+          [t.x - 22, 574],
+          [t.x - 18, 548],
+          [t.x + 18, 548],
+          [t.x + 22, 574],
+          [t.x + 32, 593],
+          [t.x + 52, 600],
+          [t.x, 605],
         ],
-        0.4,
+        0.45,
       );
       ctx.fillStyle = bark;
       ctx.fill();
@@ -537,23 +540,34 @@ function bakeTrees(b: Baker): void {
     const all = TREE_DEFS.flatMap((t) => t.domes);
     all.sort((a, b2) => a[1] - b2[1]);
     const r = artRng(1300);
+    // union outline first (grown silhouette), so inner overlaps stay soft
+    for (const [x, y, rr] of all) {
+      ctx.beginPath();
+      domePath(ctx, x, y, rr + 2.2, artRng(Math.floor(x * 7 + y)));
+      ctx.fillStyle = shade(leafDeep, 0.28);
+      ctx.fill();
+    }
     for (const [x, y, rr] of all) {
       const seed = Math.floor(x * 7 + y);
       ctx.beginPath();
       domePath(ctx, x, y, rr, artRng(seed));
-      ctx.fillStyle = leafDeep;
+      ctx.fillStyle = vGrad(ctx, y - rr, y + rr + 10, [
+        [0, mix(leaf, P.sage, 0.2)],
+        [0.6, leaf],
+        [1, leafDeep],
+      ]);
       ctx.fill();
-      ctx.strokeStyle = rgba(shade(leafDeep, 0.25), 0.6);
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = rgba(shade(leafDeep, 0.2), 0.22);
+      ctx.lineWidth = 1.5;
       ctx.stroke();
-      litCircle(ctx, x, y, rr - 4, vGrad(ctx, y - rr, y + rr, [[0, mix(leaf, P.sage, 0.15)], [1, leafDeep]]), mix(leaf, P.sage, 0.55), SUN[0], SUN[1], 0.13);
+      litCrescent(ctx, x, y, rr - 5, rgba(mix(leaf, P.sage, 0.62), 0.75), SUN[0], SUN[1], 0.12);
       // inner leaf texture: soft lighter leaf strokes on the lit side
       for (let i = 0; i < 12; i++) {
         const a = -Math.PI * (0.02 + r() * 0.75);
         const dd = rr * (0.3 + r() * 0.55);
         const lx = x + Math.cos(a) * dd;
         const ly = y + Math.sin(a) * dd;
-        ctx.fillStyle = rgba(tint(P.sage, 0.25), 0.3);
+        ctx.fillStyle = rgba(tint(P.sage, 0.25), 0.28);
         ctx.beginPath();
         ctx.ellipse(lx, ly, 9, 3, a + 1.2, 0, Math.PI * 2);
         ctx.fill();

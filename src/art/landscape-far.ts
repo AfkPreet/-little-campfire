@@ -10,7 +10,7 @@ import { BAND, BX0, ELDEST, FAR_BACK, FAR_FRONT, PEAKS, PEAK_BASE, Peak, bandW }
 import { dir, erase, rimOf, underCurve } from './landscape-util';
 
 const SUN: [number, number] = dir(1, -0.55);
-const MOON: [number, number] = dir(-0.8, -0.6);
+const MOON: [number, number] = dir(-0.92, -0.4);
 
 // ---------------------------------------------------------------------------
 // Peak geometry
@@ -99,55 +99,35 @@ function drawPeak(ctx: Ctx, p: Peak): void {
     ]);
     ctx.fill();
     ctx.clip();
-    // Shade face: a gentle S-curve from the summit down; shade on the left,
-    // with a few soft shade fingers reaching into the lit face (snow gullies).
+    // Shade face: the ridge line runs from the summit down and to the left in a
+    // gentle S; everything left of it is the shaded flank.
     const h = g.h;
-    const s0: [number, number] = [p.x + h * 0.04, p.tip - 4];
-    const s1: [number, number] = [p.x - h * 0.2, p.tip + h * 0.28];
-    const s2: [number, number] = [p.x + h * 0.16, p.tip + h * 0.6];
-    const s3: [number, number] = [p.x - h * 0.02, PEAK_BASE + 8];
-    const bez = (t: number): [number, number] => {
-      const u = 1 - t;
-      return [
-        u * u * u * s0[0] + 3 * u * u * t * s1[0] + 3 * u * t * t * s2[0] + t * t * t * s3[0],
-        u * u * u * s0[1] + 3 * u * u * t * s1[1] + 3 * u * t * t * s2[1] + t * t * t * s3[1],
-      ];
-    };
-    const shadeFill = vGrad(ctx, p.tip, PEAK_BASE, [
-      [0, shTop],
-      [0.45, sh],
-      [1, mix(sh, A['ridge-far'], 0.18)],
-    ]);
+    const lrun = p.sl * h;
+    const s0: [number, number] = [p.x + h * 0.03, p.tip - 6];
+    const s1: [number, number] = [p.x - lrun * 0.12, p.tip + h * 0.26];
+    const s2: [number, number] = [p.x - lrun * 0.08, p.tip + h * 0.58];
+    const s3: [number, number] = [p.x - lrun * 0.34, PEAK_BASE + 8];
     ctx.beginPath();
     ctx.moveTo(s0[0], s0[1]);
     ctx.bezierCurveTo(s1[0], s1[1], s2[0], s2[1], s3[0], s3[1]);
     ctx.lineTo(g.lx - 80, PEAK_BASE + 8);
     ctx.lineTo(g.lx - 80, p.tip - 10);
     ctx.closePath();
-    ctx.fillStyle = shadeFill;
+    ctx.fillStyle = vGrad(ctx, p.tip, PEAK_BASE, [
+      [0, shTop],
+      [0.45, sh],
+      [1, mix(sh, A['ridge-far'], 0.16)],
+    ]);
     ctx.fill();
-    for (const [ft, len, drop] of [
-      [0.3, 0.2, 0.14],
-      [0.52, 0.26, 0.16],
-      [0.74, 0.18, 0.12],
-    ] as [number, number, number][]) {
-      const [fx, fy] = bez(ft);
-      const [gx2, gy2] = bez(ft + 0.08);
-      ctx.beginPath();
-      ctx.moveTo(fx - 2, fy - 2);
-      ctx.quadraticCurveTo(fx + h * len * 0.55, fy + h * drop * 0.2, fx + h * len, fy + h * drop);
-      ctx.quadraticCurveTo(fx + h * len * 0.45, fy + h * drop * 0.9, gx2 - 2, gy2);
-      ctx.closePath();
-      ctx.fillStyle = shadeFill;
-      ctx.fill();
-    }
-    // Soft reflected-light band just inside the split.
-    ctx.strokeStyle = rgba(A.snow, 0.2);
-    ctx.lineWidth = 4;
+    // a soft half-tone just right of the ridge line (rounds the form)
     ctx.beginPath();
-    ctx.moveTo(s0[0] - 2, s0[1] + 8);
-    ctx.bezierCurveTo(s1[0] - 2, s1[1], s2[0] - 2, s2[1], s3[0] - 2, s3[1]);
-    ctx.stroke();
+    ctx.moveTo(s0[0], s0[1]);
+    ctx.bezierCurveTo(s1[0], s1[1], s2[0], s2[1], s3[0], s3[1]);
+    ctx.lineTo(s3[0] + h * 0.12, s3[1]);
+    ctx.bezierCurveTo(s2[0] + h * 0.1, s2[1], s1[0] + h * 0.07, s1[1], s0[0] + 2, s0[1] + 4);
+    ctx.closePath();
+    ctx.fillStyle = rgba(mix(lit, sh, 0.5), 0.35);
+    ctx.fill();
     // Two rounded rock wedges on the shaded face, lower half only.
     const rock = mix(A['ridge-far'], sh, 0.2 + back);
     for (let i = 0; i < 2; i++) {
@@ -183,17 +163,20 @@ function drawPeak(ctx: Ctx, p: Peak): void {
       ctx.quadraticCurveTo(xx - ww * 0.12, yy - hh * 0.62, xx + ww * 0.16, yy - hh * 0.28);
       ctx.stroke();
     }
-    // Gully lines on the lit face: soft lavender strokes running down-right.
-    ctx.lineCap = 'round';
+    // Couloirs on the lit face: soft tapered lavender streaks running down-right.
     for (let i = 0; i < 3; i++) {
-      const sx = p.x + h * (0.08 + i * 0.12);
-      const sy = p.tip + h * (0.22 + i * 0.14);
-      ctx.strokeStyle = rgba(A['snow-shade'], 0.34 - i * 0.06);
-      ctx.lineWidth = 1.6 - i * 0.2;
+      const sx = p.x + h * (0.1 + i * 0.13);
+      const sy = p.tip + h * (0.2 + i * 0.13);
+      const len = h * (0.3 - i * 0.04);
+      const ex = sx + len * 0.22 + rnd() * 4;
+      const ey = sy + len;
       ctx.beginPath();
       ctx.moveTo(sx, sy);
-      ctx.quadraticCurveTo(sx + h * 0.06, sy + h * 0.18, sx + h * 0.04 + rnd() * 6, sy + h * (0.36 + rnd() * 0.12));
-      ctx.stroke();
+      ctx.quadraticCurveTo(sx + len * 0.14 + 3, sy + len * 0.5, ex + 1.5, ey);
+      ctx.quadraticCurveTo(sx + len * 0.1 - 2, sy + len * 0.55, sx, sy);
+      ctx.closePath();
+      ctx.fillStyle = rgba(A['snow-shade'], 0.42 - i * 0.08);
+      ctx.fill();
     }
   });
   // Soft silhouette edge (darker shade of the snow-shade, never black).
@@ -288,9 +271,9 @@ function bakeSea(b: Baker): void {
         puffs.push({ x, top: topMin + r() * (topMax - topMin), rr });
         x += rr * (0.75 + r() * 0.5);
       }
-      const bodyTop = mix(A['cloud-sea'], P.cream, back ? 0.1 : 0.35);
-      const body = back ? mix(A['cloud-sea'], P.lavender, 0.22) : mix(A['cloud-sea'], P.lavender, 0.1);
-      const low = back ? mix(A['cloud-sea'], P.lavender, 0.38) : mix(A['cloud-sea'], P.lavender, 0.26);
+      const bodyTop = mix(A['cloud-sea'], P.cream, back ? 0.45 : 0.75);
+      const body = back ? mix(A['cloud-sea'], P.lavender, 0.12) : A['cloud-sea'];
+      const low = back ? mix(A['cloud-sea'], P.lavender, 0.3) : mix(A['cloud-sea'], P.lavender, 0.2);
       // Flat body under the puffs.
       ctx.fillStyle = vGrad(ctx, base - 30, H, [
         [0, body],
@@ -303,14 +286,14 @@ function bakeSea(b: Baker): void {
         ctx.beginPath();
         ctx.arc(px, cy, rr, 0, Math.PI * 2);
         ctx.clip();
-        ctx.fillStyle = vGrad(ctx, top, top + rr * 1.1, [
+        ctx.fillStyle = vGrad(ctx, top, top + rr * 1.2, [
           [0, bodyTop],
-          [0.45, mix(bodyTop, body, 0.6)],
+          [0.35, mix(bodyTop, body, 0.35)],
           [1, body],
         ]);
         ctx.fillRect(px - rr, top, rr * 2, rr * 2);
         // shade crescent low on the left: gives each puff its roundness
-        ctx.fillStyle = rgba(P.lavender, back ? 0.14 : 0.12);
+        ctx.fillStyle = rgba(P.lavender, back ? 0.12 : 0.1);
         ctx.beginPath();
         ctx.arc(px + rr * 0.25, cy - rr * 0.14, rr, 0, Math.PI * 2);
         ctx.rect(px - rr * 2, top - 4, rr * 4, rr * 3);
@@ -322,19 +305,6 @@ function bakeSea(b: Baker): void {
           const px = p.x + off;
           if (px + p.rr < -2 || px - p.rr > W + 2) continue;
           drawPuff(px, p.top, p.rr);
-        }
-      }
-      // soft highlight dots along the tops (sun-kissed lip)
-      for (const p of puffs) {
-        for (const off of [-W, 0, W]) {
-          const px = p.x + off + p.rr * 0.15;
-          if (px < -40 || px > W + 40) continue;
-          ctx.strokeStyle = rgba(P.cream, back ? 0.35 : 0.6);
-          ctx.lineWidth = 2;
-          ctx.lineCap = 'round';
-          ctx.beginPath();
-          ctx.arc(p.x + off, p.top + p.rr, p.rr - 1.5, -Math.PI * 0.72, -Math.PI * 0.38);
-          ctx.stroke();
         }
       }
     });

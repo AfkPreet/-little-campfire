@@ -9,7 +9,7 @@ import { BAND, BX0, HOUSES, MID_RIDGE, WINDOWS, bandW } from './landscape-geo';
 import { dir, erase, litCircle, rimOf, teardrop, underCurve } from './landscape-util';
 
 const SUN: [number, number] = dir(1, -0.55);
-const MOON: [number, number] = dir(-0.8, -0.6);
+const MOON: [number, number] = dir(-0.92, -0.4);
 
 // ---------------------------------------------------------------------------
 // M: mid ridge

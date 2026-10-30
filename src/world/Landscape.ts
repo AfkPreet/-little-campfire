@@ -653,7 +653,7 @@ export class Landscape {
     this.tintBand(this.far, l.far, l.haze, clamp01(0.36 * hKey + rain * 0.42 + mist * 0.62), farA);
     const rimWarm = lerpInt(hexToInt(P.peach), hexToInt(P.butter), golden / Math.max(0.001, golden + dawn));
     for (const r of this.far.rimR) r.setTint(rimWarm).setAlpha(dry * (dawn * 0.9 + golden * 0.85) * (1 - mist));
-    for (const r of this.far.rimL) r.setTint(hexToInt(A['moon-snow'])).setAlpha(night * dry * 0.5);
+    for (const r of this.far.rimL) r.setTint(hexToInt(A['moon-snow'])).setAlpha(night * dry * 0.3);
     this.spillAlpha = (0.55 + rain * 0.35 + mist * 0.3) * (1 - night * 0.65);
     for (const s of this.spill) s.setTint(seaTopB);
 
@@ -665,7 +665,7 @@ export class Landscape {
     // --- Mid ridge: tea, town, windows, threads
     this.tintBand(this.mid, l.mid, l.haze, clamp01(0.26 * hKey + rain * 0.36 + mist * 0.58), 1);
     for (const r of this.mid.rimR) r.setTint(rimWarm).setAlpha(dry * golden * 0.85 * (1 - mist));
-    for (const r of this.mid.rimL) r.setTint(hexToInt(A['moon-snow'])).setAlpha(night * dry * 0.45);
+    for (const r of this.mid.rimL) r.setTint(hexToInt(A['moon-snow'])).setAlpha(night * dry * 0.28);
     const wantOn = p >= 0.88 || night > 0.5;
     if (wantOn !== this.necklaceOn) {
       this.necklaceOn = wantOn;
@@ -677,7 +677,7 @@ export class Landscape {
     // --- Near forest
     this.tintBand(this.near, l.near, l.haze, clamp01(0.1 * hKey + rain * 0.16 + mist * 0.5), 1);
     for (const r of this.near.rimR) r.setTint(rimWarm).setAlpha(dry * (golden * 0.8 + dawn * 0.25) * (1 - mist));
-    for (const r of this.near.rimL) r.setTint(hexToInt(A['moon-snow'])).setAlpha(night * dry * 0.3);
+    for (const r of this.near.rimL) r.setTint(hexToInt(A['moon-snow'])).setAlpha(night * dry * 0.2);
     this.steamAlpha = rain * 0.55;
     if (dusk < 0.3 && night < 0.5) this.junkiriArmed = true;
 

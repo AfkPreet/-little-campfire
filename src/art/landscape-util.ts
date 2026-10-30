@@ -115,3 +115,18 @@ export function teardrop(c: Ctx, x: number, top: number, w: number, h: number, l
   c.bezierCurveTo(x - hw * 1.02, top + h * 0.5, tx - hw * 0.35, top + h * 0.18, tx, top);
   c.closePath();
 }
+
+/** Only the lit crescent of a circle (circle minus itself shifted away from the light). */
+export function litCrescent(ctx: Ctx, x: number, y: number, r: number, color: string, lx: number, ly: number, d = 0.18): void {
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI * 2);
+  ctx.clip();
+  ctx.beginPath();
+  ctx.rect(x - r - 2, y - r - 2, r * 2 + 4, r * 2 + 4);
+  ctx.moveTo(x - lx * r * d + r, y - ly * r * d);
+  ctx.arc(x - lx * r * d, y - ly * r * d, r, 0, Math.PI * 2);
+  ctx.fillStyle = color;
+  ctx.fill('evenodd');
+  ctx.restore();
+}

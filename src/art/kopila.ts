@@ -460,7 +460,7 @@ export function drawBall(ctx: Ctx): void {
   // The gap: a soft slit with a closed eyelid inside.
   const g = KG.ballEye;
   ctx.beginPath();
-  ellipsePath(ctx, g.x, g.y, 4.6, 3.3, 0.18);
+  ellipsePath(ctx, g.x, g.y, 5, 3.6, 0.18);
   ctx.fillStyle = rGrad(ctx, g.x, g.y + 1.2, 0.5, 5, [
     [0, mix(PANGO, PLINE, 0.55)],
     [1, mix(PANGO, PLINE, 0.25)],
@@ -503,10 +503,13 @@ export function drawBall(ctx: Ctx): void {
 export function drawBallEye(ctx: Ctx): void {
   const g = KG.ballEye;
   ctx.beginPath();
-  ellipsePath(ctx, g.x, g.y, 4.4, 3.3, 0.18);
+  ellipsePath(ctx, g.x, g.y, 5, 4, 0.18);
   ctx.fillStyle = PFACE;
   ctx.fill();
-  eye(ctx, g.x + 0.2, g.y - 0.1, 2.5, 3.0, 0.5);
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = INNER_LINE;
+  ctx.stroke();
+  eye(ctx, g.x + 0.2, g.y - 0.1, 3.1, 3.8, 0.5);
 }
 
 // ---------------------------------------------------------------------------

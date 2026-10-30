@@ -129,3 +129,14 @@ export const MOON_TRUSS: [number, number] = [4, -78];
 // ---------------------------------------------------------------------------
 
 export const HAMMOCK = { span: 150 };
+
+/** Wool Bunting: one curved line, y(x) = sag * (1 - (x/half)^2), hanging from (0,0). */
+export const BUNTING = { half: 58, sag: 14, n: 7, colours: 3 };
+/** Bamboo Chime tube lengths and x offsets on the disc. */
+export const CHIME = { lengths: [22, 31, 37, 29, 20], xs: [-12, -6, 0, 6, 12], discY: 13 };
+/** Laltin: globe centre + flame base (hang-local). */
+export const LALTIN = { globeY: 30, flameY: 37, h: 54 };
+/** Kuhiro's Lantern: star centre (hang-local). */
+export const KLANTERN = { starY: 31, h: 52 };
+/** Brass Star-Scope objective tip (ground-local). */
+export const SCOPE_TIP: [number, number] = [26, -68];

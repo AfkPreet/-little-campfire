@@ -81,10 +81,11 @@ export class FgLayer {
     const span = viewW + Math.max(0, worldW - viewW) * F + 200;
     let s = 4242;
     const rnd = () => ((s = (s * 16807) % 2147483647) / 2147483647);
+    // Leaf clusters 1000 apart (one per corner in a typical view), grass between.
     let k = 0;
-    for (let x = 80; x < span; x += 560, k++) {
-      if (k % 2 === 0) this.leafCluster(x, (k / 2) % 2 === 0, rnd);
-      else this.grassClump(x, rnd, k % 4 === 1);
+    for (let x = 150; x < span; x += 1000, k++) {
+      this.leafCluster(x, k % 2 === 1, rnd);
+      if (x + 500 < span) this.grassClump(x + 500, rnd, k % 2 === 0);
     }
   }
 
