@@ -133,3 +133,11 @@ export function applyDebugParams(): boolean {
   }
   return applied;
 }
+
+let debugApplied = false;
+/** Apply debug URL params once per page load (the first scene that asks wins). */
+export function applyDebugOnce(): boolean {
+  if (debugApplied) return false;
+  debugApplied = true;
+  return applyDebugParams();
+}

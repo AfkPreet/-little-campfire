@@ -23,6 +23,9 @@ export interface BusEvents {
   'settings:changed': Record<string, never>;
   'overlay:open': { key: string };
   'overlay:close': { key: string };
+  'hud:bounce': { target: 'backpack' | 'money' | 'lamp' | 'journal' };
+  'hud:hint': { text: string | null };
+  'camp:activity': { activity: string };
 }
 
 type Handler<K extends keyof BusEvents> = (e: BusEvents[K]) => void;

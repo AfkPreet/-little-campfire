@@ -227,14 +227,22 @@ async function bakePreviewArt(scene: Phaser.Scene): Promise<void> {
       ridge(h * 0.58, 10, mix(k.far, k.horizon, 0.25), 1);
       ridge(h * 0.7, 8, mix(P.lavender, k.mid, 0.5), 3);
       ridge(h * 0.84, 6, mix(P.moss, k.near, 0.55), 5);
-      // A little tent and its glow.
-      glowDisc(ctx, w * 0.075, h * 0.82, 24, P.glow, 0.45);
+      // A little dome tent and its glow.
+      const tx = w * 0.06;
+      const ty = h * 0.86;
+      glowDisc(ctx, tx, ty - 8, 26, P.glow, 0.45);
       ctx.beginPath();
-      ctx.moveTo(w * 0.075 - 18, h * 0.88);
-      ctx.quadraticCurveTo(w * 0.075 - 4, h * 0.7, w * 0.075, h * 0.66);
-      ctx.quadraticCurveTo(w * 0.075 + 4, h * 0.7, w * 0.075 + 18, h * 0.88);
+      ctx.moveTo(tx - 20, ty);
+      ctx.bezierCurveTo(tx - 19, ty - 18, tx - 9, ty - 27, tx, ty - 27);
+      ctx.bezierCurveTo(tx + 9, ty - 27, tx + 19, ty - 18, tx + 20, ty);
       ctx.closePath();
-      ctx.fillStyle = mix(P.peach, k.actor, 0.4);
+      ctx.fillStyle = mix(P.peach, k.actor, 0.35);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.moveTo(tx - 6, ty);
+      ctx.quadraticCurveTo(tx, ty - 20, tx + 6, ty);
+      ctx.closePath();
+      ctx.fillStyle = mix(P.glow, P.peach, 0.3);
       ctx.fill();
       // Scrim (ink-tinted, never black).
       ctx.fillStyle = rgba(P.ink, 0.36);

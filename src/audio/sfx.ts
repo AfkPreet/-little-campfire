@@ -403,6 +403,15 @@ export const SFX_IDS = [
   'rumble',
   'hearts',
   'sparkle',
+  // Setting flavour (docs/WORLD.md).
+  'tonk',
+  'rattle',
+  'eep',
+  'rustle',
+  'fwump',
+  'tuck',
+  'twinkle',
+  'breath',
 ] as const;
 
 export type SfxId = (typeof SFX_IDS)[number];
@@ -442,6 +451,17 @@ export const SFX_ALIASES: Record<string, SfxId> = {
   whistle: 'kettle',
   fry: 'sizzle',
   footstep: 'step',
+  yakbell: 'tonk',
+  bell: 'tonk',
+  lid: 'rattle',
+  steamer: 'rattle',
+  hero: 'eep',
+  doko: 'rustle',
+  ghum: 'fwump',
+  curl: 'tuck',
+  mica: 'twinkle',
+  exhale: 'breath',
+  mist: 'breath',
 };
 
 export function resolveSfx(id: string): SfxId | null {
@@ -814,6 +834,117 @@ const R: Record<SfxId, Recipe> = {
     [93, 95, 98].forEach((m, i) => bell(s, t + i * 0.065, mtof(m) * p, { vol: 0.065 * vol, pan: pan + (i - 1) * 0.2, wet: 0.45, decay: 0.45, ratio: 2, index: 0.4 }));
   },
 
+  // Yak bell: a hollow bronze "tonk" with a soft wooden clapper.
+  tonk(s, t, p, pan, vol) {
+    bell(s, t, 430 * p, { vol: 0.11 * vol, pan, wet: 0.3, decay: 1.2, ratio: 2.41, index: 1.6 });
+    bell(s, t + 0.004, 430 * 2.76 * p, { vol: 0.025 * vol, pan, wet: 0.3, decay: 0.5, ratio: 1.5, index: 0.4 });
+    const v = s.voice(0.05 * vol, pan, 0.1);
+    const a = v.gain(0);
+    perc(a.gain, t, 1, 0.002, 0.03);
+    v.noise('pink', t, t + 0.05, v.filter('bandpass', 1100 * p, 1.4, a));
+    v.done();
+  },
+
+  // Steamer lid rattle: a little run of soft bamboo-and-tin taps.
+  rattle(s, t, p, pan, vol) {
+    let tt = t;
+    const n = 6 + Math.floor(Math.random() * 5);
+    for (let i = 0; i < n; i++) {
+      const k = 1 - i / (n + 2);
+      const v = s.voice(0.07 * vol * k, pan, 0.08);
+      const a = v.gain(0);
+      perc(a.gain, tt, 1, 0.002, 0.03);
+      v.noise('pink', tt, tt + 0.05, v.filter('bandpass', rand(1900, 2600) * p, 1.6, a));
+      const pg = v.gain(0);
+      const end = perc(pg.gain, tt, 0.25, 0.002, 0.05);
+      v.osc('sine', rand(1300, 1500) * p, tt, end, pg);
+      v.done();
+      tt += rand(0.04, 0.09);
+    }
+  },
+
+  // Tuki's "eep": a single round little squeak, a touch lower than the companion's.
+  eep(s, t, p, pan, vol) {
+    const v = s.voice(0.1 * vol, pan, 0.12);
+    const a = v.gain(0, v.filter('lowpass', 2600, 0.7));
+    const end = swell(a.gain, t, 1, 0.012, 0.07, 0.09);
+    const o = v.osc('sine', 700 * p, t, end, a);
+    o.frequency.setValueAtTime(700 * p, t);
+    o.frequency.exponentialRampToValueAtTime(1120 * p, t + 0.07);
+    o.frequency.exponentialRampToValueAtTime(920 * p, t + 0.16);
+    v.osc('sine', 18, t, end, v.paramGain(o.frequency, 22 * p));
+    v.done();
+  },
+
+  // Doko-tuck rustle: a soft wicker crinkle and a tiny settle.
+  rustle(s, t, p, pan, vol) {
+    const v = s.voice(0.11 * vol, pan, 0.05);
+    const a = v.gain(0, v.filter('lowpass', 4500, 0.6));
+    swell(a.gain, t, 1, 0.03, 0.18, 0.14);
+    const jit = v.gain(0.5, a);
+    for (let i = 0; i < 14; i++) {
+      const tt = t + rand(0, 0.32);
+      jit.gain.setValueAtTime(0.5, tt);
+      jit.gain.linearRampToValueAtTime(rand(0.8, 1.2), tt + 0.006);
+      jit.gain.linearRampToValueAtTime(0.5, tt + 0.02);
+    }
+    v.noise('pink', t, t + 0.42, v.filter('bandpass', 3000 * p, 0.9, jit));
+    const th = v.gain(0);
+    const end = perc(th.gain, t + 0.3, 0.6, 0.004, 0.08);
+    const o = v.osc('sine', 180 * p, t + 0.3, end, th);
+    glide(o.frequency, t + 0.3, 180 * p, 110 * p, 0.07);
+    v.done();
+  },
+
+  // Ghum "fwump": a soft puff of air as the leaf hood settles.
+  fwump(s, t, p, pan, vol) {
+    const v = s.voice(0.16 * vol, pan, 0.08);
+    const a = v.gain(0);
+    swell(a.gain, t, 1, 0.03, 0.02, 0.22);
+    const lp = v.filter('lowpass', 600, 0.8, a);
+    glide(lp.frequency, t, 700 * p, 160 * p, 0.22);
+    v.noise('pink', t, t + 0.32, lp);
+    const b = v.gain(0);
+    const end = perc(b.gain, t, 0.5, 0.01, 0.16);
+    const o = v.osc('sine', 120 * p, t, end, b);
+    glide(o.frequency, t, 120 * p, 70 * p, 0.14);
+    v.done();
+  },
+
+  // Kopila's curl "tuck": a tiny soft tuck.
+  tuck(s, t, p, pan, vol) {
+    const v = s.voice(0.11 * vol, pan, 0.06);
+    const a = v.gain(0, v.filter('lowpass', 1800, 0.7));
+    const end = perc(a.gain, t, 1, 0.003, 0.08);
+    const o = v.osc('triangle', 620 * p, t, end, a);
+    glide(o.frequency, t, 620 * p, 420 * p, 0.06);
+    const k = v.gain(0);
+    perc(k.gain, t, 0.2, 0.001, 0.012);
+    v.noise('pink', t, t + 0.03, v.filter('bandpass', 2200, 1.2, k));
+    v.done();
+  },
+
+  // Mica twinkle: two or three tiny glassy glints.
+  twinkle(s, t, p, pan, vol) {
+    const n = 2 + Math.floor(Math.random() * 2);
+    for (let i = 0; i < n; i++) {
+      bell(s, t + i * rand(0.07, 0.12), mtof(pick([93, 95, 98, 100])) * p, { vol: 0.05 * vol, pan: pan + rand(-0.3, 0.3), wet: 0.6, decay: rand(0.5, 0.8), ratio: 3.5, index: 0.6 });
+    }
+  },
+
+  // The guardian's gill-mist breath: a long, soft, low exhale.
+  breath(s, t, p, pan, vol) {
+    const v = s.voice(0.14 * vol, pan, 0.4);
+    const a = v.gain(0);
+    swell(a.gain, t, 1, 0.4, 0.3, 0.9);
+    const lp = v.filter('lowpass', 900, 0.6, a);
+    lp.frequency.setValueAtTime(500 * p, t);
+    lp.frequency.linearRampToValueAtTime(950 * p, t + 0.45);
+    lp.frequency.linearRampToValueAtTime(380 * p, t + 1.6);
+    v.noise('pink', t, t + 1.75, lp);
+    v.done();
+  },
+
   // Sparkle: a shimmer of high pentatonic blips.
   sparkle(s, t, p, pan, vol) {
     for (let i = 0; i < 6; i++) {
@@ -824,7 +955,7 @@ const R: Record<SfxId, Recipe> = {
 
 const lastPlayed = new Map<SfxId, number>();
 /** Minimum gap between two plays of the same sound (seconds). */
-const MIN_GAP: Partial<Record<SfxId, number>> = { reel: 0.5, sizzle: 1.0, bubble: 0.8, kettle: 1.2, rumble: 1.0, fanfare: 0.4, splash: 0.15, stir: 0.4 };
+const MIN_GAP: Partial<Record<SfxId, number>> = { reel: 0.5, sizzle: 1.0, bubble: 0.8, kettle: 1.2, rumble: 1.0, fanfare: 0.4, splash: 0.15, stir: 0.4, breath: 1.0, rattle: 0.3 };
 
 /**
  * Play one effect on a synth at time t (defaults to now). Light random pitch

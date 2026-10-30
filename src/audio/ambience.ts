@@ -411,7 +411,9 @@ class FireBed extends Bed {
 class WaterBed extends Bed {
   private laps: { g: GainNode; lp: BiquadFilterNode; next: number }[] = [];
   private syn!: Synth;
+  private trickleSyn!: Synth;
   private nextGlug = 0;
+  private nextTrickle = 0;
 
   start(t: number): void {
     this.laps = [];
@@ -427,6 +429,18 @@ class WaterBed extends Bed {
     }
     this.syn = new Synth(this.ctx, { dry: this.gain, wet: this.g(0) }, this.noise);
     this.nextGlug = t + rand(1, 3);
+    // A trickling stream off to one side: a soft hiss and tiny bubbly plinks.
+    const tr = this.g(0.18);
+    const trPan = this.panner(-0.55);
+    const bp = this.filt('bandpass', 2400, 0.8);
+    bp.connect(tr);
+    tr.connect(trPan);
+    trPan.connect(this.gain);
+    this.loop('pink', bp, t, 1.05);
+    const plinks = this.g(1);
+    plinks.connect(trPan);
+    this.trickleSyn = new Synth(this.ctx, { dry: plinks, wet: this.g(0) }, this.noise);
+    this.nextTrickle = t + 0.2;
   }
 
   override tick(until: number): void {
@@ -448,6 +462,19 @@ class WaterBed extends Bed {
         l.next = t + up + down + rand(0.2, 1.4);
       }
     }
+    if (this.nextTrickle < now - 0.5) this.nextTrickle = now + 0.05;
+    let guard = 0;
+    while (this.nextTrickle < until && guard++ < 24) {
+      const t = this.nextTrickle;
+      const v = this.trickleSyn.voice(rand(0.02, 0.05), rand(-0.2, 0.2), 0);
+      const a = v.gain(0, v.filter('lowpass', 3000, 0.7));
+      const end = perc(a.gain, t, 1, 0.003, rand(0.03, 0.06));
+      const f = rand(800, 1900);
+      const o = v.osc('sine', f, t, end, a);
+      glide(o.frequency, t, f, f * rand(1.3, 1.7), 0.035);
+      v.done();
+      this.nextTrickle += Math.random() < 0.3 ? rand(0.03, 0.07) : rand(0.08, 0.3);
+    }
     if (this.nextGlug < now - 0.5) this.nextGlug = now + 0.5;
     if (this.nextGlug < until) {
       const t = this.nextGlug;
@@ -463,7 +490,7 @@ class WaterBed extends Bed {
   }
 }
 
-type BirdKind = 'tweet' | 'trill' | 'whistle' | 'coo' | 'feebee';
+type BirdKind = 'tweet' | 'trill' | 'whistle' | 'coo' | 'feebee' | 'chatter' | 'barbet';
 
 class BirdsBed extends Bed {
   private syn!: Synth;
@@ -484,12 +511,15 @@ class BirdsBed extends Bed {
     if (this.next < now - 0.5) this.next = now + rand(0.2, 1);
     if (this.next >= until) return;
     const t = this.next;
+    const dawn = this.p < 0.16;
     const kinds: [BirdKind, number][] = [
-      ['tweet', 3],
-      ['whistle', 2.5],
-      ['trill', 1.2],
-      ['feebee', 1],
-      ['coo', this.p < 0.4 ? 1.4 : 0.2],
+      ['chatter', 2.6],
+      ['tweet', 2.4],
+      ['whistle', 2],
+      ['trill', 1],
+      ['feebee', 0.8],
+      ['barbet', dawn ? 2.4 : 0.25],
+      ['coo', this.p < 0.4 ? 0.6 : 0.1],
     ];
     const total = kinds.reduce((a, [, w]) => a + w, 0);
     let r = Math.random() * total;
@@ -524,6 +554,20 @@ class BirdsBed extends Bed {
         notes.push([fr, nf, rand(0.1, 0.2), 0.9, rand(0.04, 0.09)]);
         fr = nf;
       }
+    } else if (kind === 'chatter') {
+      // Laughingthrush: a giggly tumble of mid-pitched notes.
+      const n = 7 + Math.floor(Math.random() * 7);
+      let fr = rand(1500, 2300);
+      for (let i = 0; i < n; i++) {
+        const nf = Math.max(1200, Math.min(2900, fr * rand(0.8, 1.25)));
+        notes.push([fr, nf, rand(0.045, 0.08), 0.55 + 0.45 * Math.random(), rand(0.02, 0.07)]);
+        fr = nf;
+      }
+    } else if (kind === 'barbet') {
+      // Barbet at dawn: a low, repeated "pu-kuruk" hoot.
+      const base = rand(620, 720);
+      const n = 3 + Math.floor(Math.random() * 3);
+      for (let i = 0; i < n; i++) notes.push([base * 1.1, base * 1.08, 0.07, 0.8, 0.05], [base, base * 0.97, 0.15, 0.9, 0.22]);
     } else if (kind === 'feebee') {
       const hi = rand(3100, 3500);
       notes.push([hi, hi * 0.99, 0.24, 0.9, 0.06], [hi * 0.84, hi * 0.83, 0.26, 0.8, 0.04]);
@@ -533,8 +577,9 @@ class BirdsBed extends Bed {
       [0.8, 1, 0.7, 0.65].forEach((pk, i) => notes.push([base * (i === 1 ? 1.06 : 1), base * (i === 1 ? 0.98 : 0.94), i === 1 ? 0.38 : 0.26, pk, 0.12]));
     }
     const total = notes.reduce((a, n) => a + n[2] + n[4], 0);
-    const v = this.syn.voice((kind === 'coo' ? 0.1 : 0.075) * dist, pan, 0);
-    const amp = v.gain(0, kind === 'coo' ? v.filter('lowpass', 1100, 0.7) : v.input);
+    const low = kind === 'coo' || kind === 'barbet';
+    const v = this.syn.voice((low ? 0.1 : kind === 'chatter' ? 0.065 : 0.075) * dist, pan, 0);
+    const amp = v.gain(0, low ? v.filter('lowpass', 1300, 0.7) : v.input);
     const o = v.osc('sine', notes[0][0], t, t + total + 0.05, amp);
     const f = o.frequency;
     const g = amp.gain;
@@ -664,6 +709,12 @@ class RoomBed extends Bed {
   private syn!: Synth;
   private next = 0;
   private tick2 = false;
+  private tinRoar!: GainNode;
+  private tinSyn!: Synth;
+  private nextTin = 0;
+  /** 0..1: rain drumming on the shop's tin roof. */
+  tin = 0;
+  private tinApplied = -1;
 
   start(t: number): void {
     const lp = this.filt('lowpass', 170, 0.6);
@@ -673,11 +724,43 @@ class RoomBed extends Bed {
     this.loop('brown', lp, t);
     this.syn = new Synth(this.ctx, { dry: this.gain, wet: this.g(0) }, this.noise);
     this.next = t + 0.5;
+    // Rain on the tin roof: a soft mid roar plus metallic pings.
+    this.tinRoar = this.g(0);
+    const bp = this.filt('bandpass', 1700, 0.7);
+    bp.connect(this.tinRoar);
+    this.tinRoar.connect(this.gain);
+    this.loop('pink', bp, t, 0.95);
+    const pings = this.g(1);
+    const plp = this.filt('lowpass', 5200, 0.6);
+    pings.connect(plp);
+    plp.connect(this.gain);
+    this.tinSyn = new Synth(this.ctx, { dry: pings, wet: this.g(0) }, this.noise);
+    this.nextTin = t + 0.1;
+    this.tinApplied = -1;
   }
 
   override tick(until: number): void {
     if (!this.running || this.target < 0.02) return;
     const now = this.ctx.currentTime;
+    if (Math.abs(this.tin - this.tinApplied) > 0.01) {
+      this.tinApplied = this.tin;
+      this.tinRoar.gain.setTargetAtTime(0.5 * this.tin, now, 1.5);
+    }
+    if (this.tin > 0.05) {
+      if (this.nextTin < now - 0.5) this.nextTin = now + 0.05;
+      let g = 0;
+      while (this.nextTin < until && g++ < 32) {
+        const t = this.nextTin;
+        const v = this.tinSyn.voice(rand(0.04, 0.11) * this.tin, rand(-0.7, 0.7), 0);
+        const a = v.gain(0);
+        const end = perc(a.gain, t, 1, 0.002, rand(0.02, 0.05));
+        const f = rand(2400, 4200);
+        const o = v.osc('sine', f, t, end, a);
+        v.osc('sine', f * 1.47, t, end, v.paramGain(o.frequency, f * 0.3));
+        v.done();
+        this.nextTin += rand(0.03, 0.12);
+      }
+    }
     if (this.next < now - 0.5) this.next = now + 0.1;
     let guard = 0;
     while (this.next < until && guard++ < 4) {
@@ -798,6 +881,7 @@ export class Ambience {
     this.rain.setTent(tent, 0.6);
     this.fire.set(fire, 0.8);
     this.water.set(water, 1);
+    this.room.tin = sc === 'shop' && rain ? 1 : 0;
     this.room.set(sc === 'shop' ? 1 : 0, 0.5);
   }
 

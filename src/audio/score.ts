@@ -8,7 +8,7 @@
  * setTimeout loop and every note is placed on the AudioContext clock. No
  * per-frame work.
  */
-import { type NoiseBank, type Out, Synth, glide, loopify, mtof, perc, pick, rand, swell } from './sfx';
+import { type NoiseBank, type Out, Synth, bell, glide, loopify, mtof, perc, pick, rand, swell } from './sfx';
 
 export type ScoreVariant = 'day' | 'rain' | 'night' | 'finale';
 export type LeadVoice = 'flute' | 'none';
@@ -43,13 +43,17 @@ interface VariantCfg {
   vinyl: number;
   /** Finale: kalimba arpeggios. */
   arps: boolean;
+  /** Soft shaker level (day groove, and alone in rain). */
+  shaker: number;
+  /** Finale only: a warm string pad and gentle chimes. */
+  pad: boolean;
 }
 
 const CFG: Record<ScoreVariant, VariantCfg> = {
-  day: { bpm: 76, barsPerChord: 1, drums: true, bass: 1, keys: 1, keysLP: 2300, kalimba: 0.15, lead: 0.24, leadLow: false, wet: 0.22, swing: 0.16, comp: 1, vinyl: 1, arps: false },
-  rain: { bpm: 72, barsPerChord: 1, drums: false, bass: 0.7, keys: 0.85, keysLP: 1500, kalimba: 0.11, lead: 0.16, leadLow: false, wet: 0.48, swing: 0.14, comp: 0.55, vinyl: 1.25, arps: false },
-  night: { bpm: 66, barsPerChord: 2, drums: false, bass: 0.55, keys: 0.82, keysLP: 1300, kalimba: 0.07, lead: 0.13, leadLow: true, wet: 0.4, swing: 0.12, comp: 0.3, vinyl: 0.8, arps: false },
-  finale: { bpm: 64, barsPerChord: 2, drums: false, bass: 0.8, keys: 1, keysLP: 2000, kalimba: 0.12, lead: 0.42, leadLow: false, wet: 0.52, swing: 0.1, comp: 0.5, vinyl: 0.5, arps: true },
+  day: { bpm: 76, barsPerChord: 1, drums: true, bass: 1, keys: 1, keysLP: 2300, kalimba: 0.15, lead: 0.24, leadLow: false, wet: 0.22, swing: 0.16, comp: 1, vinyl: 1, arps: false, shaker: 1, pad: false },
+  rain: { bpm: 72, barsPerChord: 1, drums: false, bass: 0.7, keys: 0.85, keysLP: 1500, kalimba: 0.11, lead: 0.16, leadLow: false, wet: 0.48, swing: 0.14, comp: 0.55, vinyl: 1.25, arps: false, shaker: 0.55, pad: false },
+  night: { bpm: 66, barsPerChord: 2, drums: false, bass: 0.55, keys: 0.82, keysLP: 1300, kalimba: 0.07, lead: 0.13, leadLow: true, wet: 0.4, swing: 0.12, comp: 0.3, vinyl: 0.8, arps: false, shaker: 0, pad: false },
+  finale: { bpm: 64, barsPerChord: 2, drums: false, bass: 0.8, keys: 1, keysLP: 2000, kalimba: 0.12, lead: 0.42, leadLow: false, wet: 0.52, swing: 0.1, comp: 0.5, vinyl: 0.5, arps: true, shaker: 0, pad: true },
 };
 
 /** Rootless voicings, smooth voice leading (MIDI). */
@@ -116,6 +120,7 @@ export class Score {
   private pluckSyn: Synth;
   private leadSyn: Synth;
   private drumSyn: Synth;
+  private padSyn: Synth;
   private keysLP: BiquadFilterNode;
   private wetLevel: GainNode;
   private vinylGain: GainNode;
@@ -207,6 +212,19 @@ export class Score {
     const drumWet = g(0.2);
     drumWet.connect(this.wetLevel);
     this.drumSyn = new Synth(ctx, { dry: drumIn, wet: drumWet }, noise);
+
+    // Finale pad: detuned saws, darkened and washed in reverb.
+    const padIn = g(1);
+    const padLP = ctx.createBiquadFilter();
+    padLP.type = 'lowpass';
+    padLP.frequency.value = 950;
+    padLP.Q.value = 0.4;
+    padIn.connect(padLP);
+    padLP.connect(this.out);
+    this.persistent.push(padLP);
+    const padWet = g(0.8);
+    padWet.connect(this.wetLevel);
+    this.padSyn = new Synth(ctx, { dry: padIn, wet: padWet }, noise);
 
     // Vinyl bed.
     this.vinylBuf = makeVinyl(ctx);
@@ -419,7 +437,14 @@ export class Score {
       this.planPhrase(base, t, chord.tones);
     }
 
-    // --- Drums (day only) ---------------------------------------------------
+    // --- Finale pad and chimes ---------------------------------------------
+    if (c.pad && firstOfChord) {
+      const len = beat * 4 * c.barsPerChord;
+      this.queue(base, (tt) => this.pad(tt, chord.keys.map((m) => m + 12), len));
+      if (Math.random() < 0.6) this.queue(base + 4, (tt) => bell(this.pluckSyn, tt, mtof(nearestPenta(chord.keys[3] + 24)), { vol: 0.03, pan: rand(-0.4, 0.4), wet: 0.7, decay: 2.2, ratio: 3.5, index: 0.9 }));
+    }
+
+    // --- Drums: brushes and madal by day, a soft shaker in rain, none at night ---
     if (c.drums) {
       const breathe = cycle >= 12;
       if (!breathe || cycle === 15) {
@@ -428,10 +453,17 @@ export class Score {
       }
       this.queue(base + 4, (tt) => this.brush(tt, 1));
       this.queue(base + 12, (tt) => this.brush(tt, 1));
-      for (let s = 0; s < 16; s += 2) {
-        if (Math.random() < 0.85) this.queue(base + s, (tt) => this.shaker(tt, s % 4 === 2 ? 1 : 0.6));
-      }
       if (cycle === 7 || cycle === 15) this.queue(base + 14, (tt) => this.brush(tt, 0.6));
+      // Madal: light hand-drum pats between the brushes.
+      if (Math.random() < 0.8) this.queue(base + 6, (tt) => this.madal(tt, 1, false));
+      if (Math.random() < 0.6) this.queue(base + 14, (tt) => this.madal(tt, 0.8, true));
+      if (Math.random() < 0.35) this.queue(base + 3, (tt) => this.madal(tt, 0.45, false));
+      if (Math.random() < 0.35) this.queue(base + 11, (tt) => this.madal(tt, 0.55, true));
+    }
+    if (c.shaker > 0) {
+      for (let s = 0; s < 16; s += 2) {
+        if (Math.random() < (c.drums ? 0.85 : 0.7)) this.queue(base + s, (tt) => this.shaker(tt, (s % 4 === 2 ? 1 : 0.6) * c.shaker));
+      }
     }
   }
 
@@ -455,6 +487,7 @@ export class Score {
     const sixteenth = this.beat() / 4;
     const slow = this.cfg.barsPerChord > 1 ? 2 : 1;
     let endT = t;
+    let prevNote = pool[idx];
     for (let i = 0; i < n; i++) {
       const last = i === n - 1;
       const durSteps = (last ? pick([8, 12]) : pick([2, 4, 4, 6])) * slow;
@@ -466,7 +499,9 @@ export class Score {
       }
       const dur = durSteps * sixteenth * 0.92;
       const vel = (last ? 0.05 : 0.055) * (this.variant === 'rain' ? 0.8 : 1);
-      this.queue(step, (tt) => this.flute(tt, m, dur, vel));
+      const prev = i > 0 ? prevNote : null;
+      this.queue(step, (tt) => this.flute(tt, m, dur, vel, prev));
+      prevNote = m;
       step += durSteps;
       endT = t + (step - base) * sixteenth;
     }
@@ -537,37 +572,76 @@ export class Score {
     v.done();
   }
 
-  /** Breathy flute: sine + band-passed breath noise + delayed vibrato. */
-  private flute(t: number, m: number, dur: number, vel: number): void {
+  /**
+   * Bansuri-style flute (WORLD.md "ghats" recipe): a sine plus a quiet
+   * triangle 2nd partial, band-passed breath at 1.5-3 kHz (~-24 dB), a 60 ms
+   * soft attack, 5 Hz +-12 cent vibrato fading in after 250 ms and a 90 ms
+   * portamento from the previous note of the phrase.
+   */
+  private flute(t: number, m: number, dur: number, vel: number, prev: number | null): void {
     const s = this.leadSyn;
     const f = mtof(m);
     const v = s.voice(vel, rand(-0.15, 0.15), 1);
     const end = t + dur + 0.3;
-    const lp = v.filter('lowpass', 3400, 0.6);
+    const lp = v.filter('lowpass', 3600, 0.6);
     const amp = v.gain(0, lp);
-    swell(amp.gain, t, 1, 0.09, Math.max(0.05, dur - 0.09), 0.22);
+    swell(amp.gain, t, 1, 0.06, Math.max(0.05, dur - 0.06), 0.22);
     const o = v.osc('sine', f, t, end, amp);
-    const body = v.gain(0.12, amp);
-    const o2 = v.osc('triangle', f, t, end, body);
-    // Vibrato fades in after the attack.
+    const o2 = v.osc('triangle', f * 2, t, end, v.gain(0.07, amp));
+    // Portamento from the previous note (or a tiny scoop into a first note).
+    const from = prev !== null ? mtof(prev) : f * 0.985;
+    glide(o.frequency, t, from, f, prev !== null ? 0.09 : 0.06);
+    glide(o2.frequency, t, from * 2, f * 2, prev !== null ? 0.09 : 0.06);
+    // Vibrato: +-12 cents at ~5 Hz, fading in after 250 ms.
     const vib = v.paramGain(o.frequency);
-    vib.connect(o2.frequency);
-    v.osc('sine', rand(4.6, 5.4), t, end, vib);
+    v.osc('sine', rand(4.8, 5.2), t, end, vib);
+    const vib2 = v.paramGain(o2.frequency);
+    vib.connect(vib2);
+    vib2.gain.value = 2;
     vib.gain.setValueAtTime(0, t);
     vib.gain.setValueAtTime(0, t + Math.min(0.25, dur * 0.4));
-    vib.gain.linearRampToValueAtTime(f * 0.007, t + Math.min(0.7, dur));
-    // A tiny scoop up into the note.
-    glide(o.frequency, t, f * 0.985, f, 0.06);
-    // Breath.
+    vib.gain.linearRampToValueAtTime(f * 0.007, t + Math.min(0.75, dur));
+    // Breath: a puff at the attack that settles to a quiet hiss.
     const br = v.gain(0, lp);
     br.gain.setValueAtTime(0, t);
-    br.gain.linearRampToValueAtTime(0.5, t + 0.04);
-    br.gain.setTargetAtTime(0.22, t + 0.05, 0.12);
+    br.gain.linearRampToValueAtTime(0.32, t + 0.035);
+    br.gain.setTargetAtTime(0.12, t + 0.05, 0.1);
     br.gain.setTargetAtTime(0.0001, t + dur, 0.06);
-    v.noise('pink', t, end, v.filter('bandpass', f, 3.2, br));
-    const chiff = v.gain(0);
-    perc(chiff.gain, t, 0.12, 0.004, 0.05);
-    v.noise('white', t, t + 0.08, v.filter('bandpass', f * 3, 1.2, chiff));
+    v.noise('pink', t, end, v.filter('bandpass', Math.max(1500, Math.min(3000, f * 2)), 1.1, br));
+    v.done();
+  }
+
+  /** Madal pat: a short pitched body thump plus a filtered slap (day only). */
+  private madal(t: number, k: number, low: boolean): void {
+    const v = this.drumSyn.voice(0.075 * k, low ? -0.15 : 0.15, 0.4);
+    const amp = v.gain(0);
+    const end = perc(amp.gain, t, 1, 0.003, low ? 0.2 : 0.14);
+    const f = low ? 96 : 124;
+    const o = v.osc('sine', f, t, end, amp);
+    glide(o.frequency, t, f * 1.08, f * 0.85, 0.12);
+    v.osc('sine', f * 2.3, t, end, v.gain(0.12, amp));
+    const slap = v.gain(0);
+    perc(slap.gain, t, low ? 0.15 : 0.32, 0.002, 0.035);
+    v.noise('pink', t, t + 0.06, v.filter('bandpass', low ? 900 : 1500, 1.2, slap));
+    v.done();
+  }
+
+  /** Warm string pad for the finale: two detuned saws per note, slow swell. */
+  private pad(t: number, notes: number[], len: number): void {
+    const v = this.padSyn.voice(0.012, 0, 1);
+    const amp = v.gain(0);
+    amp.gain.setValueAtTime(0, t);
+    amp.gain.linearRampToValueAtTime(1, t + 1.6);
+    amp.gain.setValueAtTime(1, t + Math.max(1.6, len - 0.4));
+    amp.gain.linearRampToValueAtTime(0, t + len + 1.6);
+    const end = t + len + 1.7;
+    for (const m of notes) {
+      const f = mtof(m);
+      for (const d of [-7, 7]) {
+        const o = v.osc('sawtooth', f, t, end, amp);
+        o.detune.value = d + rand(-2, 2);
+      }
+    }
     v.done();
   }
 

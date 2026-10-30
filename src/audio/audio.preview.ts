@@ -51,6 +51,14 @@ const LABELS: Partial<Record<SfxId, string>> = {
   rumble: 'Rumble',
   hearts: 'Hearts',
   sparkle: 'Sparkle',
+  tonk: 'Yak bell',
+  rattle: 'Lid rattle',
+  eep: 'Tuki eep',
+  rustle: 'Doko rustle',
+  fwump: 'Ghum fwump',
+  tuck: 'Curl tuck',
+  twinkle: 'Mica twinkle',
+  breath: 'Mist breath',
 };
 
 const base = { raining: false, inTent: false, nearFire: 0, nearWater: 0 };
@@ -92,7 +100,7 @@ export default function preview(scene: Phaser.Scene): void {
   const l = layout();
   const W = l.w;
   const M = Math.max(28, l.safe.left + 16);
-  const GAP = 8;
+  const GAP = 6;
   const BH = MIN_TOUCH;
   const BW = 128;
   const cols = Math.max(4, Math.floor((W - 2 * M + GAP) / (BW + GAP)));
@@ -153,7 +161,7 @@ export default function preview(scene: Phaser.Scene): void {
     txt(scene, x0 + 22, y, text, 'label', { align: 'left', size: 21 });
   };
 
-  let y = 92;
+  let y = 86;
   const ROW = BH + GAP;
 
   // --- Sounds ---------------------------------------------------------------
@@ -167,7 +175,7 @@ export default function preview(scene: Phaser.Scene): void {
       if (id === 'nope') wobble(scene, b.c);
     });
   });
-  y += Math.ceil(SFX_IDS.length / cols) * ROW + 26;
+  y += Math.ceil(SFX_IDS.length / cols) * ROW + 16;
 
   // --- Music ----------------------------------------------------------------
   heading(y, 'Music', P.lavender);
@@ -190,7 +198,7 @@ export default function preview(scene: Phaser.Scene): void {
     const b = makeBtn(bx, by, label, P.lavender, fn);
     if (i < MOODS.length) moodBtns.push([b, MOODS[i][1]]);
   });
-  y += Math.ceil(musicItems.length / cols) * ROW + 26;
+  y += Math.ceil(musicItems.length / cols) * ROW + 16;
 
   // --- Ambience -------------------------------------------------------------
   heading(y, 'Ambience', P.powder);
@@ -216,7 +224,7 @@ export default function preview(scene: Phaser.Scene): void {
   });
   y += Math.ceil(ambItems.length / cols) * ROW;
 
-  txt(scene, x0, Math.min(700, y + 18), 'Every sound here is made in code. Music crossfades over 4 s; dropped-in music files take over automatically.', 'small', {
+  if (y + 16 < 714) txt(scene, x0, y + 14, 'Every sound here is made in code. Music crossfades over 4 s; dropped-in music files take over automatically.', 'small', {
     align: 'left',
     size: 16,
     color: shade(P.lavender, 0.3),

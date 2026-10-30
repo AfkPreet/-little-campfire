@@ -122,11 +122,11 @@ export class Slider extends Phaser.GameObjects.Container {
     this.v = v;
     this.layoutValue(tap && !reduceMotion());
     this.o.onChange?.(this.v);
-    // A soft tick every 10% while dragging (audio may map it or ignore it).
+    // A soft tok every 10% while dragging, so the level can be heard.
     const step = Math.round(v * 10);
     if (step !== this.lastTick) {
       this.lastTick = step;
-      if (!tap) bus.emit('sfx', { id: 'tick', vol: 0.25 });
+      if (!tap) bus.emit('sfx', { id: 'tok', vol: 0.18 });
     }
   }
 

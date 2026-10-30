@@ -723,24 +723,25 @@ function bakeIcons(b: Baker): void {
     const cx = 24;
     const cy = 22.5;
     const r = 18;
-    const edge = mix(P.butter, P.ember, 0.18);
+    const gold = mix(P.butter, P.glow, 0.45);
+    const edge = mix(gold, P.ember, 0.3);
     ctx.beginPath();
     ctx.arc(cx, cy + 3.2, r, 0, TAU);
-    fillOutline(ctx, shade(edge, 0.12), P.butter);
+    fillOutline(ctx, shade(edge, 0.1), edge);
     ctx.beginPath();
     ctx.arc(cx, cy, r, 0, TAU);
     fillOutline(
       ctx,
       rGrad(ctx, cx - 6, cy - 7, 1, r * 1.35, [
-        [0, mix(P.butter, P.cream, 0.55)],
-        [0.55, P.butter],
+        [0, mix(gold, P.cream, 0.6)],
+        [0.5, gold],
         [1, edge],
       ]),
-      P.butter,
+      edge,
     );
     ctx.beginPath();
     ctx.arc(cx, cy, r - 5, 0, TAU);
-    ctx.strokeStyle = rgba(shade(P.butter, 0.22), 0.55);
+    ctx.strokeStyle = rgba(shade(edge, 0.18), 0.5);
     ctx.lineWidth = 1.6;
     ctx.stroke();
     // Embossed leaf.
@@ -752,9 +753,9 @@ function bakeIcons(b: Baker): void {
       ctx.quadraticCurveTo(0, -6.5, 7.5, 0);
       ctx.quadraticCurveTo(0, 6.5, -7.5, 0);
       ctx.closePath();
-      ctx.fillStyle = mix(P.butter, P.ember, 0.12);
+      ctx.fillStyle = mix(gold, P.ember, 0.16);
       ctx.fill();
-      ctx.strokeStyle = shade(P.butter, 0.26);
+      ctx.strokeStyle = shade(edge, 0.22);
       ctx.lineWidth = 1.5;
       ctx.stroke();
       ctx.beginPath();
