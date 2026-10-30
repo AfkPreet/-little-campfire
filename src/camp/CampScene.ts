@@ -39,21 +39,10 @@ import { dishName } from '@/systems/inventory';
 import { CampLight } from './CampLight';
 import { Interactables } from './Interactables';
 import type { CampCtx } from './ctx';
+import { controllerFactories, shotHandlers } from './registry';
+import './controllers';
 
 type Updater = (time: number, delta: number) => void;
-
-/** Shot handlers registered by controllers (?shot=<name>). */
-const shotHandlers = new Map<string, (ctx: CampCtx) => void | Promise<void>>();
-export function registerShot(name: string, fn: (ctx: CampCtx) => void | Promise<void>): void {
-  shotHandlers.set(name, fn);
-}
-
-/** Controllers that want to attach to every Camp instance. */
-type ControllerFactory = (ctx: CampCtx) => { destroy?: () => void } | void;
-const controllerFactories: ControllerFactory[] = [];
-export function registerCampController(f: ControllerFactory): void {
-  controllerFactories.push(f);
-}
 
 export interface CampData {
   /** Arriving from the shop: start at the path. */
@@ -92,6 +81,7 @@ export default class Camp extends Phaser.Scene {
   private sitSecs = 0;
   private peekCheckT = 0;
   private dialog: Dialog | null = null;
+  private tapInterceptor: ((wx: number, wy: number) => boolean) | null = null;
   private litWindowTimer = 0;
   activity: CampCtx['activity'] = 'idle';
 
@@ -116,6 +106,7 @@ export default class Camp extends Phaser.Scene {
     this.glowAt = -1;
     this.sitSecs = 0;
     this.dialog = null;
+    this.tapInterceptor = null;
   }
 
   create(data: CampData = {}): void {
@@ -335,6 +326,9 @@ export default class Camp extends Phaser.Scene {
       focus: (x) => {
         this.focusX = x;
       },
+      setTapInterceptor: (fn) => {
+        this.tapInterceptor = fn;
+      },
       onUpdate: (fn) => {
         this.updaters.add(fn);
         return () => this.updaters.delete(fn);
@@ -365,6 +359,7 @@ export default class Camp extends Phaser.Scene {
     const wp = cam.getWorldPoint(p.x, p.y);
     const wx = wp.x;
     const wy = wp.y;
+    if (this.tapInterceptor && this.tapInterceptor(wx, wy)) return;
     if (this.bubbleGroup) {
       this.closeBubbles();
     }

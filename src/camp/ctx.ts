@@ -33,6 +33,8 @@ export interface CampCtx {
   focus(x: number | null): void;
   /** Register a per-frame updater; returns a remover. */
   onUpdate(fn: (time: number, delta: number) => void): () => void;
+  /** A controller may claim world taps first (fishing bite window). Return true to consume. */
+  setTapInterceptor(fn: ((wx: number, wy: number) => boolean) | null): void;
   /** Current activity Tuki is in (for ambience + clock rules). */
   activity: 'idle' | 'walk' | 'fish' | 'sit' | 'rest' | 'cook' | 'decor' | 'sleep' | 'finale' | 'read' | 'nap';
 }
