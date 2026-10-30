@@ -482,9 +482,9 @@ export function drawBallEye(ctx: Ctx): void {
 // The Bud Bush (bush coords: origin at base centre, y negative up)
 // ---------------------------------------------------------------------------
 
-const LEAF = P.moss;
+const LEAF: string = P.moss;
 const LEAF_DEEP = A['dhupi'];
-const LEAF_LIGHT = P.sage;
+const LEAF_LIGHT: string = P.sage;
 
 /** Bud positions (base point of the ball sprite) and scale. */
 export const BUDS: { x: number; y: number; s: number }[] = [
