@@ -67,7 +67,7 @@ export const KH = {
   ] as [number, number, number][],
   heart: { x: 76, y: -92 },
   finNear: { x: 28, y: -88, angle: 30 },
-  finFar: { x: -126, y: -50, angle: 166 },
+  finFar: { x: -112, y: -26, angle: 172 },
   crest: { x: 196, y: -236 },
   tail: { x: 446 },
   halo: { x: 110, y: -140, w: 900, h: 500 },
@@ -340,31 +340,26 @@ function drawScales(ctx: Ctx): void {
         ctx.translate(s.x, s.y);
         ctx.rotate(s.a);
         ctx.scale(1, 0.92);
-        // Faint cloud-puff body of the scallop.
+        // A soft cloud-puff disc...
         ctx.beginPath();
-        ctx.arc(0, 0, s.r, -Math.PI / 2, Math.PI / 2);
-        ctx.closePath();
-        ctx.fillStyle = rGrad(ctx, -s.r * 0.25, 0, 0, s.r, [
+        ctx.arc(0, 0, s.r, 0, Math.PI * 2);
+        ctx.fillStyle = rGrad(ctx, -s.r * 0.3, 0, 0, s.r, [
           [0, C.belly, 0],
-          [0.6, C.belly, 0.04],
-          [0.9, C.belly, 0.16],
-          [1, C.belly, 0.22],
+          [0.5, C.belly, 0.07],
+          [0.86, C.belly, 0.2],
+          [1, C.belly, 0],
         ]);
         ctx.fill();
-        // The lighter arc (moonmilk 0.35, feathered)...
+        // ...whose tail-ward edge catches a lighter arc with a fish-glow inner edge.
         ctx.beginPath();
-        ctx.arc(0, 0, s.r - 4, -1.36, 1.36);
-        ctx.strokeStyle = rgba(C.belly, 0.14);
-        ctx.lineWidth = 10;
+        ctx.arc(0, 0, s.r - 5, -1.2, 1.2);
+        ctx.strokeStyle = rgba(C.belly, 0.16);
+        ctx.lineWidth = 7;
         ctx.stroke();
-        ctx.strokeStyle = rgba(C.belly, 0.24);
-        ctx.lineWidth = 5;
-        ctx.stroke();
-        // ...with a fish-glow inner edge.
         ctx.beginPath();
-        ctx.arc(0, 0, s.r - 8.5, -1.22, 1.22);
-        ctx.strokeStyle = rgba(C.glow, 0.5);
-        ctx.lineWidth = 1.3;
+        ctx.arc(0, 0, s.r - 7.5, -1.08, 1.08);
+        ctx.strokeStyle = rgba(C.glow, 0.42);
+        ctx.lineWidth = 1.2;
         ctx.stroke();
       });
     }
@@ -704,18 +699,23 @@ export function bake(b: Baker): void {
   b.tex('kuhiro_gills', 64, 120, (ctx) => {
     ctx.translate(32, 60);
     ctx.lineCap = 'round';
-    ctx.strokeStyle = rgba(C.line, 0.55);
-    ctx.lineWidth = 3;
     const arcs = [
       [-14, 36],
       [0, 46],
       [14, 36],
     ];
-    for (const [x, h] of arcs) {
-      ctx.beginPath();
-      ctx.moveTo(x - 6, -h);
-      ctx.quadraticCurveTo(x + 12, 0, x - 6, h);
-      ctx.stroke();
+    for (const [w, a] of [
+      [7, 0.12],
+      [2.6, 0.42],
+    ] as [number, number][]) {
+      ctx.strokeStyle = rgba(C.line, a);
+      ctx.lineWidth = w;
+      for (const [x, h] of arcs) {
+        ctx.beginPath();
+        ctx.moveTo(x - 6, -h);
+        ctx.quadraticCurveTo(x + 12, 0, x - 6, h);
+        ctx.stroke();
+      }
     }
   });
 

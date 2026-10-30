@@ -97,19 +97,19 @@ export const BW: Record<string, Win> = {
   mouthTalk: { x0: -14, y0: -148, w: 28, h: 20 },
   mouthO: { x0: -14, y0: -148, w: 28, h: 20 },
   muffler: { x0: -84, y0: -126, w: 168, h: 40 },
-  mufflerTails: { x0: -60, y0: -108, w: 48, h: 66 },
-  bell: { x0: 1, y0: -104, w: 26, h: 34 },
-  hoofL: { x0: -80, y0: -40, w: 40, h: 46 },
-  hoofR: { x0: 40, y0: -40, w: 40, h: 46 },
+  mufflerTails: { x0: -62, y0: -108, w: 56, h: 66 },
+  bell: { x0: 1, y0: -104, w: 26, h: 36 },
+  hoofL: { x0: -80, y0: -44, w: 40, h: 50 },
+  hoofR: { x0: 40, y0: -44, w: 40, h: 50 },
   swatch: { x0: -20, y0: -50, w: 40, h: 28 },
   yarn: { x0: 4, y0: -36, w: 90, h: 30 },
   ball: { x0: 82, y0: -32, w: 36, h: 38 },
   // Local-coordinate props (pivot at 0,0).
   needle: { x0: -10, y0: -6, w: 82, h: 12 },
-  kettle: { x0: -34, y0: -34, w: 56, h: 52 },
+  kettle: { x0: -34, y0: -6, w: 56, h: 44 },
   glass: { x0: -11, y0: -25, w: 22, h: 28 },
   tea: { x0: -11, y0: -25, w: 22, h: 28 },
-  stream: { x0: 28, y0: -56, w: 26, h: 42 },
+  stream: { x0: 28, y0: -61, w: 26, h: 47 },
 };
 
 export function bOrigin(name: string, px: number, py: number): [number, number] {
@@ -319,13 +319,6 @@ export function drawHead(ctx: Ctx): void {
   ]);
   ctx.fill();
   stroke(ctx, mix(YAK_FACE, YAK_LINE, 0.3), 1.6);
-  // A little cream blaze up the forehead.
-  ctx.beginPath();
-  ctx.moveTo(-9, m.y - m.ry + 3);
-  ctx.quadraticCurveTo(0, -200, 9, m.y - m.ry + 3);
-  ctx.closePath();
-  ctx.fillStyle = rgba(YAK_FACE, 0.0);
-  ctx.fill();
 }
 
 export function drawFringe(ctx: Ctx): void {

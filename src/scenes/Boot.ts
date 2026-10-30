@@ -40,6 +40,10 @@ export default class Boot extends Phaser.Scene {
     await bakeAll(this.textures, baker, (d, t) => setBar(0.1 + 0.85 * (d / Math.max(1, t))));
     for (const m of mods) m.afterBake?.(this.game);
 
+    // World scenes are loaded lazily so a broken art module can only break its
+    // own scene (and previews never load them).
+    if ((param('scene') ?? '').toLowerCase() !== 'preview') await this.loadLazyScenes();
+
     try {
       const audio = await import('@/audio/engine');
       await audio.detectMusic?.();
@@ -54,6 +58,29 @@ export default class Boot extends Phaser.Scene {
       setTimeout(() => splash.remove(), 700);
     }
     this.route();
+  }
+
+  private async loadLazyScenes(): Promise<void> {
+    const keys: Record<string, string> = {
+      '../camp/CampScene.ts': SCENES.camp,
+      '../shop/ShopScene.ts': SCENES.shop,
+      '../title/TitleScene.ts': SCENES.title,
+      '../title/IntroScene.ts': SCENES.intro,
+      '../styleboard/StyleBoardScene.ts': SCENES.styleboard,
+    };
+    const loaders = import.meta.glob<{ default: typeof Phaser.Scene }>(['../camp/CampScene.ts', '../shop/ShopScene.ts', '../title/*Scene.ts', '../styleboard/StyleBoardScene.ts']);
+    await Promise.all(
+      Object.entries(loaders).map(async ([path, load]) => {
+        const key = keys[path];
+        if (!key || this.scene.manager.keys[key]) return;
+        try {
+          const m = await load();
+          this.scene.manager.add(key, m.default, false);
+        } catch (err) {
+          console.error(`[boot] scene failed to load: ${path}`, err);
+        }
+      }),
+    );
   }
 
   private async loadFonts(): Promise<void> {

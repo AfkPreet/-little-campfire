@@ -219,6 +219,7 @@ export class Hero extends Rig {
 
   // Doko state.
   private nItems = 0;
+  private tierInit = false;
   private cap = 1;
   private readonly popT = new Float32Array(6).fill(1);
   private scaleOn = false;
@@ -390,9 +391,7 @@ export class Hero extends Rig {
       h.setTexture(this.heldKey);
       const sz = texSize(this.heldKey);
       const lw = sz.w > 0 ? Math.max(sz.w, sz.h) : Math.max(h.frame.width, h.frame.height) / ART_SCALE;
-      const want = this.basePose === 'eat' ? 22 : 30;
-      h.setScale((want / Math.max(1, lw)) * K);
-      h.setData('fitScale', h.scaleX);
+      h.setData('fitScale', (30 / Math.max(1, lw)) * K);
     }
     this.updateHeldVisibility();
     return this;
@@ -412,7 +411,8 @@ export class Hero extends Rig {
 
   /** Doko fill cap + quirk flourish (WORLD 5.1 table). Idempotent. */
   setTier(t: Tier): this {
-    const changed = t !== this.tier || this.nItems === 0;
+    const changed = t !== this.tier || !this.tierInit;
+    this.tierInit = true;
     this.tier = t;
     this.cap = TIER_CAP[t];
     if (changed) {
@@ -1136,8 +1136,7 @@ export class Hero extends Rig {
     h.setVisible(show);
     if (show) {
       const fit = (h.getData('fitScale') as number | undefined) ?? K;
-      const want = this.basePose === 'eat' ? 22 / 30 : 1;
-      h.setScale(fit * (this.basePose === 'eat' ? want : 1));
+      h.setScale(fit * (this.basePose === 'eat' ? 22 / 30 : 1));
     }
   }
 

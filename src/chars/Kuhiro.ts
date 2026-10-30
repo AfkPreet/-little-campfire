@@ -162,7 +162,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
 
     // Heart-glow: a campfire seen through fog, deep in the chest.
     this.heartGlow = mk('glow', KH.heart.x, KH.heart.y).setTint(hexToInt(P.glow)).setAlpha(0.35);
-    this.heartGlow.setScale((K * 200) / 256, (K * 170) / 256);
+    this.heartGlow.setScale((K * 250) / 256, (K * 210) / 256);
     this.heartCore = mk('glow', KH.heart.x, KH.heart.y).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(P.glow)).setAlpha(0.12);
     this.heartCore.setScale((K * 120) / 256, (K * 100) / 256);
     bc.add([this.heartGlow, this.heartCore]);
@@ -595,7 +595,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Glow.
     const g = this.glowLevel;
     this.halo.setAlpha(0.35 * g * (0.9 + 0.1 * br));
-    this.heartGlow.setAlpha(0.3 + 0.08 * br + (this.happy ? 0.08 : 0));
+    this.heartGlow.setAlpha(0.42 + 0.08 * br + (this.happy ? 0.1 : 0));
     this.heartCore.setAlpha((0.1 + 0.05 * br) * g);
     this.waterGlow.setAlpha(g * (0.1 + 0.2 * up));
     this.waterGlow.y = 24 + oy * 0.22;
@@ -603,7 +603,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.gleam.setAlpha(this.gleamA * above);
     this.blushes[0].setAlpha(this.blushA * 0.85);
     this.blushes[1].setAlpha(this.blushA);
-    this.waterline.setAlpha(above * (0.36 + 0.1 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
+    this.waterline.setAlpha(above * (0.22 + 0.07 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
 
     // Freckles pulse on their own phases.
     const fd = Math.exp(-dt * 2.2);
