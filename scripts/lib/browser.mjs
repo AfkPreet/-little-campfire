@@ -82,7 +82,8 @@ export async function openGame(browser, base, query, viewport = VIEWPORTS.ipad, 
   const page = await context.newPage();
   const errors = [];
   page.on('console', (m) => {
-    if (m.type() === 'error') errors.push(m.text());
+    // Vite's dev client chatter is not a game error.
+    if (m.type() === 'error' && !m.text().startsWith('[vite]')) errors.push(m.text());
   });
   page.on('pageerror', (e) => errors.push(String(e && e.stack ? e.stack : e)));
   if (storage) {

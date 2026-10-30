@@ -9,7 +9,7 @@ const vp = VIEWPORTS.ipad;
 const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.deviceScaleFactor, isMobile: true, hasTouch: true });
 const page = await context.newPage();
 const errors = [];
-page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
+page.on('console', (m) => m.type() === 'error' && !m.text().startsWith('[vite]') && errors.push(m.text()));
 page.on('pageerror', (e) => errors.push(String(e && e.stack ? e.stack : e)));
 
 const steps = [];

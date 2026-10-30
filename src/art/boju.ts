@@ -457,8 +457,8 @@ function drawEyes(ctx: Ctx, kind: 'smile' | 'happy' | 'round' | 'closed'): void 
       case 'smile': {
         // Kindly half-lidded: a yak lid covers the top 30%; nearly level,
         // easing down at the outer corner, with a soft lash flick.
-        const rx = 6.6;
-        const ry = 7.8;
+        const rx = 7.1;
+        const ry = 8.5;
         const out = Math.sign(e.x);
         const lidY = e.y - ry + 2 * ry * 0.3;
         const yIn = lidY - 0.6;
@@ -489,7 +489,7 @@ function drawEyes(ctx: Ctx, kind: 'smile' | 'happy' | 'round' | 'closed'): void 
         stroke(ctx, YAK_LINE, 2);
         ctx.fillStyle = CREAM;
         ctx.beginPath();
-        ctx.arc(e.x - 2, e.y + 0.4, 2.5, 0, Math.PI * 2);
+        ctx.arc(e.x - 2.2, e.y + 0.6, 2.7, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
         ctx.arc(e.x + 2.6, e.y + 4, 1.1, 0, Math.PI * 2);
