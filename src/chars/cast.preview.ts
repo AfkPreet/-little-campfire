@@ -11,11 +11,11 @@ import { anyParam } from '@/core/debug';
 import { layout } from '@/core/layout';
 import { LIGHT_PRESETS } from '@/fx/lighting';
 import { A, LIGHT, P, hexToInt, mix } from '@/palette';
-
-const NIGHT_SKY = LIGHT.night.skyTop;
 import { txt } from '@/ui/text';
 import { Boju, type BojuExpr } from './Boju';
 import { BudBush, Kopila, type KopilaMode } from './Kopila';
+
+const NIGHT_SKY = LIGHT.night.skyTop;
 
 type Tickable = { tick(time: number, delta: number): void; setLightTint?(c: number): unknown };
 
@@ -41,18 +41,26 @@ function dockEdge(scene: Phaser.Scene, x: number, y: number): void {
   g.strokeRoundedRect(x - 30, y, 60, 14, 5);
 }
 
-/** A simple shop-wood counter edge drawn in front of Boju. */
-function counter(scene: Phaser.Scene, x0: number, x1: number, y: number): void {
+/** Multiply a colour int by a light tint int (what setTint does to sprites). */
+function lit(c: number, tint: number): number {
+  const ch = (sh: number) => Math.round((((c >> sh) & 255) * ((tint >> sh) & 255)) / 255);
+  return (ch(16) << 16) | (ch(8) << 8) | ch(0);
+}
+
+/** A simple shop-wood counter edge drawn in front of Boju (h = depth of the board). */
+function counter(scene: Phaser.Scene, x0: number, x1: number, y: number, tint = 0xffffff, h = 30): void {
   const wood = A['shop-wood'];
+  const c = (hex: string) => lit(hexToInt(hex), tint);
   const g = scene.add.graphics().setDepth(10);
-  g.fillStyle(hexToInt(mix(wood, P.bark, 0.25)), 1);
-  g.fillRoundedRect(x0, y + 2, x1 - x0, 30, 6);
-  g.fillStyle(hexToInt(wood), 1);
-  g.fillRoundedRect(x0, y + 2, x1 - x0, 9, 4);
-  g.lineStyle(2, hexToInt(mix(wood, P.bark, 0.6)), 1);
-  g.strokeRoundedRect(x0, y + 2, x1 - x0, 30, 6);
-  g.lineStyle(1.5, hexToInt(mix(wood, P.bark, 0.45)), 0.6);
-  g.lineBetween(x0 + 8, y + 17, x1 - 8, y + 17);
+  const r = Math.min(6, h / 3);
+  g.fillStyle(c(mix(wood, P.bark, 0.25)), 1);
+  g.fillRoundedRect(x0, y + 2, x1 - x0, h, r);
+  g.fillStyle(c(wood), 1);
+  g.fillRoundedRect(x0, y + 2, x1 - x0, h * 0.3, Math.min(4, r));
+  g.lineStyle(2, c(mix(wood, P.bark, 0.6)), 1);
+  g.strokeRoundedRect(x0, y + 2, x1 - x0, h, r);
+  g.lineStyle(1.5, c(mix(wood, P.bark, 0.45)), 0.6);
+  g.lineBetween(x0 + 8, y + 2 + h * 0.5, x1 - 8, y + 2 + h * 0.5);
 }
 
 const EXPRS: BojuExpr[] = ['smile', 'happy', 'talking', 'surprised'];
@@ -116,7 +124,7 @@ function sheet(scene: Phaser.Scene, ticks: Tickable[]): void {
   ticks.push(b2);
   label(scene, 280, by + 30, 'bush: 4th bud');
 
-  // Kopila beside Tuki's 104 px height marker.
+  // Kopila beside Tuki's 104 px height marker (live: crown flick + scale wave).
   const mx = 420;
   const g = scene.add.graphics();
   g.lineStyle(2, hexToInt(P.rose), 1);
@@ -126,31 +134,50 @@ function sheet(scene: Phaser.Scene, ticks: Tickable[]): void {
   const km = new Kopila(scene, mx + 30, by);
   km.lookAt(mx);
   ticks.push(km);
+  let flick = false;
+  scene.time.addEvent({ delay: 1700, loop: true, callback: () => ((flick = !flick) ? km.flickCrown() : km.scaleWave()) });
   label(scene, mx + 10, by + 30, '104 / 48 px');
 
-  // Night copies.
+  // Night copies (LIGHT_PRESETS.night().actor) on an indigo panel.
   const nx = 560;
+  const right = l.w - 20;
+  const top = by - 168;
   const g2 = scene.add.graphics();
   g2.fillStyle(hexToInt(NIGHT_SKY), 1);
-  g2.fillRoundedRect(nx - 20, by - 130, Math.min(420, l.w - nx), 170, 20);
-  ground(scene, nx - 10, nx + Math.min(400, l.w - nx - 20), by + 2, true);
+  g2.fillRoundedRect(nx - 20, top, right - (nx - 20), by + 44 - top, 20);
+  ground(scene, nx - 10, right - 10, by + 2, true);
   const nb = new BudBush(scene, nx + 70, by);
   nb.setLightTint(night.actor);
   nb.peek(true);
   nb.lookAt(nx + 300);
   ticks.push(nb);
-  const nk = new Kopila(scene, nx + 190, by);
+  const nk = new Kopila(scene, nx + 172, by);
   nk.setLightTint(night.actor);
+  nk.lookAt(nx + 300);
   ticks.push(nk);
-  const nk2 = new Kopila(scene, nx + 260, by);
+  const nk2 = new Kopila(scene, nx + 226, by);
   nk2.setLightTint(night.actor);
   nk2.setMode('sleepFire');
   ticks.push(nk2);
-  const nb2 = new BudBush(scene, nx + 340, by);
-  nb2.setLightTint(night.actor);
-  void nb2.hide();
-  ticks.push(nb2);
-  label(scene, nx + 190, by + 30, 'night');
+  let cx = nx + 260;
+  if (count < 5) {
+    // Boju has no room for a real-size night copy in the top row: half size here.
+    const s = 0.5;
+    const bxN = cx + 80;
+    const cyN = by - 26;
+    const nbj = new Boju(scene, bxN, cyN).setScale(s).setDepth(1);
+    nbj.setLightTint(night.actor);
+    ticks.push(nbj);
+    counter(scene, bxN - 72, bxN + 72, cyN, night.actor, 14);
+    cx = bxN + 80;
+  }
+  if (right - cx > 150) {
+    const nb2 = new BudBush(scene, cx + 75, by);
+    nb2.setLightTint(night.actor);
+    void nb2.hide();
+    ticks.push(nb2);
+  }
+  txt(scene, (nx - 20 + right) / 2, by + 30, 'night', 'small', { color: mix(P.cream, NIGHT_SKY, 0.15), size: 15, fixed: true }).setDepth(11);
 }
 
 function zoom(scene: Phaser.Scene, ticks: Tickable[]): void {

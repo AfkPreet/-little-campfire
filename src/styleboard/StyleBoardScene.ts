@@ -56,7 +56,7 @@ export default class StyleBoard extends Phaser.Scene {
     const l = layout();
     const W = l.w;
     // Row 1: expressions.
-    const exY = 210;
+    const exY = 186;
     const exStep = Math.min(130, (W * 0.62) / EXPRESSIONS.length);
     EXPRESSIONS.forEach((e, i) => {
       const x = 70 + i * exStep;
@@ -67,7 +67,7 @@ export default class StyleBoard extends Phaser.Scene {
     });
     // Row 2: poses + walk.
     const poses: HeroPose[] = ['sit', 'fish', 'eat', 'pick', 'rest', 'sleep'];
-    const pY = 400;
+    const pY = 356;
     poses.forEach((p, i) => {
       const x = 70 + i * exStep;
       const h = new Hero(this, x, pY);
@@ -76,25 +76,25 @@ export default class StyleBoard extends Phaser.Scene {
       this.label(x, pY + 22, p);
     });
     // Rain hood + glowing tier + walker.
-    const rainHero = new Hero(this, 70, 590);
+    const rainHero = new Hero(this, 70, 524);
     rainHero.setRain(true);
     this.tickers.push(rainHero);
-    this.label(70, 612, 'ghum (rain)');
-    const blissHero = new Hero(this, 70 + exStep, 590);
+    this.label(70, 546, 'ghum (rain)');
+    const blissHero = new Hero(this, 70 + exStep, 524);
     blissHero.setTier('blissful');
     blissHero.setExpression('blissful');
     this.tickers.push(blissHero);
-    this.label(70 + exStep, 612, 'blissful');
-    const night = new Hero(this, 70 + exStep * 2, 590);
+    this.label(70 + exStep, 546, 'blissful');
+    const night = new Hero(this, 70 + exStep * 2, 524);
     night.setLightTint(LIGHT_PRESETS.night().actor);
     night.setExpression('sleepy');
     this.tickers.push(night);
-    this.label(70 + exStep * 2, 612, 'night tint');
-    const walker = new Hero(this, 70 + exStep * 3, 590);
+    this.label(70 + exStep * 2, 546, 'night tint');
+    const walker = new Hero(this, 70 + exStep * 3, 524);
     this.tickers.push(walker);
     const walk = () => walker.walkTo(walker.x < 70 + exStep * 4 ? 70 + exStep * 5.5 : 70 + exStep * 3, () => this.time.delayedCall(300, walk));
     walk();
-    this.label(70 + exStep * 4.2, 612, 'hop-walk');
+    this.label(70 + exStep * 4.2, 546, 'hop-walk');
 
     // Right column: Kopila, Bud Bush, Boju, Kuhiro.
     const rx = W * 0.66;
@@ -114,25 +114,25 @@ export default class StyleBoard extends Phaser.Scene {
     const counter = this.add.image(rx + 90, 470, 'px').setOrigin(0.5, 0).setDisplaySize(240, 16).setTint(hexToInt(A['shop-wood']));
     void counter;
     this.label(rx + 90, 500, 'Boju');
-    const kh = new Kuhiro(this, W - 150, 690);
-    kh.setScale(0.36);
+    const kh = new Kuhiro(this, W - 190, 700);
+    kh.setScale(0.34);
     void kh.rise(10);
     this.tickers.push(kh);
-    this.label(W - 150, 700, 'Kuhiro');
+    this.label(W - 190, 560, 'Kuhiro');
 
     // Palette strip.
     const tokens = Object.entries(P);
     const sw = Math.min(46, (W * 0.6 - 40) / tokens.length);
     tokens.forEach(([name, hex], i) => {
       const x = 30 + i * sw;
-      const r = this.add.rectangle(x + sw / 2, 670, sw - 4, 40, hexToInt(hex)).setStrokeStyle(2, hexToInt(mix(hex, P.ink, 0.3)));
+      const r = this.add.rectangle(x + sw / 2, 640, sw - 4, 40, hexToInt(hex)).setStrokeStyle(2, hexToInt(mix(hex, P.ink, 0.3)));
       void r;
-      if (i % 2 === 0) txt(this, x + sw / 2, 700, name, 'small', { size: 11 });
+      if (i % 2 === 0) txt(this, x + sw / 2, 672, name, 'small', { size: 11 });
     });
     const acc = ['gurans', 'lake-jade', 'snow', 'tea-green', 'tin-blue', 'oat', 'doko', 'yak', 'pango', 'mistfish', 'fish-glow', 'copper'];
     acc.forEach((name, i) => {
       const x = 30 + i * sw;
-      this.add.rectangle(x + sw / 2, 630, sw - 4, 26, hexToInt(ACCENTS[name])).setStrokeStyle(2, hexToInt(mix(ACCENTS[name], P.ink, 0.3)));
+      this.add.rectangle(x + sw / 2, 600, sw - 4, 26, hexToInt(ACCENTS[name])).setStrokeStyle(2, hexToInt(mix(ACCENTS[name], P.ink, 0.3)));
     });
     this.events.on('update', (t: number, d: number) => this.tickers.forEach((x) => x.tick(t, d)));
   }
@@ -157,12 +157,10 @@ export default class StyleBoard extends Phaser.Scene {
       const x = 20 + col * (tw + gap);
       const y = 80 + row * (th + 46);
       const holder = this.add.container(x, y);
-      const land = new Landscape(this, { container: holder });
+      const land = new Landscape(this, { container: holder, viewW: 1280, viewX: 980 });
       land.applyLight(fn());
       const k = tw / 1280;
       holder.setScale(k);
-      // Show the clearing + a little lake: shift the world left.
-      holder.x = x - 980 * k;
       const mask = this.make.graphics({}, false).fillStyle(0xffffff).fillRoundedRect(x, y, tw, th, 14);
       holder.setMask(mask.createGeometryMask());
       const frame = this.add.graphics();

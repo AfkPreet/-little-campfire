@@ -158,12 +158,12 @@ export default class Intro extends Phaser.Scene {
     } else {
       // A landscape thumbnail: the lake at dawn (page 2) or the path to the shop (page 3).
       const holder = this.add.container(0, 0);
-      const land = new Landscape(this, { container: holder });
+      const k = Math.max(iw / 1300, ih / 720);
+      const land = new Landscape(this, { container: holder, viewW: Math.ceil(iw / k) + 20, viewX: i === 1 ? 1700 : 0 });
       const p = i === 1 ? 0.05 : 0.3;
       land.applyLight(lightAt(p));
-      const k = Math.max(iw / 1300, ih / 720);
       holder.setScale(k);
-      holder.x = i === 1 ? -iw / 2 - 1500 * k : -iw / 2 - 0 * k;
+      holder.x = -iw / 2;
       holder.y = -ih / 2 - (720 * k - ih) * 0.6;
       ill.add(holder);
       this.extras.push({ tick: (t, d) => land.update(t, d), destroy: () => land.destroy() });

@@ -272,7 +272,7 @@ function bakeGroundStrip(b: Baker): void {
         const fadeIn = Math.min(1, (x - 470) / 120);
         const fadeOut = x > 1960 ? Math.max(0, 1 - (x - 1960) / 100) : 1;
         const broken = 0.35 + 0.65 * Math.min(1, Math.max(0, (nw(x / 90) - 0.3) * 2.6));
-        const a = 0.16 * fadeIn * fadeOut * broken;
+        const a = 0.25 * fadeIn * fadeOut * broken;
         if (a < 0.01) continue;
         ctx.fillStyle = rgba(mix(P.sage, A.pebble, 0.6), a);
         ctx.beginPath();
@@ -303,7 +303,7 @@ function bakeGroundStrip(b: Baker): void {
       ];
       for (const [x, y, rx, ry] of patches) {
         if (!clearOfProps(x, y, rx * 0.5)) continue;
-        mossPatch(ctx, x, y, rx, ry, rm, mix(P.moss, P.sage, 0.15), 0.2);
+        mossPatch(ctx, x, y, rx, ry, rm, mix(P.moss, P.sage, 0.1), 0.3);
       }
       for (const [x, y, rx] of [
         [900, 634, 120],
@@ -366,12 +366,12 @@ function bakeGroundStrip(b: Baker): void {
         for (let x = GX0; x <= GX1; x += 8) ctx.lineTo(x, 650 + k * 7 + Math.sin(x / 210 + k) * 8 + Math.sin(x / 83) * 3);
         ctx.lineTo(GX1, 724);
         ctx.closePath();
-        ctx.fillStyle = rgba(P.moss, 0.1);
+        ctx.fillStyle = rgba(P.moss, 0.13);
         ctx.fill();
       }
       ctx.fillStyle = vGrad(ctx, 670, 720, [
         [0, P.moss, 0],
-        [1, shade(P.moss, 0.12), 0.32],
+        [1, shade(P.moss, 0.12), 0.4],
       ]);
       ctx.fillRect(GX0, 670, GX1 - GX0, 54);
       grain(ctx, GX0, 500, GX1 - GX0, 220, 0.045, 1206, 0.3);
@@ -682,6 +682,21 @@ function drawTrunk(ctx: Ctx, t: (typeof TREE_DEFS)[number], bark: string): void 
   ctx.beginPath();
   ctx.arc(kx - 2, ky, 6.5, -1.2, 0.5);
   ctx.stroke();
+  // tuck the base into the grass: a ground-coloured skirt hides the outline,
+  // then a few blades overlap the flare
+  ctx.fillStyle = vGrad(ctx, 600, 616, [
+    [0, mix(P.sage, P.moss, 0.3), 0],
+    [0.35, mix(P.sage, P.moss, 0.3), 1],
+    [1, mix(P.sage, P.moss, 0.34), 1],
+  ]);
+  ctx.beginPath();
+  ctx.ellipse(t.x + 2, 612, 92, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+  const rg = artRng(t.x + 7);
+  for (let i = 0; i < 9; i++) {
+    const gx = t.x - 70 + i * 17 + (rg() - 0.5) * 8;
+    tuft(ctx, gx, 611 + rg() * 3, 0.95, rgba(mix(P.moss, P.sage, 0.2), 0.75), rg);
+  }
   // moss cushions on the root flare
   for (const [dx, rx, ry, a] of [
     [-40, 16, 5, -0.12],
