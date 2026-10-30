@@ -5,3 +5,4 @@ shots/**/*.tmp.png
 test-results
 *.log
 .DS_Store
+scripts/.*.tmp.mjs
