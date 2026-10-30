@@ -738,7 +738,11 @@ export class Landscape {
 
   private tintBand(b: Band, tint: number, haze: number, hazeA: number, alpha: number): void {
     for (const o of b.imgs) o.setTint(tint).setAlpha(alpha);
-    for (const o of b.haze) o.setTintFill(haze).setAlpha(hazeA * alpha);
+    // Phaser's fill-tint shader leaves (1 - texA) * texRGB unscaled by the
+    // object alpha, so a fill-tinted copy over a nearly transparent band draws
+    // a bright wire outline (rain snows at 0.1). Skip the haze copy there.
+    const ha = alpha < 0.25 ? 0 : hazeA * alpha;
+    for (const o of b.haze) o.setTintFill(haze).setAlpha(ha);
   }
 
   private tintRow(r: DriftRow, top: number, bot: number, alpha = 1): void {

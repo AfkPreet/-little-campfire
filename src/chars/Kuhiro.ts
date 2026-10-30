@@ -83,6 +83,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   private readonly veil: Img;
   private readonly waterGlow: Img;
   private readonly waterline: Img;
+  private readonly reflA: Img;
+  private readonly reflB: Img;
+  private readonly reflWarm: Img;
   private readonly wisps: Img[] = [];
   private readonly twinkles: Img[] = [];
   private readonly drops: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -164,8 +167,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     bc.add(this.gills);
 
     // Heart-glow: a campfire seen through fog, deep in the chest.
-    this.heartGlow = mk('glow', KH.heart.x, KH.heart.y).setTint(hexToInt(P.glow)).setAlpha(0.35);
-    this.heartGlow.setScale((K * 250) / 256, (K * 210) / 256);
+    this.heartGlow = mk('soft', KH.heart.x, KH.heart.y).setTint(hexToInt(P.glow)).setAlpha(0.3);
+    this.heartGlow.setScale((K * 300) / 128, (K * 250) / 128);
     this.heartCore = mk('glow', KH.heart.x, KH.heart.y).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(P.glow)).setAlpha(0.12);
     this.heartCore.setScale((K * 120) / 256, (K * 100) / 256);
     bc.add([this.heartGlow, this.heartCore]);
@@ -213,7 +216,12 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     bc.add(this.gleam);
 
     // The lake in front of the submerged body.
-    this.veil = mk('kuhiro_veil', -300, 0, 0, 0).setScale(2 * K);
+    this.veil = mk('kuhiro_veil', -400, 0, 0, 0).setScale((1180 / 480) * K, 2 * K);
+    // Its glow reflected on the lake: two shimmer frames crossfading, plus the warm flower's smear.
+    this.reflA = mk('kuhiro_reflectA', 112, 2, 0.5, 0).setScale(2 * K).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setAlpha(0);
+    this.reflB = mk('kuhiro_reflectB', 112, 2, 0.5, 0).setScale(2 * K).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setAlpha(0);
+    this.reflWarm = mk('glowSmall', KH.flower.x, 128).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(P.glow)).setAlpha(0);
+    this.reflWarm.setScale((K * 70) / 48, (K * 150) / 48);
     this.waterGlow = mk('glow', 110, 26).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['lake-glow'])).setAlpha(0);
     this.waterGlow.setScale((K * 720) / 256, (K * 120) / 256);
     this.waterline = mk('kuhiro_waterline', 110, 0).setTint(hexToInt(A['fish-glow'])).setAlpha(0);
@@ -266,7 +274,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       emitting: false,
     });
 
-    this.add([this.halo, this.tail, this.liftC, this.veil, this.waterGlow, this.waterline, ...this.wisps, this.drops, this.mist, this.plume]);
+    this.add([this.halo, this.tail, this.liftC, this.veil, this.reflA, this.reflB, this.reflWarm, this.waterGlow, this.waterline, ...this.wisps, this.drops, this.mist, this.plume]);
     this.setDepth(DEPTH.water + 1);
     this.setAlpha(0);
     this.setVisible(false);
@@ -352,10 +360,10 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       this.sheeting = 1;
       this.surfaceRings(1.4);
     });
-    this.tw(this, { gleamA: 0.55 }, ms * 0.5, 'Sine.easeIn', ms * 0.25).then(() => this.tw(this, { gleamA: 0.08 }, 2600, 'Sine.easeOut'));
+    this.tw(this, { gleamA: 0.6 }, ms * 0.5, 'Sine.easeIn', ms * 0.25).then(() => this.tw(this, { gleamA: 0.16 }, 2600, 'Sine.easeOut'));
     // Tail lifts out at the far right late in the rise, then settles.
     this.tw(this, { tailLift: 1, tailAngle: -8 }, ms * 0.45, 'Sine.easeInOut', ms * 0.45).then(() =>
-      this.tw(this, { tailLift: 0.12, tailAngle: 0 }, 2600, 'Sine.easeInOut'),
+      this.tw(this, { tailLift: -0.2, tailAngle: 0 }, 2600, 'Sine.easeInOut'),
     );
     // Freckles pulse in a wave as it rises.
     this.flowerF.concat(this.scatterF).forEach((f, i) => {
@@ -613,12 +621,24 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Glow.
     const g = this.glowLevel;
     this.halo.setAlpha(0.35 * g * (0.9 + 0.1 * br));
-    this.heartGlow.setAlpha(0.42 + 0.08 * br + (this.happy ? 0.1 : 0));
-    this.heartCore.setAlpha((0.1 + 0.05 * br) * g);
+    this.heartGlow.setAlpha(0.3 + 0.06 * br + (this.happy ? 0.08 : 0));
+    this.heartCore.setAlpha((0.14 + 0.06 * br + (this.happy ? 0.06 : 0)) * g);
     this.waterGlow.setAlpha(g * (0.1 + 0.2 * up));
     this.waterGlow.y = 24 + oy * 0.22;
     this.waterGlow.setScale((K * (620 + 160 * (1 - up))) / 256, (K * (110 + 30 * (1 - up))) / 256);
-    this.gleam.setAlpha(this.gleamA * above);
+    this.gleam.setAlpha(this.gleamA * above * (0.85 + 0.15 * br));
+    // Reflections shimmer: crossfade two streak frames, breathe the width.
+    const ra = above * (0.3 + 0.7 * g);
+    const sh = 0.5 + 0.5 * Math.sin(t * 1.7);
+    this.reflA.setAlpha(ra * 0.5 * sh);
+    this.reflB.setAlpha(ra * 0.5 * (1 - sh));
+    this.reflA.scaleX = 2 * K * (1 + 0.03 * Math.sin(t * 0.9));
+    this.reflB.scaleX = 2 * K * (1 + 0.03 * Math.sin(t * 0.9 + 2));
+    this.reflA.x = 112 + this.bumpX;
+    this.reflB.x = 112 + this.bumpX;
+    let fl = 0;
+    for (const f of this.flowerF) fl += f.lit;
+    this.reflWarm.setAlpha(ra * (0.08 + 0.3 * (fl / 6)) * (0.85 + 0.15 * sh));
     this.blushes[0].setAlpha(this.blushA * 0.85);
     this.blushes[1].setAlpha(this.blushA);
     this.waterline.setAlpha(above * (0.22 + 0.07 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));

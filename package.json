@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "shots": "node scripts/shots.mjs",
     "smoke": "node scripts/smoke.mjs",
-    "icons": "node scripts/icons.mjs"
+    "icons": "node scripts/icons.mjs",
+    "playtest": "node scripts/playtest.mjs"
   },
   "dependencies": {
     "@fontsource/baloo-2": "5.3.0",

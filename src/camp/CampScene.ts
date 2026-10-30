@@ -358,6 +358,23 @@ export default class Camp extends Phaser.Scene {
     registerDebug('heroX', () => this.hero.x);
     registerDebug('walk', ((x: number) => this.walkTo(x)) as never);
     registerDebug('sitFire', () => this.sitByFire(true));
+    // World point -> CSS pixel point on the page (for input tests).
+    registerDebug('w2s', ((x: number, y: number) => {
+      const cam = this.cameras.main;
+      const l = layout();
+      return { x: ((x - cam.scrollX) * l.zoom) / l.dpr, y: ((y - cam.scrollY) * l.zoom) / l.dpr };
+    }) as never);
+    registerDebug('interAt', ((x: number, y: number) => {
+      const it = this.inter.at(x, y);
+      return it ? { id: it.id, actions: it.actions(), hit: it.hit() } : null;
+    }) as never);
+    registerDebug('campInfo', () => ({
+      heroX: this.hero.x,
+      activity: this.activity,
+      busy: this.busy,
+      bubbles: this.bubbleGroup ? this.bubbleGroup.bubbles.map((b) => (b as unknown as { label: string }).label) : [],
+      tentPegs: S().camp.tentSpot !== null ? this.tents[S().camp.tentSpot!].pegPositions() : [],
+    }));
   }
 
   // ---------------------------------------------------------------------------

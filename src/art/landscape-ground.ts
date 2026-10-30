@@ -567,14 +567,14 @@ const TREE_DEFS = [
 
 /** Soft concave root flare that melts into the grass (no cone, no stump). */
 function flarePath(c: Ctx, x: number): void {
-  c.moveTo(x - 74, 605);
-  c.bezierCurveTo(x - 50, 603, x - 36, 594, x - 33, 552);
+  c.moveTo(x - 64, 605);
+  c.bezierCurveTo(x - 46, 603, x - 35, 594, x - 33, 552);
   c.lineTo(x + 32, 552);
-  c.bezierCurveTo(x + 36, 594, x + 52, 603, x + 78, 605);
-  c.quadraticCurveTo(x + 66, 611, x + 44, 609);
-  c.quadraticCurveTo(x + 22, 613, x, 610);
-  c.quadraticCurveTo(x - 24, 613, x - 46, 609);
-  c.quadraticCurveTo(x - 68, 611, x - 74, 605);
+  c.bezierCurveTo(x + 35, 594, x + 48, 603, x + 66, 605);
+  c.quadraticCurveTo(x + 58, 611, x + 40, 609);
+  c.quadraticCurveTo(x + 20, 613, x, 610);
+  c.quadraticCurveTo(x - 22, 613, x - 42, 609);
+  c.quadraticCurveTo(x - 58, 611, x - 64, 605);
   c.closePath();
 }
 
@@ -690,11 +690,11 @@ function drawTrunk(ctx: Ctx, t: (typeof TREE_DEFS)[number], bark: string): void 
     [1, mix(P.sage, P.moss, 0.34), 1],
   ]);
   ctx.beginPath();
-  ctx.ellipse(t.x + 2, 612, 92, 8, 0, 0, Math.PI * 2);
+  ctx.ellipse(t.x + 1, 612, 78, 8, 0, 0, Math.PI * 2);
   ctx.fill();
   const rg = artRng(t.x + 7);
   for (let i = 0; i < 9; i++) {
-    const gx = t.x - 70 + i * 17 + (rg() - 0.5) * 8;
+    const gx = t.x - 62 + i * 15 + (rg() - 0.5) * 8;
     tuft(ctx, gx, 611 + rg() * 3, 0.95, rgba(mix(P.moss, P.sage, 0.2), 0.75), rg);
   }
   // moss cushions on the root flare
@@ -784,7 +784,7 @@ function bakeTrees(b: Baker): void {
     const bark = mix(P.bark, A['shop-wood'], 0.22);
     const leaf = P.moss;
     const leafDeep = shade(P.moss, 0.1);
-    for (const t of TREE_DEFS) softShadow(ctx, t.x + 4, 604, 96, 13, 0.2);
+    for (const t of TREE_DEFS) softShadow(ctx, t.x + 4, 604, 84, 12, 0.2);
     // trunks: 3 merged rounded curves each, with a soft root flare
     for (const t of TREE_DEFS) drawTrunk(ctx, t, bark);
     // leaf tufts at the tips of the low branches (hammock / hang points)
@@ -1134,21 +1134,29 @@ function bakeDock(b: Baker): void {
     const wood = A['shop-wood'];
     const post = mix(wood, P.bark, 0.5);
     const deckY = CAMP.dock.y;
-    // posts: above water solid, below water fading into the lake
+    // stringer beam under the planks (darker wood), so the deck reads as one dock
+    ctx.beginPath();
+    roundRectPath(ctx, CAMP.dock.x0 + 6, deckY + 8, CAMP.dock.x1 - CAMP.dock.x0 - 12, 8, 4);
+    ctx.fillStyle = mix(post, P.bark, 0.25);
+    ctx.fill();
+    ctx.strokeStyle = shade(post, 0.32);
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    // posts: rounded caps above the deck, solid to the water, then fading into the lake
     for (const px of CAMP.dock.posts) {
       ctx.save();
       ctx.beginPath();
-      roundRectPath(ctx, px - 7, deckY - 7, 14, 104, 6);
+      roundRectPath(ctx, px - 7, deckY - 17, 14, 114, 7);
       ctx.clip();
-      ctx.fillStyle = vGrad(ctx, deckY - 7, deckY + 96, [
-        [0, post],
-        [0.15, post],
-        [0.17, mix(post, A['lake-deep'], 0.45)],
+      ctx.fillStyle = vGrad(ctx, deckY - 17, deckY + 96, [
+        [0, tint(post, 0.12)],
+        [0.25, post],
+        [0.27, mix(post, A['lake-deep'], 0.45)],
         [1, A['lake-deep']],
       ]);
-      ctx.fillRect(px - 8, deckY - 8, 16, 106);
+      ctx.fillRect(px - 8, deckY - 18, 16, 116);
       ctx.fillStyle = rgba(tint(post, 0.4), 0.6);
-      ctx.fillRect(px + 2, deckY - 7, 3, 22);
+      ctx.fillRect(px + 2, deckY - 14, 3, 28);
       ctx.restore();
       // fade the submerged part to transparent
       ctx.save();
@@ -1163,10 +1171,17 @@ function bakeDock(b: Baker): void {
       ctx.lineWidth = 1.6;
       ctx.beginPath();
       ctx.moveTo(px - 7, deckY + 15);
-      ctx.lineTo(px - 7, deckY - 2);
-      ctx.quadraticCurveTo(px - 7, deckY - 8, px, deckY - 8);
-      ctx.quadraticCurveTo(px + 7, deckY - 8, px + 7, deckY - 2);
+      ctx.lineTo(px - 7, deckY - 10);
+      ctx.quadraticCurveTo(px - 7, deckY - 17, px, deckY - 17);
+      ctx.quadraticCurveTo(px + 7, deckY - 17, px + 7, deckY - 10);
       ctx.lineTo(px + 7, deckY + 15);
+      ctx.stroke();
+      // cap ring
+      ctx.strokeStyle = rgba(shade(post, 0.2), 0.6);
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(px - 6, deckY - 11);
+      ctx.quadraticCurveTo(px, deckY - 9, px + 6, deckY - 11);
       ctx.stroke();
       // ripple ring where the post meets the water
       ctx.strokeStyle = rgba(P.cream, 0.6);

@@ -5,10 +5,14 @@
  *   ?show=bush    Bud Bush loop: peek -> hide -> one-eye blink -> emerge
  *   ?show=zoom    Kopila + ball + bush at 3x for detail checks
  *   &night=1      tint everything with LIGHT_PRESETS.night().actor on an indigo ground
+ *   &step=pour|scale|talk   (show=boju) start the loop at that beat
+ *   &freeze=MS    pause the scene after MS on the tween clock (deterministic screenshots)
+ *   &freeze=tea   (show=boju) pause mid-pour, stream showing
+ *   &freeze=eye   (show=bush) pause while the hidden 4th bud has its eye open
  */
 import Phaser from 'phaser';
 import { anyParam } from '@/core/debug';
-import { layout } from '@/core/layout';
+import { ART_SCALE, layout } from '@/core/layout';
 import { LIGHT_PRESETS } from '@/fx/lighting';
 import { A, LIGHT, P, hexToInt, mix } from '@/palette';
 import { txt } from '@/ui/text';
@@ -176,6 +180,16 @@ function sheet(scene: Phaser.Scene, ticks: Tickable[]): void {
     nb2.setLightTint(night.actor);
     void nb2.hide();
     ticks.push(nb2);
+    cx += 160;
+  }
+  // Wide screens: fill the rest of the panel with more night modes.
+  const extra: KopilaMode[] = ['nibble', 'wiggle', 'curled', 'follow', 'stand'];
+  for (let i = 0; cx + 70 < right && i < extra.length; i++, cx += 64) {
+    const k = new Kopila(scene, cx + 40, by);
+    k.setMode(extra[i]);
+    k.setLightTint(night.actor);
+    k.lookAt(nx);
+    ticks.push(k);
   }
   txt(scene, (nx - 20 + right) / 2, by + 30, 'night', 'small', { color: mix(P.cream, NIGHT_SKY, 0.15), size: 15, fixed: true }).setDepth(11);
 }
@@ -215,18 +229,39 @@ function bojuLoop(scene: Phaser.Scene, ticks: Tickable[]): void {
   const b = new Boju(scene, l.w / 2, cy);
   b.setScale(1.6);
   ticks.push(b);
+  if (anyParam('freeze') === 'tea') {
+    // Pause mid-pour (stream showing, glass ~60% full) for a deterministic shot.
+    const peek = b as unknown as { stream: Phaser.GameObjects.Image; tea: Phaser.GameObjects.Image };
+    const fn = () => {
+      const t = peek.tea;
+      if (peek.stream.visible && t.isCropped && t.frame && (t as unknown as { _crop: { height: number } })._crop.height > t.frame.height * 0.45) {
+        scene.events.off('update', fn);
+        scene.scene.pause();
+      }
+    };
+    scene.events.on('update', fn);
+  }
   counter(scene, 40, l.w - 40, cy);
   const status = txt(scene, l.w / 2, cy + 70, '', 'small', { color: P.ink, size: 18, fixed: true }).setDepth(11);
   b.onClick = () => status.setText('click');
+  let step = anyParam('step') ?? '';
+  const pause = (ms: number) => new Promise((r) => scene.time.delayedCall(ms, r));
   const cycle = async () => {
-    status.setText('idle');
-    await new Promise((r) => scene.time.delayedCall(2500, r));
-    status.setText('talk');
-    b.talk(2200);
-    await new Promise((r) => scene.time.delayedCall(2600, r));
-    status.setText('pourChiya');
-    await b.pourChiya();
-    await new Promise((r) => scene.time.delayedCall(1500, r));
+    if (step !== 'pour' && step !== 'scale') {
+      if (step !== 'talk') {
+        status.setText('idle');
+        await pause(2500);
+      }
+      status.setText('talk');
+      b.talk(2200);
+      await pause(2600);
+    }
+    if (step !== 'scale') {
+      status.setText('pourChiya');
+      await b.pourChiya();
+      await pause(1500);
+    }
+    step = '';
     status.setText('surprisedScale');
     await b.surprisedScale();
     await new Promise((r) => scene.time.delayedCall(3500, r));
@@ -245,6 +280,17 @@ function bushLoop(scene: Phaser.Scene, ticks: Tickable[]): void {
   const b = new BudBush(scene, l.w / 2, 520);
   b.setScale(2);
   ticks.push(b);
+  if (anyParam('freeze') === 'eye') {
+    // Pause while the hidden 4th bud has its one eye open.
+    const peek = b as unknown as { hideEye: Phaser.GameObjects.Image; st: string };
+    const fn = () => {
+      if (peek.st === 'hidden' && peek.hideEye.scaleY >= 0.95 / ART_SCALE) {
+        scene.events.off('update', fn);
+        scene.scene.pause();
+      }
+    };
+    scene.events.on('update', fn);
+  }
   const cycle = async () => {
     b.reset();
     b.peek(true);
@@ -275,4 +321,9 @@ export default function preview(scene: Phaser.Scene): void {
   scene.events.on('update', (t: number, d: number) => {
     for (const o of ticks) o.tick(t, d);
   });
+  // For headless probes (dev preview only).
+  (window as unknown as { __castTicks?: Tickable[] }).__castTicks = ticks;
+  const freeze = Number(anyParam('freeze') ?? 0);
+  // Counted on the tween clock (it runs apart from scene.time under load).
+  if (freeze > 0) scene.tweens.addCounter({ from: 0, to: 1, duration: freeze, onComplete: () => scene.scene.pause() });
 }

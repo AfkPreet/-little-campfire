@@ -9,7 +9,7 @@ import { ART_SCALE, layout } from '@/core/layout';
 import { lightAt, type ResolvedLight } from '@/fx/lighting';
 import { Fireflies, Rain, ripple } from '@/fx/particles';
 import { blobPath, type Ctx, fillOutline, rGrad, roundRectPath, smoothOpen, vGrad, withState, artRng, noise1 } from '@/art/kit';
-import { A, P, hexToInt, mix, mixInt, rgba } from '@/palette';
+import { A, LIGHT, P, hexToInt, mix, mixInt, rgba } from '@/palette';
 import { GlowSighting, Kuhiro, UnderGlow } from './Kuhiro';
 import { cloudPartingPlume, highlightGurans, playRainbow, playShootingStar, showMoonbow } from '@/world/skyMoments';
 
@@ -185,8 +185,13 @@ class Backdrop {
   }
 
   apply(l: ResolvedLight, skyOpen = 0): void {
-    this.skyA.setTint(l.skyTop, l.skyTop, l.skyMid, l.skyMid);
-    this.skyB.setTint(l.skyMid, l.skyMid, l.horizon, l.horizon);
+    // Keep the night indigo even under rain (the rainy key greys it a lot).
+    const n = 0.55 * l.night;
+    const top = mixInt(l.hex.skyTop, LIGHT.night.skyTop, n);
+    const midC = mixInt(l.hex.skyMid, mix(LIGHT.night.skyTop, LIGHT.night.horizon, 0.55), n);
+    const hor = mixInt(l.hex.horizon, LIGHT.night.horizon, n * 0.6);
+    this.skyA.setTint(top, top, midC, midC);
+    this.skyB.setTint(midC, midC, hor, hor);
     const starA = Math.max(l.stars, skyOpen * l.night);
     for (const s of this.stars) s.setAlpha(starA * (s.getData('a') as number));
     this.snow.setTint(mixInt(l.hex.far, l.hex.horizon, 0.5)).setAlpha(l.night > 0.5 ? (l.rain > 0.5 ? 0.1 : 0.35) : 1 - l.rain * 0.9);
@@ -228,8 +233,20 @@ export default function preview(scene: Phaser.Scene): void {
   };
   relight();
   // Game-clock seconds since the beat started (screenshot scripts wait on it).
-  const win = window as unknown as { __pvT?: number; __pvPause?: (on: boolean) => void };
-  const t0 = scene.time.now;
+  const win = window as unknown as { __pvT?: number; __pvPause?: (on: boolean) => void; __pvSlept?: number; __pvWake?: () => void };
+  // &stops=14,23.5: the game loop sleeps when the beat clock reaches each stop
+  // (window.__pvSlept = stop) until a script calls __pvWake() after its screenshot.
+  const stops = (anyParam('stops') ?? '')
+    .split(',')
+    .map(Number)
+    .filter((n) => n > 0)
+    .sort((a, b) => a - b);
+  win.__pvSlept = -1;
+  win.__pvWake = () => {
+    win.__pvSlept = -1;
+    scene.game.loop.wake();
+  };
+  let beatMs = 0;
   win.__pvT = 0;
   let paused = false;
   win.__pvPause = (on: boolean) => {
@@ -257,7 +274,14 @@ export default function preview(scene: Phaser.Scene): void {
     );
   }
   scene.events.on(Phaser.Scenes.Events.UPDATE, (t: number, d: number) => {
-    win.__pvT = (scene.time.now - t0) / 1000;
+    // Beat clock in game time (accumulated loop delta, like tweens and timers),
+    // not wall time: software GL can run far slower than real time.
+    beatMs += d;
+    win.__pvT = beatMs / 1000;
+    if (stops.length && win.__pvT >= stops[0]) {
+      win.__pvSlept = stops.shift();
+      scene.game.loop.sleep();
+    }
     rain.update(d / 1000);
     ff.update(t, d);
     kuhiro.tick(t, d);

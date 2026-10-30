@@ -102,7 +102,7 @@ export class Bubble extends Phaser.GameObjects.Container {
 
   /** Gentle idle bob (off with Reduce motion). */
   bob(delay = 0): this {
-    if (reduceMotion()) return this;
+    if (reduceMotion() || !this.scene || !this.active) return this;
     this.bobTween?.stop();
     this.bobTween = this.scene.tweens.add({ targets: this, y: this.y - 3, duration: 1300, yoyo: true, repeat: -1, ease: EASE.loop, delay });
     return this;
@@ -167,7 +167,9 @@ export class BubbleGroup extends Phaser.GameObjects.Container {
     this.bubbles.forEach((b, i) => {
       b.setData('baseScaleX', 1).setData('baseScaleY', 1);
       const t = popIn(scene, b, i * 70, 440);
-      t.once('complete', () => b.bob(i * 220));
+      t.once('complete', () => {
+        if (b.active && !this.closing) b.bob(i * 220);
+      });
     });
     bus.emit('sfx', { id: 'pop', vol: 0.6 });
     scene.add.existing(this);

@@ -16,14 +16,14 @@ import { A, P, mix, rgba } from '@/palette';
 
 /** Control points of the body bean (Catmull-Rom, closed). */
 export const SIL: [number, number][] = [
-  [-150, 62],
-  [-171, 4],
-  [-181, -60],
-  [-182, -122],
-  [-169, -188],
-  [-137, -243],
-  [-87, -283],
-  [-22, -302],
+  [-142, 62],
+  [-163, 4],
+  [-179, -60],
+  [-187, -124],
+  [-177, -190],
+  [-145, -248],
+  [-91, -288],
+  [-22, -304],
   [52, -299],
   [128, -282],
   [204, -251],
@@ -325,7 +325,36 @@ function drawSkin(ctx: Ctx, details: boolean): void {
       ]);
       ctx.fillRect(-100, -100, 200, 200);
     });
+    // Inner luminance: the whole body glows softly from within, like moonlit fog.
+    withState(ctx, () => {
+      ctx.translate(90, -150);
+      ctx.scale(1.45, 1);
+      ctx.fillStyle = rGrad(ctx, 0, 0, 0, 210, [
+        [0, C.glow, 0.34],
+        [0.6, C.glow, 0.12],
+        [1, C.glow, 0],
+      ]);
+      ctx.fillRect(-220, -220, 440, 440);
+    });
     if (!details) return;
+    // Bounce light from the glowing lake along the waterline.
+    ctx.fillStyle = vGrad(ctx, -96, 6, [
+      [0, A['lake-glow'], 0],
+      [0.6, A['lake-glow'], 0.22],
+      [1, A['lake-glow'], 0.5],
+    ]);
+    ctx.fillRect(-260, -96, 720, 110);
+    // Turning shade down the rear flank so the bean reads round, not flat.
+    withState(ctx, () => {
+      ctx.translate(395, -110);
+      ctx.scale(0.75, 1.3);
+      ctx.fillStyle = rGrad(ctx, 0, 0, 40, 170, [
+        [0, C.spine, 0.34],
+        [0.55, C.spine, 0.14],
+        [1, C.spine, 0],
+      ]);
+      ctx.fillRect(-200, -200, 400, 400);
+    });
     // Soft core shade low on the rear flank (cool, ink-free).
     withState(ctx, () => {
       ctx.translate(300, -40);
@@ -870,6 +899,66 @@ export function bake(b: Baker): void {
     ctx.fillRect(0, 0, w, h);
     ctx.globalCompositeOperation = 'source-over';
   });
+
+  // Glow reflections on the lake under the body: two shimmer frames of soft
+  // broken streaks (half size, shown at 2x), crossfaded at runtime.
+  for (const [key, seed] of [
+    ['kuhiro_reflectA', 31],
+    ['kuhiro_reflectB', 77],
+  ] as [string, number][]) {
+    b.tex(key, 330, 120, (ctx, w, h) => {
+      let s = seed;
+      const rnd = () => {
+        s = (s * 16807) % 2147483647;
+        return s / 2147483647;
+      };
+      ctx.lineCap = 'round';
+      for (let i = 0; i < 46; i++) {
+        const t = Math.pow(rnd(), 1.5); // denser near the waterline
+        const y = 3 + t * (h - 10);
+        const half = (w / 2 - 14) * (1 - 0.55 * t) * (0.55 + 0.45 * rnd());
+        const cx = w / 2 + (rnd() - 0.5) * (w - 2 * half) * 0.9;
+        const len = (10 + rnd() * 44) * (1 - 0.4 * t);
+        const x = cx + (rnd() - 0.5) * 2 * half;
+        const a = (0.55 + 0.45 * rnd()) * (1 - t) * (1 - t);
+        ctx.strokeStyle = rgba('#FFFFFF', a * 0.35);
+        ctx.lineWidth = 4.5;
+        ctx.beginPath();
+        ctx.moveTo(x - len / 2, y);
+        ctx.lineTo(x + len / 2, y);
+        ctx.stroke();
+        ctx.strokeStyle = rgba('#FFFFFF', a);
+        ctx.lineWidth = 1.4;
+        ctx.beginPath();
+        ctx.moveTo(x - len * 0.4, y);
+        ctx.lineTo(x + len * 0.4, y);
+        ctx.stroke();
+      }
+      // A soft column of reflected glow under it all.
+      ctx.globalCompositeOperation = 'destination-over';
+      withState(ctx, () => {
+        ctx.translate(w / 2, 0);
+        ctx.scale(1, (h * 0.9) / (w * 0.42));
+        ctx.fillStyle = rGrad(ctx, 0, 0, 0, w * 0.42, [
+          [0, '#FFFFFF', 0.3],
+          [0.6, '#FFFFFF', 0.1],
+          [1, '#FFFFFF', 0],
+        ]);
+        ctx.fillRect(-w / 2, 0, w, w * 0.42);
+      });
+      ctx.globalCompositeOperation = 'source-over';
+      // Fade the sides.
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.fillStyle = lGrad(ctx, 0, 0, w, 0, [
+        [0, '#FFFFFF', 0],
+        [0.18, '#FFFFFF', 1],
+        [0.82, '#FFFFFF', 1],
+        [1, '#FFFFFF', 0],
+      ]);
+      ctx.fillRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'source-over';
+    });
+  }
 
   // Waterline sheen where the body meets the lake.
   b.tex('kuhiro_waterline', 240, 22, (ctx, w, h) => {
