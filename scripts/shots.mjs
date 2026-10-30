@@ -15,7 +15,9 @@ const vps = vpArg ? [vpArg] : ['ipad', 'phone'];
 // Shot list (spec section 11). `q` is the URL query; the scene reads the debug
 // params and sets __shotReady when settled. `wait` adds settle time (ms).
 const SHOTS = [
-  { name: 'styleboard', q: 'scene=styleboard&seed=7', wait: 600 },
+  { name: 'styleboard_cast', q: 'scene=styleboard&page=1&seed=7', wait: 900 },
+  { name: 'styleboard_world', q: 'scene=styleboard&page=2&seed=7', wait: 900 },
+  { name: 'styleboard_ui', q: 'scene=styleboard&page=3&seed=7', wait: 900 },
   { name: 'title', q: 'scene=title&seed=7', wait: 1500 },
   { name: 'shop', q: 'scene=shop&state=midtrip&seed=7', wait: 800 },
   { name: 'camp_dawn', q: 'scene=camp&state=midtrip&time=dawn&weather=clear&seed=7', wait: 1200 },

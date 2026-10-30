@@ -145,7 +145,7 @@ function dirRot(dx: number, dy: number): number {
 type PetalSpec = [x: number, y: number, w: number, h: number, rot: number];
 
 function petals(ctx: Ctx, list: PetalSpec[], lw = 1.5): void {
-  for (const [x, y, w, h, r] of list) petal(ctx, x, y, w, h, r, lw);
+  for (const [x, y, w, h, r] of list) petal(ctx, x, y, w, h, r, lw, PANGO, PLINE);
 }
 
 /** Egg, wider at the bottom. */
@@ -219,9 +219,9 @@ const HIP_ROW: PetalSpec[] = [
   [4.2, -5.4, 9, 9, 0.22],
 ];
 const CROWN_ROW: PetalSpec[] = [
-  [-10.2, -41.2, 10.5, 10.5, -0.78],
-  [-4.4, -47.2, 11, 11, -0.42],
-  [3.4, -50.2, 11, 11, -0.08],
+  [-11, -40.2, 12, 10.6, -0.98],
+  [-5.6, -46.4, 12.6, 11, -0.52],
+  [2, -49.4, 12.6, 11, -0.1],
 ];
 
 export function drawRowBack(ctx: Ctx): void {
@@ -323,163 +323,192 @@ export function drawArm(ctx: Ctx): void {
   nub(ctx, a.x, a.y, a.rx, a.ry, 0.3);
 }
 
-/** Tail petals along a path; round ends point toward the tip. Drawn tip first. */
-function tailAlong(ctx: Ctx, pts: [number, number][], sizes: number[]): void {
-  const list: PetalSpec[] = [];
-  for (let i = 0; i < pts.length; i++) {
+/** Smooth tapered tube along pts with widths ws (round tip). */
+function tubePath(ctx: Ctx, pts: [number, number][], ws: number[]): void {
+  const left: [number, number][] = [];
+  const right: [number, number][] = [];
+  const n = pts.length;
+  for (let i = 0; i < n; i++) {
     const a = pts[Math.max(0, i - 1)];
-    const b = pts[Math.min(pts.length - 1, i + 1)];
-    const w = sizes[i];
-    list.push([pts[i][0], pts[i][1], w, w * 0.96, dirRot(b[0] - a[0], b[1] - a[1])]);
+    const b = pts[Math.min(n - 1, i + 1)];
+    const dx = b[0] - a[0];
+    const dy = b[1] - a[1];
+    const l = Math.hypot(dx, dy) || 1;
+    const nx = -dy / l;
+    const ny = dx / l;
+    left.push([pts[i][0] + nx * ws[i] / 2, pts[i][1] + ny * ws[i] / 2]);
+    right.push([pts[i][0] - nx * ws[i] / 2, pts[i][1] - ny * ws[i] / 2]);
   }
-  for (let i = list.length - 1; i >= 0; i--) {
-    const [x, y, w, h, r] = list[i];
-    petal(ctx, x, y, w, h, r, 1.5);
+  const t = pts[n - 1];
+  const p = pts[n - 2];
+  const d = Math.hypot(t[0] - p[0], t[1] - p[1]) || 1;
+  const cap: [number, number] = [t[0] + ((t[0] - p[0]) / d) * ws[n - 1] * 0.5, t[1] + ((t[1] - p[1]) / d) * ws[n - 1] * 0.5];
+  smoothClosed(ctx, [...left, cap, ...right.reverse()], 0.5);
+}
+
+/**
+ * A thick tapering tail: a soft tube with 4 shrinking petal scales shingled
+ * along it (round ends toward the tip). Drawn tip first so each scale overlaps
+ * the next one out.
+ */
+function tail(ctx: Ctx, pts: [number, number][], sizes: number[]): void {
+  const ws = sizes.map((s) => s * 0.82);
+  ctx.beginPath();
+  tubePath(ctx, pts, ws);
+  ctx.fillStyle = mix(PANGO, PLINE, 0.12);
+  ctx.fill();
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.strokeStyle = PLINE;
+  ctx.stroke();
+  const n = pts.length;
+  for (let i = n - 1; i >= 0; i--) {
+    const a = pts[Math.max(0, i - 1)];
+    const b = pts[Math.min(n - 1, i + 1)];
+    const w = sizes[i];
+    petal(ctx, pts[i][0], pts[i][1], w, w * 0.92, dirRot(b[0] - a[0], b[1] - a[1]), 1.4, PANGO, i === n - 1 ? PLINE : INNER_LINE);
   }
 }
 
 export function drawTailOut(ctx: Ctx): void {
-  tailAlong(
+  tail(
     ctx,
     [
-      [-15, -8.5],
-      [-21.5, -10],
-      [-27, -12.8],
-      [-31.2, -16.6],
+      [-14.5, -8.6],
+      [-20.5, -10.2],
+      [-25.6, -12.8],
+      [-29.4, -16.4],
     ],
-    [11.5, 10, 8.4, 6.8],
+    [12.5, 10.6, 8.8, 7],
   );
 }
 
 export function drawTailWrap(ctx: Ctx): void {
-  tailAlong(
+  tail(
     ctx,
     [
-      [-14, -6.5],
-      [-8.6, -1.4],
-      [-1.6, 0.4],
-      [5.4, -1],
+      [-13.4, -5.6],
+      [-8, -1.2],
+      [-1.6, 0.2],
+      [4.6, -1.2],
     ],
-    [10.6, 9.4, 8, 6.6],
+    [11.6, 10, 8.4, 6.8],
   );
 }
 
 export function drawTailDangle(ctx: Ctx): void {
-  tailAlong(
+  tail(
     ctx,
     [
-      [-9.6, 0.5],
-      [-10.4, 6.6],
-      [-10, 12.2],
-      [-7.6, 16.8],
+      [-9.4, 0.4],
+      [-10, 5.6],
+      [-9.4, 10.4],
+      [-7, 14.2],
     ],
-    [10.4, 9.2, 7.8, 6.4],
+    [11.6, 10, 8.4, 6.8],
   );
 }
 
 /** Ball silhouette: round, with a soft bud tip at the top. */
 function ballShape(ctx: Ctx, cx: number, cy: number, r: number): void {
   const pts: [number, number][] = [];
-  const n = 24;
+  const n = 28;
   for (let i = 0; i < n; i++) {
     const a = (i / n) * Math.PI * 2 - Math.PI / 2;
-    // Slight bud point at the top (a = -PI/2).
-    const top = Math.max(0, Math.cos(a + Math.PI / 2));
-    const k = 1 + 0.07 * Math.pow(top, 6);
-    pts.push([cx + Math.cos(a) * r * k * (1 - 0.02 * top), cy + Math.sin(a) * r * k]);
+    const top = Math.max(0, -Math.sin(a));
+    const k = 1 + 0.1 * Math.pow(top, 8);
+    pts.push([cx + Math.cos(a) * r * (1 - 0.04 * top), cy + Math.sin(a) * r * k]);
   }
   smoothClosed(ctx, pts);
 }
 
 /**
- * The bud-ball: petals in helix rows round a sphere (2 turns), top rows first
- * so lower petals overlap upward like a closed rhododendron bud. One gap at
- * the front where a single eye can open; the tail tip tucks in beneath it.
+ * The bud-ball: a few broad scales in offset tiers (a 2-turn helix) round a
+ * sphere, upper tiers first so lower scales overlap upward like a closed
+ * rhododendron bud. One gap at the front where a single eye can open; the
+ * tail tip tucks round the bottom and up toward it.
  */
 export function drawBall(ctx: Ctx): void {
   const { x: cx, y: cy, r } = KG.ball;
-  softShadow(ctx, cx, 0.6, r * 0.82, 3, 0.16);
+  softShadow(ctx, cx, 0.6, r * 0.8, 3, 0.16);
   ctx.beginPath();
   ballShape(ctx, cx, cy, r);
   ctx.fillStyle = rGrad(ctx, cx - 5, cy - 7, 2, r * 1.3, [
-    [0, mix(PANGO, PLIGHT, 0.5)],
+    [0, mix(PANGO, PLIGHT, 0.4)],
     [0.7, PANGO],
-    [1, mix(PANGO, PLINE, 0.25)],
+    [1, mix(PANGO, PLINE, 0.3)],
   ]);
   ctx.fill();
-  ctx.lineWidth = 2;
-  ctx.strokeStyle = PLINE;
-  ctx.stroke();
 
-  // Rows: [yOffset from centre, count, petal size].
-  const rows: [number, number, number][] = [
-    [-15.2, 2, 7],
-    [-10.4, 3, 9],
-    [-3.6, 4, 11],
-    [3.8, 5, 11.4],
-    [10.6, 4, 10.6],
-  ];
-  const gapRow = 2;
-  const gapIdx = 2;
-  rows.forEach(([dy, count, size], ri) => {
-    const yy = cy + dy;
-    const hw = Math.sqrt(Math.max(0, r * r - dy * dy)) * 0.92;
-    for (let i = 0; i < count; i++) {
-      if (ri === gapRow && i === gapIdx) continue;
-      // Spread across the visible hemisphere, helix tilt per row.
-      const phase = ri % 2 ? 0.5 / count : 0;
-      const phi = -Math.PI / 2 + (Math.PI * (i + 0.5 + phase)) / count;
-      const px = cx + hw * Math.sin(phi) * 0.95;
-      const fore = 0.55 + 0.45 * Math.cos(phi);
-      const py = yy + px * 0.1 - 0.4 * ri;
-      const lean = Math.sin(phi) * 0.55 + (cy + dy < cy ? Math.sin(phi) * 0.25 : 0);
-      petal(ctx, px, py, size * fore, size * 0.92, lean, 1.4);
-    }
+  withState(ctx, () => {
+    ctx.beginPath();
+    ballShape(ctx, cx, cy, r - 0.6);
+    ctx.clip();
+    // Tip scales.
+    petal(ctx, cx - 3.4, cy - 13.2, 10, 9.4, -0.35, 1.3, PANGO, INNER_LINE);
+    petal(ctx, cx + 3.6, cy - 13.6, 10, 9.4, 0.32, 1.3, PANGO, INNER_LINE);
+    // Upper tier (3), helix-tilted.
+    petal(ctx, cx - 11.4, cy - 4.8, 12, 13, -0.62, 1.4, PANGO, INNER_LINE);
+    petal(ctx, cx - 1.2, cy - 6.6, 13.6, 13.6, -0.06, 1.4, PANGO, INNER_LINE);
+    // (gap at the front right: no scale here)
+    // Lower tier (3), offset.
+    petal(ctx, cx - 7.6, cy + 5.6, 14, 13.6, -0.34, 1.4, PANGO, INNER_LINE);
+    petal(ctx, cx + 4.6, cy + 4.6, 14, 13.6, 0.22, 1.4, PANGO, INNER_LINE);
+    petal(ctx, cx - 16, cy + 5, 10, 13, -0.9, 1.4, PANGO, INNER_LINE);
   });
 
   // The gap: a soft slit with a closed eyelid inside.
   const g = KG.ballEye;
-  withState(ctx, () => {
-    ctx.beginPath();
-    ellipsePath(ctx, g.x, g.y, 4.4, 3.2, 0.12);
-    ctx.fillStyle = rGrad(ctx, g.x, g.y + 1, 0.5, 5, [
-      [0, PFACE],
-      [1, mix(PFACE, PLINE, 0.45)],
-    ]);
-    ctx.fill();
-    ctx.lineWidth = 1.4;
-    ctx.strokeStyle = PLINE;
-    ctx.stroke();
-    ctx.beginPath();
-    ctx.moveTo(g.x - 2.6, g.y - 0.2);
-    ctx.quadraticCurveTo(g.x, g.y + 1.6, g.x + 2.6, g.y - 0.2);
-    ctx.strokeStyle = mix(P.ink, PLINE, 0.35);
-    ctx.lineWidth = 1.2;
-    ctx.lineCap = 'round';
-    ctx.stroke();
-  });
+  ctx.beginPath();
+  ellipsePath(ctx, g.x, g.y, 4.6, 3.3, 0.18);
+  ctx.fillStyle = rGrad(ctx, g.x, g.y + 1, 0.5, 5, [
+    [0, PFACE],
+    [1, mix(PFACE, PLINE, 0.4)],
+  ]);
+  ctx.fill();
+  ctx.lineWidth = 1.4;
+  ctx.strokeStyle = INNER_LINE;
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(g.x - 2.6, g.y - 0.1);
+  ctx.quadraticCurveTo(g.x, g.y + 1.5, g.x + 2.6, g.y - 0.3);
+  ctx.strokeStyle = mix(P.ink, PLINE, 0.4);
+  ctx.lineWidth = 1.1;
+  ctx.lineCap = 'round';
+  ctx.stroke();
+  // Upper-right scale overlapping the gap's top edge.
+  petal(ctx, cx + 11, cy - 9, 9.6, 10, 0.75, 1.3, PANGO, INNER_LINE);
 
-  // Tail tip tucked round the bottom front, pointing up to the gap.
-  tailAlong(
-    ctx,
-    [
-      [-3, cy + 15.2],
-      [4.2, cy + 13.6],
-      [10.4, cy + 9.4],
-      [12.6, cy + 3.4],
-    ],
-    [8.6, 8, 7, 5.6],
-  );
+  // Tail tip tucked round the bottom front, curling up toward the gap.
+  const tp: [number, number][] = [
+    [cx - 6, cy + 14.6],
+    [cx + 2.6, cy + 14.2],
+    [cx + 9.6, cy + 10.2],
+    [cx + 13, cy + 3.6],
+  ];
+  const sizes = [11, 9.6, 8.2, 6.6];
+  for (let i = tp.length - 1; i >= 0; i--) {
+    const a = tp[Math.max(0, i - 1)];
+    const b = tp[Math.min(tp.length - 1, i + 1)];
+    petal(ctx, tp[i][0], tp[i][1], sizes[i], sizes[i] * 0.9, dirRot(b[0] - a[0], b[1] - a[1]), 1.4, PANGO, INNER_LINE);
+  }
+
+  // Silhouette outline last, so it stays bold and clean.
+  ctx.beginPath();
+  ballShape(ctx, cx, cy, r);
+  ctx.lineWidth = 2;
+  ctx.strokeStyle = PLINE;
+  ctx.stroke();
 }
 
 /** The single eye that opens in the ball's gap. */
 export function drawBallEye(ctx: Ctx): void {
   const g = KG.ballEye;
   ctx.beginPath();
-  ellipsePath(ctx, g.x, g.y, 4.3, 3.4, 0.12);
+  ellipsePath(ctx, g.x, g.y, 4.4, 3.3, 0.18);
   ctx.fillStyle = PFACE;
   ctx.fill();
-  eye(ctx, g.x + 0.2, g.y - 0.2, 2.5, 3.1, 0.5);
+  eye(ctx, g.x + 0.2, g.y - 0.1, 2.5, 3.0, 0.5);
 }
 
 // ---------------------------------------------------------------------------
