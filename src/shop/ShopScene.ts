@@ -149,7 +149,8 @@ export default class Shop extends Phaser.Scene {
     // Header + exit.
     const hdr = txt(this, Math.max(roomW / 2, 250), l.safe.top + 112, STR.shop.header, 'h1', { color: P.cream, stroke: mix(P.bark, P.ink, 0.4), strokeWidth: 8 });
     hdr.setDepth(20);
-    const exit = new Button(this, Math.max(roomW / 2 + 30, 270), l.h - l.safe.bottom - 54, {
+    const exit = new Button(this, Math.max(roomW / 2 + 80, 318), l.h - l.safe.bottom - 54, {
+      w: 232,
       label: STR.shop.exit,
       variant: 'warm',
       icon: 'icon.arrowRight',
