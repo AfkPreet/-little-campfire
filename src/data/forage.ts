@@ -16,11 +16,11 @@ export interface ForageDef {
 }
 
 export const FORAGE: Record<ForageId, ForageDef> = {
-  berries: { id: 'berries', when: 'day', sell: 2, name: 'Sweet Berries', flavor: 'Sun-warm and juicy.' },
-  mushrooms: { id: 'mushrooms', when: 'any', sell: 3, name: 'Puffcap Mushrooms', flavor: 'Plump after a rain.', rainBonus: true },
-  herbs: { id: 'herbs', when: 'any', sell: 2, name: 'Wild Herbs', flavor: 'Smells green and bright.' },
-  nuts: { id: 'nuts', when: 'day', sell: 3, name: 'Forest Nuts', flavor: 'Crunchy little treasures.' },
-  moon_blossom: { id: 'moon_blossom', when: 'night', sell: null, name: 'Moon Blossom', flavor: 'Opens only under the moon.', needsClue: 3 },
+  berries: { id: 'berries', when: 'day', sell: 2, name: 'Ainselu Berries', flavor: 'Golden wild raspberries. Every hill kid\'s snack.' },
+  mushrooms: { id: 'mushrooms', when: 'any', sell: 3, name: 'Puffcap Chyau', flavor: 'Chyau means mushroom. They pop up after showers.', rainBonus: true },
+  herbs: { id: 'herbs', when: 'any', sell: 2, name: 'Sisnu Nettles', flavor: 'Wild nettle. Stings to pick, sweet to eat.' },
+  nuts: { id: 'nuts', when: 'day', sell: 3, name: 'Katus Nuts', flavor: 'Tiny wild chestnuts. Roast some, share some.' },
+  moon_blossom: { id: 'moon_blossom', when: 'night', sell: null, name: 'Moon Gurans', flavor: 'A white rhododendron that opens for the moon.', needsClue: 3 },
 };
 
 export interface ForageSpotDef {

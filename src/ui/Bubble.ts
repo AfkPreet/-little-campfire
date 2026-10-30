@@ -13,7 +13,7 @@ import { artObj } from '@/art/kit';
 import { UI_INK, UI_INK_FAINT, iconObj, panel, shadowPanel } from '@/art/ui';
 import { P, hexToInt } from '@/palette';
 import { TEXT_NUDGE, pressable } from './Button';
-import { txtObj } from './text';
+import { textStyle, txtObj } from './text';
 
 export interface BubbleOpts {
   label: string;
@@ -33,7 +33,19 @@ const TAIL_H = 20;
 const PAD = 22;
 const ICON = 28;
 
+function bubbleWidth(contentW: number): number {
+  return Math.max(MIN_TOUCH + 28, contentW + PAD * 2);
+}
+
 export class Bubble extends Phaser.GameObjects.Container {
+  /** Body width a bubble with this label would have (no objects left behind). */
+  static measure(scene: Phaser.Scene, label: string, icon?: string): number {
+    const t = new Phaser.GameObjects.Text(scene, 0, 0, label, textStyle('button', { size: 24 }));
+    const w = bubbleWidth(t.width - 4 + (icon ? ICON + 8 : 0));
+    t.destroy();
+    return w;
+  }
+
   readonly bw: number;
   readonly label: string;
   private o: BubbleOpts;
@@ -51,7 +63,7 @@ export class Bubble extends Phaser.GameObjects.Container {
     const icon = opts.icon ? iconObj(scene, 0, 0, opts.icon, ICON) : undefined;
     if (icon && opts.disabled) icon.setAlpha(0.5);
     const contentW = text.width - 4 + (icon ? ICON + 8 : 0);
-    const w = Math.max(MIN_TOUCH + 28, contentW + PAD * 2);
+    const w = bubbleWidth(contentW);
     this.bw = w;
     const cy = -TAIL_H - BODY_H / 2 + 3;
     this.inner.add(shadowPanel(scene, 'pill', w, BODY_H, 0, cy + 5, 0.16));
@@ -123,13 +135,7 @@ export class BubbleGroup extends Phaser.GameObjects.Container {
     const lift = opts.lift ?? 18;
     const dip = opts.dip ?? 18;
     const gap = opts.gap ?? 14;
-    // Measure widths first (a throwaway pass keeps layout simple and exact).
-    const widths = items.slice(0, n).map((it) => {
-      const probe = new Bubble(scene, 0, 0, { label: it.label, icon: it.icon });
-      const w = probe.bw;
-      probe.destroy();
-      return w;
-    });
+    const widths = items.slice(0, n).map((it) => Bubble.measure(scene, it.label, it.icon));
     const total = widths.reduce((a, b) => a + b, 0) + gap * (n - 1);
     let cx = -total / 2;
     const xs = widths.map((w) => {

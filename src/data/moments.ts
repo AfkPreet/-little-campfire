@@ -6,15 +6,16 @@ export interface MomentDef {
   name: string;
   banner: string;
   hint: string;
+  flavor: string;
 }
 
 export const MOMENTS: Record<MomentId, MomentDef> = {
-  shooting_star: { id: 'shooting_star', name: 'Shooting star', banner: 'A shooting star! Make a wish.', hint: 'Watch a clear night sky' },
-  rainbow: { id: 'rainbow', name: 'Rainbow', banner: 'A rainbow over the {water}!', hint: 'The dawn after a rainy night' },
-  firefly_swirl: { id: 'firefly_swirl', name: 'Firefly swirl', banner: 'The fireflies are dancing.', hint: 'Sit by the fire on a clear night' },
-  misty_sunrise: { id: 'misty_sunrise', name: 'Misty sunrise', banner: 'Everything is wrapped in soft mist.', hint: 'Wake to a misty morning' },
-  golden_whisker: { id: 'golden_whisker', name: 'Golden Whisker', banner: "A Golden Whisker! It's practically glowing.", hint: 'A very lucky catch' },
-  moonbow: { id: 'moonbow', name: 'Moonbow', banner: "A moonbow... that's rare.", hint: 'A rainy night, feeling blissful' },
+  shooting_star: { id: 'shooting_star', name: 'Wishing Star', banner: 'A shooting star! Make a wish.', hint: 'Watch a clear night sky', flavor: 'It slid down right behind the Snow Grannies.' },
+  rainbow: { id: 'rainbow', name: 'Monsoon Rainbow', banner: 'A rainbow over the {water}!', hint: 'The dawn after a rainy night', flavor: 'The valley wore it like a woolly muffler.' },
+  firefly_swirl: { id: 'firefly_swirl', name: 'Junkiri Dance', banner: 'The fireflies are dancing.', hint: 'Sit by the fire on a clear night', flavor: 'Hundreds of little moon-insects, waltzing.' },
+  misty_sunrise: { id: 'misty_sunrise', name: 'Cloud-Sea Dawn', banner: 'Everything is wrapped in soft mist.', hint: 'Wake to a misty morning', flavor: 'The valley filled with cloud; only the snows peeked out.' },
+  golden_whisker: { id: 'golden_whisker', name: 'Golden Mahseer', banner: "A Golden Mahseer! It's practically glowing.", hint: 'A very lucky catch', flavor: 'Old fishers say it\'s lucky to let it go.' },
+  moonbow: { id: 'moonbow', name: 'Moonbow', banner: "A moonbow... that's rare.", hint: 'A rainy night, feeling blissful', flavor: 'A rainbow spun from moonlight, pale as milk tea.' },
 };
 
 export const MOMENT_ORDER: MomentId[] = ['shooting_star', 'rainbow', 'firefly_swirl', 'misty_sunrise', 'golden_whisker', 'moonbow'];

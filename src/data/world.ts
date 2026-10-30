@@ -1,18 +1,23 @@
-/** World names (docs/WORLD.md). Every {Placeholder} in UI copy resolves from here. */
+/** World names (docs/WORLD.md section 2). Every {Placeholder} in UI copy resolves from here. */
 export const WORLD = {
-  title: 'Little Campfire',
+  title: 'Moonlight Momos',
   subtitle: 'a tiny camping trip',
-  hero: 'Hero',
-  shopkeeper: 'Shopkeeper',
-  companion: 'Companion',
-  guardian: 'Guardian',
-  place: 'The Clearing',
-  water: 'Lake',
-  nextCampsite: 'The Next Campsite',
-  currency: 'coins',
-  /** Format an amount of money for display. */
-  money: (n: number): string => `${n}c`,
-  /** The mystery scale item name. */
-  scale: 'Glimmering Scale',
+  hero: 'Tuki',
+  shopkeeper: 'Boju',
+  companion: 'Kopila',
+  /** Guardian's name, used only after the legend; UI says "the guardian". */
+  guardian: 'Kuhiro',
+  place: 'Junkiri Danda',
+  water: 'Jun Pokhari',
+  nextCampsite: 'Sunthala Bend',
+  currency: 'rupees',
+  /** Money is always written symbol-first, whole numbers: ₹120. */
+  money: (n: number): string => `₹${Math.round(n)}`,
+  scale: 'Moon Scale',
+  scaleFlavor: 'Warm as a cup of chiya. It hums when it rains.',
+  /** "Willow Rod+" tag in fish hints. */
+  sturdyRod: 'Rattan Rod+',
+  bait: { none: 'None', wiggly: 'Atta', sparkle: 'Mica' },
   version: 'v0.1',
+  meta: 'Moonlight Momos: a tiny, cozy camping trip. Fish, forage, cook by the fire, and meet the gentle guardian of the water.',
 };

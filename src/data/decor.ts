@@ -21,17 +21,17 @@ export interface DecorDef {
 }
 
 export const DECOR: Record<DecorId, DecorDef> = {
-  potted_flower: { id: 'potted_flower', price: 10, placement: 'ground', name: 'Potted Flower', flavor: 'Nods in the wind.' },
-  paper_lantern: { id: 'paper_lantern', price: 12, placement: 'hang', name: 'Paper Lantern', flavor: 'A warm pool of light at night.', lightAtNight: true },
-  floor_cushion: { id: 'floor_cushion', price: 12, placement: 'ground', name: 'Floor Cushion', flavor: 'A comfy seat by the fire.', sitSpot: true },
-  bunting: { id: 'bunting', price: 15, placement: 'hang', name: 'Bunting Flags', flavor: 'Flutters in every gust.' },
-  wind_chime: { id: 'wind_chime', price: 18, placement: 'hang', name: 'Wind Chime', flavor: 'Tinkles when the wind sighs.' },
-  woven_rug: { id: 'woven_rug', price: 25, placement: 'ground', name: 'Woven Rug', flavor: 'Its colours warm up at night.' },
-  string_lights: { id: 'string_lights', price: 30, placement: 'span', name: 'String Lights', flavor: 'Twinkle, twinkle, after dark.', lightAtNight: true },
-  bookshelf: { id: 'bookshelf', price: 40, placement: 'ground', name: 'Little Bookshelf', flavor: 'Bedtime stories under the stars.', countsAsFire: true },
-  hammock: { id: 'hammock', price: 60, placement: 'twoTree', name: 'Hammock', flavor: 'For the laziest afternoons.', countsAsFire: true },
-  telescope: { id: 'telescope', price: 120, placement: 'ground', name: 'Star Telescope', flavor: 'Shooting stars come more often.', shootingStarBonus: 0.15 },
-  guardian_lantern: { id: 'guardian_lantern', price: null, placement: 'hang', name: 'Guardian Lantern', flavor: 'It never goes out.', baseline: 5, lightAtNight: true },
+  potted_flower: { id: 'potted_flower', price: 10, placement: 'ground', name: 'Geranium Tin', flavor: 'Every hill window grows one in an old ghee tin.' },
+  paper_lantern: { id: 'paper_lantern', price: 12, placement: 'hang', name: 'Little Laltin', flavor: 'A hurricane lamp for cozy power cuts.', lightAtNight: true },
+  floor_cushion: { id: 'floor_cushion', price: 12, placement: 'ground', name: 'Pirka Stool', flavor: 'A low wooden seat: the best spot by any fire.', sitSpot: true },
+  bunting: { id: 'bunting', price: 15, placement: 'hang', name: 'Wool Bunting', flavor: 'Knitted triangles from Boju\'s needles.' },
+  wind_chime: { id: 'wind_chime', price: 18, placement: 'hang', name: 'Bamboo Chime', flavor: 'Hollow malingo that sings in the breeze.' },
+  woven_rug: { id: 'woven_rug', price: 25, placement: 'ground', name: 'Radi Rug', flavor: 'Thick hill-sheep wool, striped and snug.' },
+  string_lights: { id: 'string_lights', price: 30, placement: 'span', name: 'Junkiri Lights', flavor: 'Blinky lights that think they\'re fireflies.', lightAtNight: true },
+  bookshelf: { id: 'bookshelf', price: 40, placement: 'ground', name: 'Tea-Chest Shelf', flavor: 'An old tea chest, now full of storybooks.', countsAsFire: true },
+  hammock: { id: 'hammock', price: 60, placement: 'twoTree', name: 'Shawl Hammock', flavor: 'Boju\'s spare shawl, slung between two rhodos.', countsAsFire: true },
+  telescope: { id: 'telescope', price: 120, placement: 'ground', name: 'Brass Star-Scope', flavor: 'Sees the snows by day and stars by night.', shootingStarBonus: 0.15 },
+  guardian_lantern: { id: 'guardian_lantern', price: null, placement: 'hang', name: 'Kuhiro\'s Lantern', flavor: 'Its own scale, with one of its stars inside.', baseline: 5, lightAtNight: true },
 };
 
 export const DECOR_ORDER: DecorId[] = [

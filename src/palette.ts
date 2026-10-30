@@ -24,12 +24,97 @@ export const P = {
 export type Token = keyof typeof P;
 
 /**
- * Setting accents (added at M0 for the world in docs/WORLD.md). Keep them
+ * Setting accents from docs/WORLD.md section 8 (Junkiri Danda). Keep them
  * muted: HSB saturation <= 40%. `checkAccents()` enforces this in dev.
  */
 export const ACCENTS = {
-  // filled in from docs/WORLD.md
+  // World and sky
+  snow: '#EEF0F4',
+  'snow-shade': '#C8C5DB',
+  alpenglow: '#F2C4B8',
+  'moon-snow': '#C9D2E6',
+  'ridge-far': '#A9B0CC',
+  'ridge-near': '#8F9DB8',
+  'cloud-sea': '#E4E3EE',
+  'cloud-spill': '#ECEBF2',
+  'tea-green': '#A9C29A',
+  'tin-blue': '#A3B8CC',
+  'tin-rose': '#D4A9A6',
+  'tin-mint': '#A8C9BB',
+  'water-thread': '#E9EEF0',
+  // Water
+  'lake-jade': '#93B5B3',
+  'lake-deep': '#6E8A99',
+  'lake-glow': '#CFE6E2',
+  reed: '#C9C29E',
+  // Plants, ground and forage
+  dhupi: '#6F8E86',
+  malingo: '#A3B88F',
+  gurans: '#D98F96',
+  'gurans-deep': '#C07A84',
+  'moon-gurans': '#F3EEF5',
+  stone: '#B9B1B4',
+  'stone-shade': '#9C9298',
+  pebble: '#CFC6C3',
+  ainselu: '#E6C392',
+  katus: '#A88870',
+  chyau: '#D7B7A0',
+  sisnu: '#9DB38F',
+  // Kitchen, shop and UI
+  'shop-wood': '#C9AE92',
+  copper: '#C99A7E',
+  'copper-line': '#9E7A64',
+  'tawa-iron': '#6B6070',
+  steamer: '#C9CDD3',
+  lokta: '#EFE4D2',
+  bell: '#D9BE8C',
+  'cream-line': '#D8C9B8',
+  // Tuki
+  oat: '#D8C3A5',
+  'oat-shade': '#C4AC8C',
+  'oat-line': '#A48B6E',
+  doko: '#A88A6A',
+  'doko-band': '#C2A483',
+  'doko-line': '#8A7058',
+  jute: '#D9C49A',
+  'ghum-cane': '#C9B283',
+  'ghum-leaf': '#A3B58F',
+  'ghum-line': '#7F9271',
+  // Boju
+  yak: '#9C8580',
+  'yak-shade': '#87716E',
+  'yak-line': '#6F5D5B',
+  'yak-face': '#F1E6DA',
+  horn: '#EADFC8',
+  'horn-line': '#BFB197',
+  'wool-ball': '#D9B3B8',
+  // Kopila
+  pango: '#BFA09A',
+  'pango-light': '#D9C1B8',
+  'pango-line': '#9A7D78',
+  'pango-face': '#F2DCD3',
+  // Kuhiro
+  mistfish: '#B8C6DE',
+  'mist-lavender': '#A99EC8',
+  'mistfish-line': '#8F8AAE',
+  moonmilk: '#EEF1F2',
+  'fish-glow': '#DCE8F5',
+  'fish-glow-edge': '#C9D9EE',
+  'scale-glow': '#E9EEF7',
+  // Fish
+  garra: '#B5B6A3',
+  'bubble-barb': '#C9C0AE',
+  asala: '#C3CBD3',
+  danio: '#B9AACB',
+  'danio-bar': '#978BB3',
+  loach: '#A7B29A',
+  glowfin: '#7E8AA8',
+  katle: '#E7C9C6',
+  mahseer: '#E6CF94',
 } as Record<string, string>;
+
+/** Shorthand for accents: A['snow-shade']. */
+export const A = ACCENTS;
 
 /** Any palette colour by name: base token or accent. */
 export function col(name: string): string {
@@ -139,7 +224,7 @@ export const LIGHT: Record<LightKey, LightingKey> = {
     actor: '#8A8DBA',
     haze: '#5B5E86',
     hazeAlpha: 0.5,
-    water: '#3F4670',
+    water: '#4E5A7A',
     warmLight: 1.0,
     vignette: 0.32,
     stars: 1,

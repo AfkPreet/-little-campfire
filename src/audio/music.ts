@@ -90,7 +90,9 @@ interface FileTrack {
 export class MusicDirector {
   private readonly ctx: BaseAudioContext;
   private readonly bus: GainNode;
-  private readonly score: Score;
+  private readonly out: Out;
+  private readonly noise: NoiseBank;
+  private scoreObj: Score | null = null;
   private mood: MusicMood = 'off';
   private token = 0;
   private tracks: FileTrack[] = [];
@@ -104,7 +106,14 @@ export class MusicDirector {
     this.bus = ctx.createGain();
     this.bus.gain.value = FILE_TRIM;
     this.bus.connect(out.dry);
-    this.score = new Score(ctx, out, noise);
+    this.out = out;
+    this.noise = noise;
+  }
+
+  /** Built on first use so unlocking stays light. */
+  private get score(): Score {
+    if (!this.scoreObj) this.scoreObj = new Score(this.ctx, this.out, this.noise);
+    return this.scoreObj;
   }
 
   getMood(): MusicMood {
@@ -117,9 +126,14 @@ export class MusicDirector {
     return this.tracks.some((t) => !t.stopping) ? 'file' : this.scoreTarget > 0 ? 'score' : 'off';
   }
 
+  /** Requested mood; repeated calls with the same mood are free. */
   setMood(m: MusicMood): void {
     if (m === this.mood) return;
     this.mood = m;
+    this.play(m);
+  }
+
+  private play(m: MusicMood): void {
     const token = ++this.token;
     const now = this.ctx.currentTime;
     // Fade every file track out.
@@ -156,6 +170,7 @@ export class MusicDirector {
       this.scoreStopTimer = null;
     }
     this.scoreTarget = target;
+    if (target <= 0 && !this.scoreObj) return;
     const g = this.score.out.gain;
     if (target > 0) {
       if (!this.score.isRunning()) {
@@ -164,7 +179,7 @@ export class MusicDirector {
         this.score.start();
       } else holdAt(g, now);
       g.linearRampToValueAtTime(target, now + FADE_S);
-    } else if (this.score.isRunning()) {
+    } else if (this.scoreObj?.isRunning()) {
       holdAt(g, now);
       g.linearRampToValueAtTime(0, now + FADE_S);
       this.scoreStopTimer = setTimeout(() => {
@@ -217,9 +232,8 @@ export class MusicDirector {
           } catch {
             /* gone */
           }
-          // Hand back to the night loop.
-          this.mood = 'off';
-          this.setMood('night');
+          // Hand back to the night loop; the request stays 'finale' so it does not restart.
+          this.play('night');
         }
       };
     }
@@ -262,6 +276,6 @@ export class MusicDirector {
   }
 
   tick(until: number): void {
-    this.score.tick(until);
+    this.scoreObj?.tick(until);
   }
 }

@@ -68,6 +68,7 @@ interface Engine {
   synth: Synth;
   ambience: Ambience;
   director: MusicDirector;
+  out: GainNode;
   analyser: AnalyserNode | null;
 }
 
@@ -105,6 +106,22 @@ function applyVolumes(): void {
   eng.music.setLevel(volCurve(s.music) * TRIM.music, t);
   eng.sfx.setLevel(volCurve(s.sounds) * TRIM.sfx, t);
   eng.amb.setLevel(volCurve(s.ambience) * TRIM.amb, t);
+  if (unlocked) {
+    applyMood();
+    if (ambRequested) applyAmb();
+  }
+}
+
+/** A muted layer is stopped outright (saves CPU on iPad) and resumes when unmuted. */
+function applyMood(): void {
+  if (!eng) return;
+  eng.director.setMood(settingsGet().music > 0 ? pendingMood : 'off');
+}
+
+const silentAmb: AmbienceCtx = { scene: 'silent', p: 0.3, raining: false, inTent: false, nearFire: 0, nearWater: 0 };
+function applyAmb(): void {
+  if (!eng) return;
+  eng.ambience.set(settingsGet().ambience > 0 ? pendingAmb : silentAmb);
 }
 
 function build(c: AudioContext): Engine {
@@ -130,14 +147,6 @@ function build(c: AudioContext): Engine {
   comp.release.value = 0.28;
   const out = g(0.92);
   masterIn.connect(hp).connect(lp).connect(comp).connect(out).connect(c.destination);
-  let analyser: AnalyserNode | null = null;
-  try {
-    analyser = c.createAnalyser();
-    analyser.fftSize = 512;
-    out.connect(analyser);
-  } catch {
-    analyser = null;
-  }
 
   // Shared reverb (impulse generated off the tap handler).
   const reverb = c.createConvolver();
@@ -163,7 +172,8 @@ function build(c: AudioContext): Engine {
     synth: new Synth(c, sfx, noise),
     ambience: new Ambience(c, amb, noise),
     director: new MusicDirector(c, music, noise),
-    analyser,
+    out,
+    analyser: null,
   };
   eng = e;
   applyVolumes();
@@ -176,8 +186,8 @@ function onState(): void {
     resumeAt = -1;
     if (!unlocked) {
       unlocked = true;
-      if (ambRequested) eng.ambience.set(pendingAmb);
-      eng.director.setMood(pendingMood);
+      if (ambRequested) applyAmb();
+      applyMood();
     }
     startLoop();
   }
@@ -320,7 +330,7 @@ export function setAmbience(c: AmbienceCtx): void {
   ambRequested = true;
   if (eng && unlocked) {
     try {
-      eng.ambience.set(pendingAmb);
+      applyAmb();
     } catch {
       /* ignore */
     }
@@ -332,7 +342,7 @@ export function setMusicMood(mood: MusicMood): void {
   pendingMood = mood;
   if (eng && unlocked) {
     try {
-      eng.director.setMood(mood);
+      applyMood();
     } catch {
       /* ignore */
     }
@@ -370,8 +380,17 @@ export function isAudioUnlocked(): boolean {
 
 /** Output level 0..1 (RMS of the master), for meters in dev previews. */
 export function audioLevel(): number {
-  const a = eng?.analyser;
-  if (!a || !unlocked) return 0;
+  if (!eng || !unlocked) return 0;
+  if (!eng.analyser) {
+    try {
+      eng.analyser = eng.ctx.createAnalyser();
+      eng.analyser.fftSize = 512;
+      eng.out.connect(eng.analyser);
+    } catch {
+      return 0;
+    }
+  }
+  const a = eng.analyser;
   if (!levelBuf || levelBuf.length !== a.fftSize) levelBuf = new Float32Array(new ArrayBuffer(a.fftSize * 4));
   a.getFloatTimeDomainData(levelBuf);
   let sum = 0;
@@ -416,6 +435,8 @@ if (typeof window !== 'undefined') {
   );
   registerDebug('audio', () => audioState());
   registerDebug('sfx', (id: string) => playAny(id));
+  // The whole API for scripted tests (one module instance, even after HMR).
+  registerDebug('audioApi', () => ({ playSfx, setMusicMood, setAmbience, duckMusic, windGust, setLeadVoice, audioLevel, audioState, SFX_IDS }));
 }
 
 if (import.meta.hot) {

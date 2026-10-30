@@ -347,6 +347,9 @@ export class Score {
         this.cfg = CFG[this.pending];
         this.pending = null;
         this.applyCfg(1.4);
+        // Land the switch on the start of a chord so slow variants never open on a silent bar.
+        const bpc = this.cfg.barsPerChord;
+        if (this.bar % bpc !== 0) this.bar += bpc - (this.bar % bpc);
       }
       this.planBar(t);
     }

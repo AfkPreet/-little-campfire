@@ -26,14 +26,14 @@ export const GOLDEN_CHANCE = 0.01;
 export const SIZE_VARIANCE = 0.3;
 
 export const FISH: Record<FishId, FishDef> = {
-  pebble_minnow: { id: 'pebble_minnow', rarity: 'common', when: 'any', sturdy: false, sell: 6, cm: 8, name: 'Pebble Minnow', flavor: 'Small, speckled, always nearby.', hint: 'Any time, anywhere' },
-  bubble_carp: { id: 'bubble_carp', rarity: 'common', when: 'any', sturdy: false, sell: 8, cm: 22, name: 'Bubble Carp', flavor: 'Blows a bubble when it is happy.', hint: 'Any time, anywhere' },
-  blushing_trout: { id: 'blushing_trout', rarity: 'common', when: 'day', sturdy: false, sell: 9, cm: 26, name: 'Blushing Trout', flavor: 'Pink-cheeked and a little shy.', hint: 'Out in the daylight' },
-  dusk_perch: { id: 'dusk_perch', rarity: 'uncommon', when: 'dusk', sturdy: false, sell: 18, cm: 24, name: 'Dusk Perch', flavor: 'Wears the sunset on its fins.', hint: 'Bites at dusk' },
-  rain_loach: { id: 'rain_loach', rarity: 'uncommon', when: 'rain', sturdy: false, sell: 20, cm: 18, name: 'Rain Loach', flavor: 'Comes up to listen to the rain.', hint: 'Only when it rains' },
-  night_glowfin: { id: 'night_glowfin', rarity: 'uncommon', when: 'night', sturdy: true, sell: 24, cm: 20, name: 'Night Glowfin', flavor: 'Its fins glow like little lamps.', hint: 'At night, with a sturdier rod' },
-  petal_koi: { id: 'petal_koi', rarity: 'rare', when: 'mistyDawn', sturdy: true, sell: 45, cm: 34, name: 'Petal Koi', flavor: 'Drifts like a petal in the mist.', hint: 'A misty dawn, with a sturdier rod' },
-  golden_whisker: { id: 'golden_whisker', rarity: 'rare', when: 'special', sturdy: false, sell: 60, cm: 40, name: 'Golden Whisker', flavor: "It's practically glowing.", hint: 'Very, very lucky' },
+  pebble_minnow: { id: 'pebble_minnow', rarity: 'common', when: 'any', sturdy: false, sell: 6, cm: 7, name: 'Pebble Garra', flavor: 'Clings to river stones with kissy lips. Mwah.', hint: 'Any time, anywhere' },
+  bubble_carp: { id: 'bubble_carp', rarity: 'common', when: 'any', sturdy: false, sell: 8, cm: 12, name: 'Bubble Barb', flavor: 'A round hill barb that thinks out loud in bubbles.', hint: 'Any time, anywhere' },
+  blushing_trout: { id: 'blushing_trout', rarity: 'common', when: 'day', sturdy: false, sell: 9, cm: 24, name: 'Blushing Asala', flavor: 'Asala: the hill snow-trout. Pink from the cold.', hint: 'Out in the daylight' },
+  dusk_perch: { id: 'dusk_perch', rarity: 'uncommon', when: 'dusk', sturdy: false, sell: 18, cm: 9, name: 'Twilight Danio', flavor: 'Its violet stripes come out with the evening.', hint: 'Bites at dusk' },
+  rain_loach: { id: 'rain_loach', rarity: 'uncommon', when: 'rain', sturdy: false, sell: 20, cm: 10, name: 'Monsoon Loach', flavor: 'Only dances when rain drums the lake.', hint: 'Only when it rains' },
+  night_glowfin: { id: 'night_glowfin', rarity: 'uncommon', when: 'night', sturdy: true, sell: 24, cm: 14, name: 'Junkiri Glowfin', flavor: 'Junkiri means firefly. It glows like a jarful.', hint: 'After dark, on a Rattan Rod or better' },
+  petal_koi: { id: 'petal_koi', rarity: 'rare', when: 'mistyDawn', sturdy: true, sell: 45, cm: 38, name: 'Petal Katle', flavor: 'A rare katle, pink as gurans in the fog.', hint: 'A misty dawn, on a Rattan Rod or better' },
+  golden_whisker: { id: 'golden_whisker', rarity: 'rare', when: 'special', sturdy: false, sell: 60, cm: 55, name: 'Golden Mahseer', flavor: 'The river\'s old tiger, wearing sunlight.', hint: 'Very, very lucky' },
 };
 
 export const FISH_ORDER: FishId[] = ['pebble_minnow', 'bubble_carp', 'blushing_trout', 'dusk_perch', 'rain_loach', 'night_glowfin', 'petal_koi', 'golden_whisker'];
