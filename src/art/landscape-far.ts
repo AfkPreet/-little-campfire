@@ -128,54 +128,34 @@ function drawPeak(ctx: Ctx, p: Peak): void {
     ctx.closePath();
     ctx.fillStyle = rgba(mix(lit, sh, 0.5), 0.35);
     ctx.fill();
-    // Two rounded rock wedges on the shaded face, lower half only.
-    const rock = mix(A['ridge-far'], sh, 0.2 + back);
+    // Two soft rounded rock wedges on the shaded face only, lower half: a
+    // rounded bean pointing up the slope, snow-dusted by a vertical gradient
+    // (no strokes), kept left of the lit/shade S-line.
+    const rock = mix(A['ridge-far'], sh, 0.25 + back);
     for (let i = 0; i < 2; i++) {
-      const fy = 0.58 + i * 0.2 + rnd() * 0.04;
+      const fy = 0.56 + i * 0.2 + rnd() * 0.04;
       const yy = p.tip + h * fy;
-      const xx = p.x - p.sl * h * fy * (0.38 + i * 0.26) - 2;
-      const ww = 20 + rnd() * 12 - i * 2;
-      const hh = 11 + rnd() * 6;
+      const xx = p.x - lrun * fy * (0.46 + i * 0.22) - 3;
+      const ww = 26 + rnd() * 10 - i * 4;
+      const hh = 15 + rnd() * 5 - i * 2;
       ctx.beginPath();
       smoothClosed(
         ctx,
         [
-          [xx - ww * 0.08, yy - hh * 0.62],
-          [xx + ww * 0.2, yy - hh * 0.3],
-          [xx + ww * 0.5, yy + hh * 0.38],
-          [xx, yy + hh * 0.5],
-          [xx - ww * 0.5, yy + hh * 0.36],
-          [xx - ww * 0.3, yy - hh * 0.1],
+          [xx + ww * 0.12, yy - hh * 0.62],
+          [xx + ww * 0.36, yy + hh * 0.05],
+          [xx + ww * 0.24, yy + hh * 0.48],
+          [xx - ww * 0.12, yy + hh * 0.56],
+          [xx - ww * 0.46, yy + hh * 0.4],
+          [xx - ww * 0.3, yy - hh * 0.04],
         ],
-        0.4,
+        0.5,
       );
-      ctx.fillStyle = vGrad(ctx, yy - hh * 0.6, yy + hh * 0.5, [
-        [0, mix(rock, sh, 0.35)],
-        [1, rock],
+      ctx.fillStyle = vGrad(ctx, yy - hh * 0.62, yy + hh * 0.56, [
+        [0, mix(rock, shTop, 0.7), 0.5],
+        [0.45, mix(rock, sh, 0.3), 0.7],
+        [1, rock, 0.75],
       ]);
-      ctx.fill();
-      // snow dusting along the wedge top
-      ctx.strokeStyle = rgba(shTop, 0.85);
-      ctx.lineWidth = 2;
-      ctx.lineCap = 'round';
-      ctx.beginPath();
-      ctx.moveTo(xx - ww * 0.36, yy - hh * 0.02);
-      ctx.quadraticCurveTo(xx - ww * 0.12, yy - hh * 0.62, xx + ww * 0.16, yy - hh * 0.28);
-      ctx.stroke();
-    }
-    // Couloirs on the lit face: soft tapered lavender streaks running down-right.
-    for (let i = 0; i < 3; i++) {
-      const sx = p.x + h * (0.1 + i * 0.13);
-      const sy = p.tip + h * (0.2 + i * 0.13);
-      const len = h * (0.3 - i * 0.04);
-      const ex = sx + len * 0.22 + rnd() * 4;
-      const ey = sy + len;
-      ctx.beginPath();
-      ctx.moveTo(sx, sy);
-      ctx.quadraticCurveTo(sx + len * 0.14 + 3, sy + len * 0.5, ex + 1.5, ey);
-      ctx.quadraticCurveTo(sx + len * 0.1 - 2, sy + len * 0.55, sx, sy);
-      ctx.closePath();
-      ctx.fillStyle = rgba(A['snow-shade'], 0.42 - i * 0.08);
       ctx.fill();
     }
   });

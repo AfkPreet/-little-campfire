@@ -792,12 +792,13 @@ const junkiriLights: Draw = (ctx) => {
     }, mix(P.moss, P.bark, 0.4), 2);
     const col = i % 2 === 0 ? P.glow : mix(P.glow, P.butter, 0.5);
     shape(ctx, (c) => {
-      c.moveTo(x - 3.5, y + 3);
-      c.quadraticCurveTo(x - 7.5, y + 11, x, y + 15);
-      c.quadraticCurveTo(x + 7.5, y + 11, x + 3.5, y + 3);
+      c.moveTo(x - 3, y + 5);
+      c.bezierCurveTo(x - 8, y + 9, x - 6, y + 16, x, y + 16);
+      c.bezierCurveTo(x + 6, y + 16, x + 8, y + 9, x + 3, y + 5);
       c.closePath();
-    }, lGrad(ctx, 0, y + 3, 0, y + 15, [[0, tint(col, 0.6)], [1, col]]), mix(P.glow, P.ember, 0.3), 1.8);
-    dot(ctx, x - 1.6, y + 7.5, 1.3, P.cream);
+    }, rGrad(ctx, x, y + 11, 0, 7, [[0, tint(col, 0.7)], [1, col]]), P.butter, 1.8);
+    shape(ctx, (c) => c.roundRect(x - 3.2, y + 1.5, 6.4, 4.5, 1.5), mix(P.moss, P.bark, 0.3), P.moss, 1.4);
+    dot(ctx, x - 2, y + 10, 1.3, P.cream);
   });
   twinkle(ctx, 22, 70, 3.4);
   twinkle(ctx, 76, 74, 2.8);
@@ -951,10 +952,11 @@ function fillOutline2(ctx: Ctx, col: string): void {
 function scalePath(cx: number, cy: number, w: number, h: number): Path2D {
   // Rounded scallop: broad rounded top edge, softly pointed base.
   const p = new Path2D();
-  p.moveTo(cx, cy + h * 0.5);
-  p.bezierCurveTo(cx - w * 0.36, cy + h * 0.36, cx - w * 0.52, cy + h * 0.02, cx - w * 0.5, cy - h * 0.18);
+  p.moveTo(cx - w * 0.1, cy + h * 0.47);
+  p.bezierCurveTo(cx - w * 0.4, cy + h * 0.3, cx - w * 0.54, cy + h * 0.02, cx - w * 0.5, cy - h * 0.18);
   p.bezierCurveTo(cx - w * 0.46, cy - h * 0.52, cx + w * 0.46, cy - h * 0.52, cx + w * 0.5, cy - h * 0.18);
-  p.bezierCurveTo(cx + w * 0.52, cy + h * 0.02, cx + w * 0.36, cy + h * 0.36, cx, cy + h * 0.5);
+  p.bezierCurveTo(cx + w * 0.54, cy + h * 0.02, cx + w * 0.4, cy + h * 0.3, cx + w * 0.1, cy + h * 0.47);
+  p.quadraticCurveTo(cx, cy + h * 0.53, cx - w * 0.1, cy + h * 0.47);
   p.closePath();
   return p;
 }

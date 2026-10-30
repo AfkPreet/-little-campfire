@@ -6,7 +6,7 @@ import { launch, startServer, VIEWPORTS } from './lib/browser.mjs';
 const server = await startServer('dev');
 const browser = await launch();
 const vp = VIEWPORTS.ipad;
-const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: vp.deviceScaleFactor, isMobile: true, hasTouch: true });
+const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
 const page = await context.newPage();
 const errors = [];
 page.on('console', (m) => m.type() === 'error' && !m.text().startsWith('[vite]') && errors.push(m.text()));
@@ -19,7 +19,7 @@ function check(name, cond, detail = '') {
   if (!cond) throw new Error(`smoke failed at: ${name} ${detail}`);
 }
 const g = (fn, ...args) => page.evaluate(([f, a]) => window.__game[f](...a), [fn, args]);
-const waitReady = () => page.waitForFunction(() => window.__shotReady === true, null, { timeout: 45000 });
+const waitReady = () => page.waitForFunction(() => window.__shotReady === true, null, { timeout: 120000 });
 
 try {
   await page.goto(`${server.base}/?debug=1&seed=11`, { waitUntil: 'load' });

@@ -1051,7 +1051,7 @@ function bowl(ctx: Ctx, soup: string, toppings?: (ctx: Ctx) => void, mound = 0, 
   line(ctx, (c) => {
     c.moveTo(48 - rx, rimY);
     c.quadraticCurveTo(48, rimY + 12, 48 + rx, rimY);
-  }, shade(A['copper'], 0.2), 2.4);
+  }, shade(A['copper'], 0.1), 2.2);
   line(ctx, (c) => {
     c.moveTo(48 - rx + 4, rimY + 2.5);
     c.quadraticCurveTo(48 - 14, rimY + 8, 48 - 6, rimY + 8.6);

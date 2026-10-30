@@ -121,6 +121,88 @@ function tuft(ctx: Ctx, x: number, y: number, s: number, col: string, rnd: () =>
   }
 }
 
+/**
+ * Clean ground for the props agent's tents, fire, forage spots, decor points,
+ * the Bud Bush and the framing trees: no dressing on the walk band there.
+ */
+const CLEAR: [x: number, hw: number][] = [
+  ...CAMP.tentSpots.map((t) => [t.x, 150] as [number, number]),
+  [CAMP.fire.x, 84],
+  [CAMP.budBush.x, 56],
+  ...Object.values(CAMP.forage).map((f) => [f.x, 52] as [number, number]),
+  ...CAMP.groundPoints.map((g) => [g.x, 40] as [number, number]),
+  ...CAMP.slabs.map((x) => [x, 46] as [number, number]),
+  ...CAMP.bamboo.map((x) => [x, 40] as [number, number]),
+  [CAMP.twoTree.left, 78],
+  [CAMP.twoTree.right, 78],
+];
+
+function clearOfProps(x: number, y: number, pad = 0): boolean {
+  if (y < 528 || y > 628) return true;
+  for (const [cx, hw] of CLEAR) if (Math.abs(x - cx) < hw + pad) return false;
+  return true;
+}
+
+/** Worn walk path centre line: from the bamboo path to the shore pebbles. */
+function wornY(x: number): number {
+  return 602 + Math.sin((x - 520) / 230) * 5 + Math.sin((x - 300) / 97) * 2 + Math.max(0, x - 1880) * 0.1;
+}
+
+/** Soft scalloped moss patch (low contrast). */
+function mossPatch(ctx: Ctx, x: number, y: number, rx: number, ry: number, rnd: () => number, col: string, a: number): void {
+  const pts: [number, number][] = [];
+  const n = 9;
+  for (let i = 0; i < n; i++) {
+    const t = (i / n) * Math.PI * 2;
+    const k = 0.82 + rnd() * 0.3;
+    pts.push([x + Math.cos(t) * rx * k, y + Math.sin(t) * ry * k]);
+  }
+  ctx.fillStyle = rgba(col, a);
+  ctx.beginPath();
+  smoothClosed(ctx, pts, 0.5);
+  ctx.fill();
+  ctx.fillStyle = rgba(col, a * 0.8);
+  ctx.beginPath();
+  ctx.ellipse(x - rx * 0.15, y + ry * 0.1, rx * 0.55, ry * 0.5, 0, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** A little family of 2-4 rounded pebbles with a soft moss shadow. */
+function pebbleCluster(ctx: Ctx, x: number, y: number, s: number, rnd: () => number): void {
+  const n = 2 + Math.floor(rnd() * 3);
+  for (let i = 0; i < n; i++) {
+    const px = x + (i - (n - 1) / 2) * 9 * s + (rnd() - 0.5) * 5 * s;
+    const py = y + (rnd() - 0.5) * 4 * s;
+    const rx = (3 + rnd() * 4.5) * s * (i === 0 ? 1.25 : 1);
+    ctx.fillStyle = rgba(P.moss, 0.3);
+    ctx.beginPath();
+    ctx.ellipse(px + 1.2, py + rx * 0.42, rx * 1.1, rx * 0.36, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = [A.pebble, A.stone, mix(A.pebble, A.stone, 0.5)][Math.floor(rnd() * 3)];
+    ctx.beginPath();
+    ctx.ellipse(px, py, rx, rx * 0.64, (rnd() - 0.5) * 0.3, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = rgba(A['stone-shade'], 0.55);
+    ctx.lineWidth = 1;
+    ctx.stroke();
+    ctx.fillStyle = rgba(P.cream, 0.45);
+    ctx.beginPath();
+    ctx.ellipse(px - rx * 0.25, py - rx * 0.22, rx * 0.42, rx * 0.17, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+/** Three-leaf clover sprig (tiny, low contrast). */
+function clover(ctx: Ctx, x: number, y: number, s: number, col: string): void {
+  ctx.fillStyle = col;
+  for (let i = 0; i < 3; i++) {
+    const a = -Math.PI / 2 + (i - 1) * 1.15;
+    ctx.beginPath();
+    ctx.ellipse(x + Math.cos(a) * 2.6 * s, y + Math.sin(a) * 2 * s, 2.4 * s, 1.7 * s, a, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
 function bakeGroundStrip(b: Baker): void {
   const { y0, y1 } = BAND.ground;
   b.strip('land_ground', GROUND_W, y1 - y0, (ctx) => {
@@ -182,6 +264,57 @@ function bakeGroundStrip(b: Baker): void {
         ctx.ellipse(x, 592 + Math.sin(x * 0.02) * 2, 16, 9, 0, 0, Math.PI * 2);
         ctx.fill();
       }
+      // Worn walk path: a soft, broken, trodden band from the bamboo path
+      // past the fire to the shore pebbles (low contrast, never a hard line).
+      const nw = fbm(1250, 3);
+      for (let x = 470; x < 2060; x += 5) {
+        const y = wornY(x);
+        const fadeIn = Math.min(1, (x - 470) / 120);
+        const fadeOut = x > 1960 ? Math.max(0, 1 - (x - 1960) / 100) : 1;
+        const broken = 0.35 + 0.65 * Math.min(1, Math.max(0, (nw(x / 90) - 0.3) * 2.6));
+        const a = 0.16 * fadeIn * fadeOut * broken;
+        if (a < 0.01) continue;
+        ctx.fillStyle = rgba(mix(P.sage, A.pebble, 0.6), a);
+        ctx.beginPath();
+        ctx.ellipse(x, y, 15, 7.5 + broken * 2.5, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // faint scuffed edges along the path
+      for (let x = 520; x < 1960; x += 34 + rnd() * 30) {
+        const side = rnd() < 0.5 ? -1 : 1;
+        ctx.fillStyle = rgba(mix(P.sage, A.pebble, 0.4), 0.1);
+        ctx.beginPath();
+        ctx.ellipse(x, wornY(x) + side * 11, 9 + rnd() * 8, 2.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      // Moss patches and sun dapples (soft, low contrast), clear of prop spots.
+      const rm = artRng(1251);
+      const patches: [number, number, number, number][] = [
+        [600, 540, 54, 9],
+        [1240, 534, 44, 7],
+        [1520, 540, 40, 7],
+        [380, 646, 70, 12],
+        [720, 660, 84, 13],
+        [1010, 648, 60, 10],
+        [1380, 664, 92, 13],
+        [1650, 650, 64, 11],
+        [1890, 650, 58, 10],
+        [140, 640, 56, 10],
+      ];
+      for (const [x, y, rx, ry] of patches) {
+        if (!clearOfProps(x, y, rx * 0.5)) continue;
+        mossPatch(ctx, x, y, rx, ry, rm, mix(P.moss, P.sage, 0.15), 0.2);
+      }
+      for (const [x, y, rx] of [
+        [900, 634, 120],
+        [1560, 626, 110],
+        [460, 622, 90],
+      ] as [number, number, number][]) {
+        ctx.fillStyle = rgba(mix(tint(P.sage, 0.4), P.butter, 0.25), 0.12);
+        ctx.beginPath();
+        ctx.ellipse(x, y, rx, rx * 0.09, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
       // Beach.
       ctx.beginPath();
       beachPath(ctx);
@@ -225,12 +358,22 @@ function bakeGroundStrip(b: Baker): void {
         ctx.ellipse(x - rx * 0.25, y - rx * 0.25, rx * 0.4, rx * 0.18, 0, 0, Math.PI * 2);
         ctx.fill();
       }
-      // Darker foreground lip along the bottom.
-      ctx.fillStyle = vGrad(ctx, 660, 720, [
+      // Darker rolling grass swell near the bottom: 3 soft stacked layers so
+      // the edge stays feathered, then a gradient deepening to the frame edge.
+      for (let k = 0; k < 3; k++) {
+        ctx.beginPath();
+        ctx.moveTo(GX0, 724);
+        for (let x = GX0; x <= GX1; x += 8) ctx.lineTo(x, 650 + k * 7 + Math.sin(x / 210 + k) * 8 + Math.sin(x / 83) * 3);
+        ctx.lineTo(GX1, 724);
+        ctx.closePath();
+        ctx.fillStyle = rgba(P.moss, 0.1);
+        ctx.fill();
+      }
+      ctx.fillStyle = vGrad(ctx, 670, 720, [
         [0, P.moss, 0],
-        [1, shade(P.moss, 0.1), 0.35],
+        [1, shade(P.moss, 0.12), 0.32],
       ]);
-      ctx.fillRect(GX0, 660, GX1 - GX0, 64);
+      ctx.fillRect(GX0, 670, GX1 - GX0, 54);
       grain(ctx, GX0, 500, GX1 - GX0, 220, 0.045, 1206, 0.3);
     });
     // Sunlit lip on the sage scallops.
@@ -269,6 +412,35 @@ function bakeGroundStrip(b: Baker): void {
         ctx.arc(x + k * 3.4 - 3.4, y + (k % 2) * 2, 1.7, 0, Math.PI * 2);
         ctx.fill();
       }
+    }
+    // Front dressing: pebble families, fuller tufts and clover, clear of props.
+    const r7 = artRng(1260);
+    for (const [x, y, sc] of [
+      [470, 640, 1],
+      [880, 676, 1.15],
+      [1196, 640, 0.9],
+      [1450, 690, 1.2],
+      [1800, 664, 1],
+      [2010, 612, 0.9],
+      [610, 700, 1.1],
+      [1600, 534, 0.8],
+    ] as [number, number, number][]) {
+      if (clearOfProps(x, y, 12)) pebbleCluster(ctx, x, y, sc, r7);
+    }
+    for (let i = 0; i < 34; i++) {
+      const x = GX0 + 30 + r7() * 1980;
+      const y = 626 + r7() * 84;
+      if (!clearOfProps(x, y, 10)) continue;
+      const n = 2 + Math.floor(r7() * 2);
+      for (let k = 0; k < n; k++) {
+        tuft(ctx, x + (r7() - 0.5) * 22, y + (r7() - 0.5) * 6, 1.05 + (y - 620) / 160, rgba(mix(P.moss, P.sage, 0.1), 0.5 + r7() * 0.2), r7);
+      }
+    }
+    for (let i = 0; i < 22; i++) {
+      const x = GX0 + 40 + r7() * 1960;
+      const y = 540 + r7() * 170;
+      if (!clearOfProps(x, y, 14)) continue;
+      clover(ctx, x, y, 0.9 + (y - 540) / 200, rgba(mix(P.moss, P.sage, 0.45), 0.55));
     }
     // Reeds on the shore's back edge.
     for (let x = 2140; x < 2252; x += 3 + r3() * 4) {
@@ -329,7 +501,7 @@ function bakeGroundStrip(b: Baker): void {
 // Framing rhododendrons (hammock point) at x 1840 and 1990.
 // ---------------------------------------------------------------------------
 
-export const TREES = { x0: 1600, y0: 0, w: 600, h: 604 };
+export const TREES = { x0: 1600, y0: 0, w: 600, h: 618 };
 
 /** Tapered limb along a cubic bezier (x0,y0)->(x1,y1) with controls, widths w0 -> w1. */
 type Limb = [x0: number, y0: number, c1x: number, c1y: number, c2x: number, c2y: number, x1: number, y1: number, w0: number, w1: number];
@@ -362,10 +534,11 @@ function limbPath(c: Ctx, l: Limb): void {
 const TREE_DEFS = [
   {
     x: 1840,
+    // 3 merged rounded curves: two stout stems leaning apart + the low hammock branch
     limbs: [
-      [1826, 600, 1806, 520, 1790, 440, 1752, 236, 46, 16],
-      [1848, 600, 1866, 512, 1824, 404, 1850, 216, 40, 15],
-      [1844, 528, 1854, 474, 1862, 414, 1892, 374, 20, 7],
+      [1832, 606, 1830, 500, 1806, 400, 1768, 246, 66, 26],
+      [1848, 606, 1864, 500, 1834, 380, 1848, 220, 56, 22],
+      [1840, 524, 1858, 472, 1864, 424, 1900, 370, 30, 10],
     ] as Limb[],
     domes: [
       [1752, 46, 104],
@@ -378,9 +551,9 @@ const TREE_DEFS = [
   {
     x: 1990,
     limbs: [
-      [2000, 600, 2020, 510, 2040, 430, 2054, 230, 44, 16],
-      [1980, 600, 1962, 512, 2002, 404, 1976, 212, 40, 15],
-      [1986, 520, 1978, 466, 1966, 414, 1944, 376, 19, 7],
+      [1998, 606, 2004, 500, 2030, 400, 2058, 240, 64, 26],
+      [1982, 606, 1966, 500, 1998, 380, 1978, 214, 54, 22],
+      [1990, 520, 1974, 468, 1964, 422, 1940, 372, 29, 10],
     ] as Limb[],
     domes: [
       [2046, 40, 106],
@@ -391,6 +564,139 @@ const TREE_DEFS = [
     ] as [number, number, number][],
   },
 ];
+
+/** Soft concave root flare that melts into the grass (no cone, no stump). */
+function flarePath(c: Ctx, x: number): void {
+  c.moveTo(x - 74, 605);
+  c.bezierCurveTo(x - 50, 603, x - 36, 594, x - 33, 552);
+  c.lineTo(x + 32, 552);
+  c.bezierCurveTo(x + 36, 594, x + 52, 603, x + 78, 605);
+  c.quadraticCurveTo(x + 66, 611, x + 44, 609);
+  c.quadraticCurveTo(x + 22, 613, x, 610);
+  c.quadraticCurveTo(x - 24, 613, x - 46, 609);
+  c.quadraticCurveTo(x - 68, 611, x - 74, 605);
+  c.closePath();
+}
+
+type PartFn = (c: Ctx) => void;
+
+function treeParts(t: (typeof TREE_DEFS)[number]): PartFn[] {
+  return [(c: Ctx) => flarePath(c, t.x), ...t.limbs.map((l) => (c: Ctx) => limbPath(c, l))];
+}
+
+/** Point on a limb's centre curve. */
+function limbAt(l: Limb, t: number): [number, number] {
+  const [x0, y0, ax, ay, bx, by, x1, y1] = l;
+  const u = 1 - t;
+  return [u * u * u * x0 + 3 * u * u * t * ax + 3 * u * t * t * bx + t * t * t * x1, u * u * u * y0 + 3 * u * u * t * ay + 3 * u * t * t * by + t * t * t * y1];
+}
+
+/**
+ * One merged trunk: union outline, a lit rim on the sun side, a soft shaded
+ * flank on the left, gentle creases where the curves meet, and bark lines that
+ * follow each curve.
+ */
+function drawTrunk(ctx: Ctx, t: (typeof TREE_DEFS)[number], bark: string): void {
+  const parts = treeParts(t);
+  const lit = tint(bark, 0.32);
+  const line = shade(bark, 0.3);
+  // union outline: stroke every part, then fill every part over it
+  for (const f of parts) {
+    ctx.beginPath();
+    f(ctx);
+    ctx.strokeStyle = line;
+    ctx.lineWidth = 4.4;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+  for (const f of parts) {
+    ctx.beginPath();
+    f(ctx);
+    ctx.fillStyle = lit;
+    ctx.fill();
+  }
+  // body tone everywhere except a 6 px sun rim (union shifted left, clipped per part)
+  for (const f of parts) {
+    withState(ctx, () => {
+      ctx.beginPath();
+      f(ctx);
+      ctx.clip();
+      ctx.translate(-6, 1);
+      ctx.fillStyle = vGrad(ctx, 220, 610, [
+        [0, shade(bark, 0.06)],
+        [0.75, bark],
+        [1, mix(bark, P.moss, 0.25)],
+      ]);
+      for (const g of parts) {
+        ctx.beginPath();
+        g(ctx);
+        ctx.fill();
+      }
+    });
+  }
+  // shaded left flank + soft creases where the curves merge
+  for (let i = 0; i < parts.length; i++) {
+    withState(ctx, () => {
+      ctx.beginPath();
+      parts[i](ctx);
+      ctx.clip();
+      ctx.lineCap = 'round';
+      for (const l of t.limbs) {
+        const { left } = limbPts(l);
+        ctx.strokeStyle = rgba(shade(bark, 0.22), 0.22);
+        ctx.lineWidth = 12;
+        ctx.beginPath();
+        left.forEach(([x, y], k) => (k ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+        ctx.stroke();
+      }
+    });
+  }
+  // bark lines following each curve, lower trunk only
+  const r = artRng(t.x);
+  ctx.lineCap = 'round';
+  t.limbs.forEach((l, li) => {
+    const n = li === 2 ? 1 : 3;
+    for (let i = 0; i < n; i++) {
+      const off = (r() - 0.5) * l[8] * 0.5;
+      const t0 = 0.08 + r() * 0.3;
+      const t1 = t0 + 0.18 + r() * 0.16;
+      ctx.strokeStyle = rgba(shade(bark, 0.22), 0.36);
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      for (let k = 0; k <= 8; k++) {
+        const [x, y] = limbAt(l, t0 + ((t1 - t0) * k) / 8);
+        if (k) ctx.lineTo(x + off * (1 - (t0 + ((t1 - t0) * k) / 8) * 0.6), y);
+        else ctx.moveTo(x + off, y);
+      }
+      ctx.stroke();
+    }
+  });
+  // a knot, where the low branch leaves the trunk
+  const [kx, ky] = limbAt(t.limbs[1], 0.36);
+  ctx.fillStyle = rgba(shade(bark, 0.2), 0.45);
+  ctx.beginPath();
+  ctx.ellipse(kx - 2, ky, 4.5, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = rgba(lit, 0.7);
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.arc(kx - 2, ky, 6.5, -1.2, 0.5);
+  ctx.stroke();
+  // moss cushions on the root flare
+  for (const [dx, rx, ry, a] of [
+    [-40, 16, 5, -0.12],
+    [-8, 12, 4.5, 0],
+    [44, 13, 4.5, 0.1],
+  ] as [number, number, number, number][]) {
+    ctx.fillStyle = vGrad(ctx, 600 - ry, 600 + ry, [
+      [0, mix(P.sage, P.butter, 0.15)],
+      [1, P.moss],
+    ]);
+    ctx.beginPath();
+    ctx.ellipse(t.x + dx, 602 - Math.abs(dx) * 0.02, rx, ry, a, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
 
 function leafRosette(ctx: Ctx, x: number, y: number, s: number, rnd: () => number, base: string): void {
   const n = 5;
@@ -463,79 +769,13 @@ function bakeTrees(b: Baker): void {
     const bark = mix(P.bark, A['shop-wood'], 0.22);
     const leaf = P.moss;
     const leafDeep = shade(P.moss, 0.1);
-    for (const t of TREE_DEFS) softShadow(ctx, t.x, 596, 52, 8, 0.22);
-    // trunks: 3 merged rounded curves each
-    for (const t of TREE_DEFS) {
-      for (const l of t.limbs) {
-        withState(ctx, () => {
-          ctx.beginPath();
-          limbPath(ctx, l);
-          ctx.fillStyle = tint(bark, 0.3);
-          ctx.fill();
-          ctx.strokeStyle = shade(bark, 0.3);
-          ctx.lineWidth = 2.2;
-          ctx.stroke();
-          ctx.clip();
-          ctx.translate(-4.5, 1);
-          ctx.beginPath();
-          limbPath(ctx, l);
-          ctx.fillStyle = vGrad(ctx, 230, 600, [
-            [0, shade(bark, 0.1)],
-            [1, bark],
-          ]);
-          ctx.fill();
-        });
-      }
-      // root flare
-      ctx.beginPath();
-      smoothClosed(
-        ctx,
-        [
-          [t.x - 50, 600],
-          [t.x - 30, 593],
-          [t.x - 22, 574],
-          [t.x - 18, 548],
-          [t.x + 18, 548],
-          [t.x + 22, 574],
-          [t.x + 32, 593],
-          [t.x + 52, 600],
-          [t.x, 605],
-        ],
-        0.45,
-      );
-      ctx.fillStyle = bark;
-      ctx.fill();
-      ctx.strokeStyle = shade(bark, 0.3);
-      ctx.lineWidth = 2;
-      ctx.stroke();
-      // bark lines and a knot
-      const r = artRng(t.x);
-      ctx.strokeStyle = rgba(shade(bark, 0.2), 0.42);
-      ctx.lineWidth = 1.3;
-      ctx.lineCap = 'round';
-      for (let i = 0; i < 8; i++) {
-        const x = t.x - 10 + r() * 20;
-        const y = 420 + r() * 150;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(x + (r() - 0.5) * 6, y + 12, x + (r() - 0.5) * 4, y + 20 + r() * 14);
-        ctx.stroke();
-      }
-      ctx.strokeStyle = rgba(shade(bark, 0.25), 0.6);
-      ctx.lineWidth = 1.6;
-      ctx.beginPath();
-      ctx.ellipse(t.x + 2, 520, 3.5, 5, 0, 0, Math.PI * 2);
-      ctx.stroke();
-      // a little moss on the root flare
-      ctx.fillStyle = rgba(P.sage, 0.7);
-      ctx.beginPath();
-      ctx.ellipse(t.x - 14, 590, 10, 4, -0.3, 0, Math.PI * 2);
-      ctx.fill();
-    }
+    for (const t of TREE_DEFS) softShadow(ctx, t.x + 4, 604, 96, 13, 0.2);
+    // trunks: 3 merged rounded curves each, with a soft root flare
+    for (const t of TREE_DEFS) drawTrunk(ctx, t, bark);
     // leaf tufts at the tips of the low branches (hammock / hang points)
     const r6 = artRng(1320);
-    leafRosette(ctx, 1890, 380, 0.9, r6, leaf);
-    leafRosette(ctx, 1946, 382, 0.9, r6, leaf);
+    leafRosette(ctx, 1898, 374, 0.95, r6, leaf);
+    leafRosette(ctx, 1940, 376, 0.95, r6, leaf);
     // canopy domes, back (top) to front (low)
     const all = TREE_DEFS.flatMap((t) => t.domes);
     all.sort((a, b2) => a[1] - b2[1]);
