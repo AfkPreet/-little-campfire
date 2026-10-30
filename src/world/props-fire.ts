@@ -94,7 +94,7 @@ export class CampfireProp implements Lightable {
   setLight(l: ResolvedLight): void {
     this.warm = l.warmLight;
     // Stones and logs take the scene light, warmed strongly by their own fire.
-    const t = hexToInt(mix(l.hex.actor, mix(P.glow, P.cream, 0.35), Math.min(0.55, 0.12 + l.warmLight * 0.5)));
+    const t = hexToInt(mix(l.hex.actor, mix(P.glow, P.cream, 0.35), Math.min(0.32, 0.08 + l.warmLight * 0.3)));
     for (const s of this.stones) s.setTint(t);
     this.applyPool();
   }
@@ -102,11 +102,11 @@ export class CampfireProp implements Lightable {
   private applyPool(): void {
     const w = this.warm;
     const f = this.flicker;
-    this.poolGround.setAlpha(w * 0.5 * f);
-    this.poolAir.setAlpha(w * 0.28 * f);
-    this.poolCore.setAlpha((0.12 + w * 0.5) * f);
-    this.halo.setAlpha((0.18 + w * 0.3) * f);
-    this.rim.setAlpha((0.25 + w * 0.7) * f);
+    this.poolGround.setAlpha(w * 0.75 * f);
+    this.poolAir.setAlpha(w * 0.32 * f);
+    this.poolCore.setAlpha((0.08 + w * 0.26) * f);
+    this.halo.setAlpha((0.12 + w * 0.16) * f);
+    this.rim.setAlpha((0.2 + w * 0.42) * f);
   }
 
   setHighlight(on: boolean): void {

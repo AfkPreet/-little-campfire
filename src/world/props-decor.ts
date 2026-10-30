@@ -233,7 +233,7 @@ export class DecorProp implements Lightable {
     this.add(pimg(s, 'prop_dec_klantern'), this.swing);
     this.star = pimg(s, 'prop_dec_klantern_star', 0, KLANTERN.starY);
     this.swing.add(this.star);
-    this.starGlow = this.worldGlow(110, 110, FISH_GLOW);
+    this.starGlow = this.worldGlow(92, 92, FISH_GLOW);
     this.groundGlow = this.worldGlow(150, 34, FISH_GLOW);
   }
 
@@ -397,8 +397,8 @@ export class DecorProp implements Lightable {
         const gx = this.x - Math.sin(r) * KLANTERN.starY;
         const gy = this.y + Math.cos(r) * KLANTERN.starY;
         // Never goes out: soft by day, lovely at night.
-        const glow = 0.35 + 0.65 * this.night;
-        this.starGlow!.setPosition(gx, gy).setAlpha(glow * (0.45 + 0.25 * p) * gk);
+        const glow = 0.12 + 0.88 * this.night;
+        this.starGlow!.setPosition(gx, gy).setAlpha(glow * (0.3 + 0.18 * p) * gk);
         this.groundGlow!.setPosition(gx, Math.max(gy + 40, CAMP.groundY + 2)).setAlpha(this.night * 0.25 * gk * (this.y < CAMP.groundY - 260 ? 0 : 1));
         break;
       }

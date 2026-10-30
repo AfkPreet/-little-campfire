@@ -124,7 +124,7 @@ export default class Hud extends Phaser.Scene {
     const bot = l.h - l.safe.bottom - m - 36;
     this.money.setPosition(l.safe.left + m + 75, top);
     this.timeBox.setPosition(l.w - l.safe.right - m - 135, top);
-    this.settingsBtn.setPosition(l.w - l.safe.right - m - 270 - 44, top);
+    this.settingsBtn.setPosition(l.safe.left + m + 36 + 84, bot + 6);
     this.lamp.setPosition(l.safe.left + m + 36, bot);
     this.journalBtn.setPosition(l.w - l.safe.right - m - 36, bot);
     this.backpackBtn.setPosition(l.w - l.safe.right - m - 36 - 90, bot);

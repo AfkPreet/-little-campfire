@@ -19,6 +19,8 @@ export type TentState = 'hidden' | 'spot' | 'flat' | 'pitched';
 
 const SPOT_TINT = hexToInt(mix(P.cream, P.glow, 0.35));
 const PEG_GLOW = hexToInt(mix(P.glow, P.butter, 0.4));
+/** Doorway/window lamp light: warm, never white. */
+const LAMP_INT = hexToInt(mix(P.glow, P.ember, 0.3));
 /** How far a peg sinks when tapped in. */
 const PEG_SINK = 11;
 
@@ -58,8 +60,8 @@ export class TentProp implements Lightable {
     this.spot = pimg(scene, 'prop_tent_spot').setTint(SPOT_TINT);
     this.flat = pimg(scene, `prop_tent_${this.type}_flat`);
     this.tent = pimg(scene, `prop_tent_${this.type}`);
-    this.door = pimg(scene, `prop_tent_${this.type}_door`).setBlendMode(Phaser.BlendModes.ADD).setTint(GLOW_INT).setAlpha(0);
-    this.win = pimg(scene, 'prop_tent_cabin_kit_win').setBlendMode(Phaser.BlendModes.ADD).setTint(GLOW_INT).setAlpha(0);
+    this.door = pimg(scene, `prop_tent_${this.type}_door`).setBlendMode(Phaser.BlendModes.ADD).setTint(LAMP_INT).setAlpha(0);
+    this.win = pimg(scene, 'prop_tent_cabin_kit_win').setBlendMode(Phaser.BlendModes.ADD).setTint(LAMP_INT).setAlpha(0);
     this.root.add([this.spot, this.flat, this.tent, this.door, this.win]);
 
     CAMP.pegs.forEach((p) => {
@@ -248,12 +250,12 @@ export class TentProp implements Lightable {
   private applyGlow(): void {
     const standing = this.state === 'pitched' && this.root.visible;
     const d = standing ? this.doorGlow : 0;
-    this.door.setAlpha(d * 0.85);
+    this.door.setAlpha(d * 0.62);
     const g = TENT_GEO[this.type];
     this.pool.setPosition(this.x + g.door.dx, this.gy - 2).setDisplaySize(g.door.w * 3.2, 44).setAlpha(d * 0.32);
     const cabin = standing && this.type === 'cabin_kit';
     const w = cabin ? Math.max(this.night, this.doorGlow) : 0;
-    this.win.setAlpha(w * 0.95);
+    this.win.setAlpha(w * 0.66);
     this.winPool.setPosition(this.x + 44, this.gy - 85).setAlpha(w * 0.3);
   }
 
@@ -264,7 +266,6 @@ export class TentProp implements Lightable {
     this.tent.setTint(t);
     this.flat.setTint(t);
     for (const p of this.pegs) p.setTint(t);
-    this.spot.setBlendMode(l.night > 0.5 ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
     for (const g of this.pegGlows) g.setBlendMode(l.night > 0.5 ? Phaser.BlendModes.ADD : Phaser.BlendModes.NORMAL);
     this.applyGlow();
   }
@@ -282,7 +283,7 @@ export class TentProp implements Lightable {
     if (this.state === 'spot') {
       // Soft breathing outline (brighter when Tuki is near).
       const b = 0.5 + 0.5 * Math.sin(t * 2.2);
-      this.spot.setAlpha((this.highlighted ? 0.8 : 0.55) + b * 0.25);
+      this.spot.setAlpha(((this.highlighted ? 0.8 : 0.55) + b * 0.25) * (1 - this.night * 0.3));
     } else if (this.state === 'flat') {
       for (let i = 0; i < 4; i++) {
         const g = this.pegGlows[i];
@@ -293,8 +294,8 @@ export class TentProp implements Lightable {
       // A gentle lamp flicker inside.
       const f = 0.94 + 0.04 * Math.sin(t * 7.1) + 0.02 * Math.sin(t * 13.3);
       const d = this.doorGlow;
-      this.door.setAlpha(d * 0.85 * f);
-      if (this.win.visible) this.win.setAlpha(Math.max(this.night, d) * 0.95 * f);
+      this.door.setAlpha(d * 0.62 * f);
+      if (this.win.visible) this.win.setAlpha(Math.max(this.night, d) * 0.66 * f);
     }
   }
 

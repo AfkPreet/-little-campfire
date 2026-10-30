@@ -24,7 +24,7 @@ function lightFromParam(): ResolvedLight {
 }
 
 function backdrop(scene: Phaser.Scene, l: ResolvedLight, w: number, h: number, rows: number[]): void {
-  const g = scene.add.graphics().setDepth(-10);
+  const g = scene.add.graphics().setDepth(1);
   g.fillGradientStyle(l.skyTop, l.skyTop, l.horizon, l.horizon, 1);
   g.fillRect(-200, -200, w + 400, h + 400);
   for (const y of rows) {

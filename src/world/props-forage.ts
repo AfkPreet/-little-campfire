@@ -330,7 +330,7 @@ export class ScaleSparkle implements Lightable {
     const t = time / 1000;
     const p = 0.5 + 0.5 * Math.sin((t * Math.PI * 2) / 2.5);
     this.scale.setAlpha(0.6 + 0.4 * p);
-    this.halo.setAlpha((0.35 + 0.35 * p) * (0.6 + this.night * 0.6));
+    this.halo.setAlpha((0.25 + 0.25 * p) * (0.5 + this.night * 0.5));
     // Twinkle: a quick 4-point star pop every 3 s.
     const c = (t % 3) / 3;
     const k = c < 0.16 ? Math.sin((c / 0.16) * Math.PI) : 0;
