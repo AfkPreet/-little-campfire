@@ -76,18 +76,27 @@ function bakeBlade(b: Baker, key: string, w: number, h: number, lean: number, he
     const tipX = bx + lean;
     const tipY = head ? 22 : 3;
     const col = mix(P.sage, P.moss, 0.35);
+    const hw = head ? 3.6 : 4.6;
     ctx.beginPath();
-    ctx.moveTo(bx - 2.6, h);
-    ctx.quadraticCurveTo(bx - 1.8 + lean * 0.2, h * 0.5, tipX, tipY);
-    ctx.quadraticCurveTo(bx + 2.2 + lean * 0.25, h * 0.5, bx + 2.6, h);
+    ctx.moveTo(bx - hw, h);
+    ctx.bezierCurveTo(bx - hw * 0.9 + lean * 0.15, h * 0.6, tipX - 1.5, tipY + h * 0.15, tipX, tipY);
+    ctx.bezierCurveTo(tipX + 1.2, tipY + h * 0.15, bx + hw * 0.8 + lean * 0.2, h * 0.6, bx + hw, h);
     ctx.closePath();
     ctx.fillStyle = vGrad(ctx, tipY, h, [
-      [0, tint(col, 0.25)],
-      [1, shade(col, 0.12)],
+      [0, tint(col, 0.3)],
+      [0.6, col],
+      [1, shade(col, 0.14)],
     ]);
     ctx.fill();
-    ctx.strokeStyle = rgba(shade(col, 0.3), 0.8);
-    ctx.lineWidth = 1.2;
+    ctx.strokeStyle = rgba(shade(col, 0.32), 0.85);
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
+    // light midline
+    ctx.strokeStyle = rgba(tint(col, 0.45), 0.5);
+    ctx.lineWidth = 0.9;
+    ctx.beginPath();
+    ctx.moveTo(bx, h - 4);
+    ctx.quadraticCurveTo(bx + lean * 0.2, h * 0.55, tipX, tipY + 8);
     ctx.stroke();
     if (head) {
       // soft seed head: fuzzy oval of tiny seeds
@@ -166,9 +175,9 @@ function bakeFiddle(b: Baker): void {
 export function bakeFgBand(b: Baker): void {
   bakeLeaf(b, 'land_leafA', 196, 54, 1501);
   bakeLeaf(b, 'land_leafB', 158, 64, 1502);
-  bakeBlade(b, 'land_bladeA', 24, 128, 3, true, 1510);
-  bakeBlade(b, 'land_bladeB', 18, 104, -4, false, 1511);
-  bakeBlade(b, 'land_bladeC', 28, 138, 7, true, 1512);
+  bakeBlade(b, 'land_bladeA', 26, 128, 3, true, 1510);
+  bakeBlade(b, 'land_bladeB', 22, 104, -5, false, 1511);
+  bakeBlade(b, 'land_bladeC', 30, 138, 7, true, 1512);
   bakeFiddle(b);
   b.tex('land_bead', 12, 12, (ctx) => {
     ctx.fillStyle = rGrad(ctx, 6, 6, 0, 5, [

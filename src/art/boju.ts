@@ -123,14 +123,15 @@ export const bKey = (name: string): string => `boju_${name}`;
 // Helpers
 // ---------------------------------------------------------------------------
 
-/** Superellipse (squircle) path. */
-function squircle(ctx: Ctx, cx: number, cy: number, rx: number, ry: number, n = 2.6, pts = 40): void {
+/** Superellipse (squircle) path; widen > 0 makes it fuller at the bottom (cheeks). */
+function squircle(ctx: Ctx, cx: number, cy: number, rx: number, ry: number, n = 2.6, pts = 40, widen = 0): void {
   const list: [number, number][] = [];
   for (let i = 0; i < pts; i++) {
     const a = (i / pts) * Math.PI * 2;
     const c = Math.cos(a);
     const s = Math.sin(a);
-    list.push([cx + Math.sign(c) * Math.pow(Math.abs(c), 2 / n) * rx, cy + Math.sign(s) * Math.pow(Math.abs(s), 2 / n) * ry]);
+    const yy = Math.sign(s) * Math.pow(Math.abs(s), 2 / n);
+    list.push([cx + Math.sign(c) * Math.pow(Math.abs(c), 2 / n) * rx * (1 + widen * yy), cy + yy * ry]);
   }
   smoothClosed(ctx, list, 0.5);
 }
@@ -277,10 +278,8 @@ export function drawHead(ctx: Ctx): void {
   const { x, y, w, h } = BG.head;
   // Cheek fluff bumps on the lower sides.
   const fluff: [number, number, number][] = [
-    [-66, -132, 15],
-    [66, -132, 15],
-    [-56, -116, 13],
-    [56, -116, 13],
+    [-68, -142, 12],
+    [68, -142, 12],
   ];
   for (const [fx, fy, r] of fluff) {
     ctx.beginPath();
@@ -288,7 +287,7 @@ export function drawHead(ctx: Ctx): void {
     stroke(ctx, YAK_LINE, 5);
   }
   ctx.beginPath();
-  squircle(ctx, x, y, w / 2, h / 2, 2.7);
+  squircle(ctx, x, y, w / 2 - 2, h / 2, 2.15, 44, 0.02);
   stroke(ctx, YAK_LINE, 5);
   const g = rGrad(ctx, x - 10, y - 40, 10, 110, [
     [0, YAK_LIGHT],
@@ -302,11 +301,11 @@ export function drawHead(ctx: Ctx): void {
     ctx.fill();
   }
   ctx.beginPath();
-  squircle(ctx, x, y, w / 2, h / 2, 2.7);
+  squircle(ctx, x, y, w / 2 - 2, h / 2, 2.15, 44, 0.02);
   ctx.fill();
   // Cheek fluff ticks.
-  curl(ctx, -60, -124, 6, YAK_SHADE, 0.5, -0.4);
-  curl(ctx, 60, -124, 6, YAK_SHADE, 0.5, 0.4);
+  curl(ctx, -64, -134, 5, YAK_SHADE, 0.5, -0.4);
+  curl(ctx, 64, -134, 5, YAK_SHADE, 0.5, 0.4);
 
   // The cream muzzle.
   const m = BG.muzzle;
@@ -318,50 +317,56 @@ export function drawHead(ctx: Ctx): void {
     [1, mix(YAK_FACE, YAK, 0.22)],
   ]);
   ctx.fill();
-  stroke(ctx, mix(YAK_FACE, YAK_LINE, 0.3), 1.6);
+  stroke(ctx, mix(YAK_FACE, YAK, 0.45), 1.6);
 }
 
 export function drawFringe(ctx: Ctx): void {
-  const tufts: [number, number][] = [
-    [-44, 17],
-    [-22, 18.5],
-    [0, 20],
-    [22, 18.5],
-    [44, 17],
+  // Five soft curls of fringe; their bottoms end at y -200 (above the eyes).
+  const tufts: [number, number, number][] = [
+    [-46, 15.5, -201],
+    [-23.5, 17.5, -200],
+    [0, 19, -200],
+    [23.5, 17.5, -200],
+    [46, 15.5, -201],
   ];
-  const cy = (r: number) => -200 - r;
-  for (const [x, r] of tufts) {
+  const cy = (r: number, bottom: number) => bottom - r;
+  for (const [x, r, bt] of tufts) {
     ctx.beginPath();
-    ctx.arc(x, cy(r), r, 0, Math.PI * 2);
+    ctx.arc(x, cy(r, bt), r, 0, Math.PI * 2);
     stroke(ctx, YAK_LINE, 5);
   }
-  const g = vGrad(ctx, -242, -200, [
-    [0, tint(YAK, 0.22)],
-    [1, YAK],
-  ]);
-  for (const [x, r] of tufts) {
+  for (const [x, r, bt] of tufts) {
     ctx.beginPath();
-    ctx.arc(x, cy(r), r, 0, Math.PI * 2);
-    ctx.fillStyle = g;
+    ctx.arc(x, cy(r, bt), r, 0, Math.PI * 2);
+    ctx.fillStyle = rGrad(ctx, x - r * 0.3, cy(r, bt) - r * 0.4, 1, r * 1.3, [
+      [0, tint(YAK, 0.3)],
+      [0.7, YAK],
+      [1, mix(YAK, YAK_SHADE, 0.6)],
+    ]);
     ctx.fill();
   }
-  // Scallop separations at the bottom of each tuft, highlight arcs on top.
-  tufts.forEach(([x, r], i) => {
+  tufts.forEach(([x, r, bt], i) => {
+    const c = cy(r, bt);
+    // Deep soft notch up between neighbouring curls.
     if (i > 0) {
       ctx.beginPath();
-      ctx.arc(x, cy(r), r, Math.PI * 0.62, Math.PI * 0.9);
-      stroke(ctx, rgba(YAK_LINE, 0.7), 2);
+      ctx.arc(x, c, r, Math.PI * 0.58, Math.PI * 0.95);
+      stroke(ctx, YAK_LINE, 2.2);
     }
+    // A curl swirl in each tuft (granny perm).
     ctx.beginPath();
-    ctx.arc(x, cy(r) + 2, r * 0.66, Math.PI * 1.2, Math.PI * 1.75);
-    stroke(ctx, rgba(tint(YAK, 0.4), 0.9), 2.4);
+    ctx.arc(x + 1, c + 1, r * 0.5, Math.PI * 0.85, Math.PI * 2.05);
+    stroke(ctx, rgba(tint(YAK, 0.5), 0.95), 2.4);
+    ctx.beginPath();
+    ctx.arc(x + 2, c + 2.5, r * 0.24, Math.PI * 1.0, Math.PI * 2.2);
+    stroke(ctx, rgba(YAK_LINE, 0.45), 1.6);
   });
 }
 
 const HORN_L: [[number, number], [number, number], [number, number]] = [
-  [-56, -222],
-  [-82, -224],
-  [-80, -256],
+  [-55, -220],
+  [-80, -219],
+  [-85, -243],
 ];
 
 function drawOneHorn(ctx: Ctx, flip: number): void {
@@ -450,46 +455,55 @@ function drawEyes(ctx: Ctx, kind: 'smile' | 'happy' | 'round' | 'closed'): void 
   for (const e of BG.eyes) {
     switch (kind) {
       case 'smile': {
-        // Kindly half-lidded: a yak lid covers the top 30%.
+        // Kindly half-lidded: a yak lid covers the top 30%; nearly level,
+        // easing down at the outer corner, with a soft lash flick.
+        const rx = 6.6;
+        const ry = 7.8;
+        const out = Math.sign(e.x);
+        const lidY = e.y - ry + 2 * ry * 0.3;
+        const yIn = lidY - 0.6;
+        const yOut = lidY + 0.9;
+        const xIn = e.x - out * 9;
+        const xOut = e.x + out * 9;
         withState(ctx, () => {
           ctx.fillStyle = P.ink;
           ctx.beginPath();
-          ctx.ellipse(e.x, e.y, 5, 6.5, 0, 0, Math.PI * 2);
+          ctx.ellipse(e.x, e.y, rx, ry, 0, 0, Math.PI * 2);
           ctx.fill();
           ctx.beginPath();
-          ctx.ellipse(e.x, e.y, 5.6, 7.1, 0, 0, Math.PI * 2);
+          ctx.ellipse(e.x, e.y, rx + 0.6, ry + 0.6, 0, 0, Math.PI * 2);
           ctx.clip();
-          const lidY = e.y - 6.5 + 13 * 0.3;
           ctx.beginPath();
-          ctx.moveTo(e.x - 7, e.y - 9);
-          ctx.lineTo(e.x + 7, e.y - 9);
-          ctx.lineTo(e.x + 7, lidY + 0.6);
-          ctx.quadraticCurveTo(e.x, lidY - 1.6, e.x - 7, lidY + 0.6);
+          ctx.moveTo(xIn, e.y - 12);
+          ctx.lineTo(xOut, e.y - 12);
+          ctx.lineTo(xOut, yOut);
+          ctx.quadraticCurveTo(e.x, lidY - 1.6, xIn, yIn);
           ctx.closePath();
           ctx.fillStyle = YAK;
           ctx.fill();
-          ctx.beginPath();
-          ctx.moveTo(e.x - 6, lidY + 0.4);
-          ctx.quadraticCurveTo(e.x, lidY - 1.5, e.x + 6, lidY + 0.4);
-          stroke(ctx, YAK_LINE, 2);
         });
+        ctx.beginPath();
+        ctx.moveTo(e.x - out * 7.2, yIn + 0.2);
+        ctx.quadraticCurveTo(e.x, lidY - 1.4, e.x + out * 7.4, yOut - 0.2);
+        ctx.quadraticCurveTo(e.x + out * 9.2, yOut - 0.4, e.x + out * 10, yOut - 2.6);
+        stroke(ctx, YAK_LINE, 2);
         ctx.fillStyle = CREAM;
         ctx.beginPath();
-        ctx.arc(e.x - 1.6, e.y + 0.2, 2.5, 0, Math.PI * 2);
+        ctx.arc(e.x - 2, e.y + 0.4, 2.5, 0, Math.PI * 2);
         ctx.fill();
         ctx.beginPath();
-        ctx.arc(e.x + 2, e.y + 3.4, 1, 0, Math.PI * 2);
+        ctx.arc(e.x + 2.6, e.y + 4, 1.1, 0, Math.PI * 2);
         ctx.fill();
         break;
       }
       case 'round':
-        eye(ctx, e.x, e.y, 6.4, 7.6, 0);
+        eye(ctx, e.x, e.y - 1, 7.4, 9, 0);
         break;
       case 'happy':
-        eyeHappy(ctx, e.x, e.y + 1, 13, 2.8);
+        eyeHappy(ctx, e.x, e.y + 1, 15, 3);
         break;
       case 'closed':
-        eyeClosed(ctx, e.x, e.y + 1, 12, 2.6);
+        eyeClosed(ctx, e.x, e.y + 1, 14, 2.8);
         break;
     }
   }
@@ -714,7 +728,7 @@ function drawHoof(ctx: Ctx, flip: number): void {
   }
   mitten();
   ctx.fillStyle = vGrad(ctx, h.y - 12, h.y + 11, [
-    [0, mix(YAK_SHADE, YAK, 0.3)],
+    [0, mix(YAK_SHADE, YAK, 0.6)],
     [1, YAK_SHADE],
   ]);
   ctx.fill();
@@ -723,17 +737,17 @@ function drawHoof(ctx: Ctx, flip: number): void {
     mitten();
     ctx.clip();
     ctx.beginPath();
-    ctx.ellipse(h.x, h.y + 13, 16, 9, 0, 0, Math.PI * 2);
+    ctx.ellipse(h.x, h.y + 12, 16, 10, 0, 0, Math.PI * 2);
     ctx.fillStyle = vGrad(ctx, h.y + 4, h.y + 12, [
       [0, tint(HORN, 0.3)],
       [1, mix(HORN, HORN_LINE, 0.3)],
     ]);
     ctx.fill();
     ctx.beginPath();
-    ctx.ellipse(h.x, h.y + 13, 16, 9, 0, Math.PI, Math.PI * 2);
+    ctx.ellipse(h.x, h.y + 12, 16, 10, 0, Math.PI, Math.PI * 2);
     stroke(ctx, HORN_LINE, 1.6);
     ctx.beginPath();
-    ctx.moveTo(h.x, h.y + 4.5);
+    ctx.moveTo(h.x, h.y + 2.5);
     ctx.lineTo(h.x, h.y + 11);
     stroke(ctx, HORN_LINE, 1.6);
   });

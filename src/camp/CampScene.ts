@@ -20,7 +20,6 @@ import { STR } from '@/data/dialogue';
 import { FORAGE, FORAGE_SPOTS } from '@/data/forage';
 import { FORAGE_SPOT_IDS, type ForageSpotId, type MomentId } from '@/data/ids';
 import { DECOR } from '@/data/decor';
-import { iconKey } from '@/art/items';
 import { sparkleBurst, sparkleTrail, dustPuff } from '@/fx/particles';
 import { EASE } from '@/fx/juice';
 import { setAmbience, setMusicMood, musicMoodFor, playSfx } from '@/audio/engine';
@@ -43,6 +42,9 @@ import { controllerFactories, shotHandlers } from './registry';
 import './controllers';
 
 type Updater = (time: number, delta: number) => void;
+
+/** Item icon texture key (src/art/items.ts bakes 'item_<id>'). */
+const iconKey = (id: string): string => `item_${id}`;
 
 export interface CampData {
   /** Arriving from the shop: start at the path. */

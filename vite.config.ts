@@ -7,7 +7,7 @@ export default defineConfig({
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },
   // NO_HMR=1 disables live reload (used for the shared screenshot server).
-  server: { host: true, port: 5173, hmr: process.env.NO_HMR ? false : undefined },
+  server: process.env.NO_HMR ? { host: true, port: 5173, hmr: false, ws: false } : { host: true, port: 5173 },
   preview: { host: true, port: 4173 },
   build: {
     target: 'es2020',

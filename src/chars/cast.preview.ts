@@ -44,11 +44,11 @@ function counter(scene: Phaser.Scene, x0: number, x1: number, y: number): void {
   const wood = A['shop-wood'];
   const g = scene.add.graphics().setDepth(10);
   g.fillStyle(hexToInt(mix(wood, P.bark, 0.25)), 1);
-  g.fillRoundedRect(x0, y, x1 - x0, 30, 6);
+  g.fillRoundedRect(x0, y + 2, x1 - x0, 30, 6);
   g.fillStyle(hexToInt(wood), 1);
-  g.fillRoundedRect(x0, y - 2, x1 - x0, 9, 4);
+  g.fillRoundedRect(x0, y + 2, x1 - x0, 9, 4);
   g.lineStyle(2, hexToInt(mix(wood, P.bark, 0.6)), 1);
-  g.strokeRoundedRect(x0, y - 2, x1 - x0, 32, 6);
+  g.strokeRoundedRect(x0, y + 2, x1 - x0, 30, 6);
   g.lineStyle(1.5, hexToInt(mix(wood, P.bark, 0.45)), 0.6);
   g.lineBetween(x0 + 8, y + 17, x1 - 8, y + 17);
 }
@@ -187,7 +187,7 @@ function bojuLoop(scene: Phaser.Scene, ticks: Tickable[]): void {
   b.setScale(1.6);
   ticks.push(b);
   counter(scene, 40, l.w - 40, cy);
-  const status = txt(scene, l.w / 2, cy + 60, '', 'small', { color: P.cream, size: 18, fixed: true }).setDepth(11);
+  const status = txt(scene, l.w / 2, cy + 70, '', 'small', { color: P.ink, size: 18, fixed: true }).setDepth(11);
   b.onClick = () => status.setText('click');
   const cycle = async () => {
     status.setText('idle');

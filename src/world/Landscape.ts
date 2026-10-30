@@ -157,7 +157,7 @@ export class Landscape {
 
   // state
   private last: ResolvedLight | null = null;
-  private sig = '';
+  private readonly sigv = [NaN, NaN, NaN, NaN, NaN];
   private w: Weights = { dawn: 0, day: 1, golden: 0, dusk: 0, night: 0, climb: 0 };
   private rain = 0;
   private mist = 0;
@@ -430,7 +430,7 @@ export class Landscape {
   private buildWater(): void {
     const d = DEPTH.water - 2;
     this.waterBody = this.quad(-40, LAKE_Y, SKY_W, 720 - LAKE_Y + 4, 0, d);
-    this.waterSheen = this.quad(-40, LAKE_Y, SKY_W, 170, 0, d + 0.05);
+    this.waterSheen = this.quad(-40, LAKE_Y, SKY_W, 220, 0, d + 0.05);
     this.refl.far = this.reflRows('land_far', BAND.far.y0, BAND.far.y1, PARALLAX.far, d + 0.1);
     this.refl.mid = this.reflRows('land_mid', BAND.mid.y0, BAND.mid.y1, PARALLAX.mid, d + 0.2);
     this.refl.near = this.reflRows('land_near', BAND.near.y0, BAND.near.y1, PARALLAX.near, d + 0.3);
@@ -558,9 +558,13 @@ export class Landscape {
   }
 
   applyLight(l: ResolvedLight, force = false): void {
-    const sig = `${l.p.toFixed(4)}|${l.rain.toFixed(3)}|${l.mist.toFixed(3)}|${l.golden.toFixed(2)}|${l.skyTop}`;
-    if (!force && sig === this.sig) return;
-    this.sig = sig;
+    const sg = this.sigv;
+    if (!force && sg[0] === l.p && sg[1] === l.rain && sg[2] === l.mist && sg[3] === l.golden && sg[4] === l.skyTop) return;
+    sg[0] = l.p;
+    sg[1] = l.rain;
+    sg[2] = l.mist;
+    sg[3] = l.golden;
+    sg[4] = l.skyTop;
     this.last = l;
     const p = l.p;
     const night = clamp01(l.night);
@@ -589,12 +593,12 @@ export class Landscape {
     const w = this.viewW;
     const sx = w * (0.64 + 0.24 * l.sun.x);
     const sy = 300 - 236 * Math.pow(Math.max(0, l.sun.y), 1.3);
-    const sunCol = lerpInt(hexToInt(P.cream), l.horizon, 0.45 + golden * 0.25);
-    const bloomCol = lerpInt(l.horizon, hexToInt(P.butter), 0.35 + day * 0.3);
+    const sunCol = lerpInt(lerpInt(hexToInt(P.cream), hexToInt(P.butter), golden * 0.7 + dawn * 0.2), l.horizon, dusk * 0.4 + dawn * 0.25);
+    const bloomCol = lerpInt(l.horizon, hexToInt(P.butter), 0.3 + golden * 0.4);
     const sa = l.sun.a;
-    this.sunDisc.setPosition(sx, sy).setTint(sunCol).setAlpha(sa * (1 - mist * 0.55));
-    this.sunBloom.setPosition(sx, sy).setTint(bloomCol).setAlpha(sa * (0.55 + golden * 0.25 + dawn * 0.2));
-    this.sunWide.setPosition(sx, sy + 20).setTint(bloomCol).setAlpha(sa * (0.22 + golden * 0.18 + dawn * 0.15 + mist * 0.25));
+    this.sunDisc.setPosition(sx, sy).setTint(sunCol).setAlpha(sa * (1 - mist * 0.5));
+    this.sunBloom.setPosition(sx, sy).setTint(bloomCol).setAlpha(sa * (0.3 + golden * 0.25 + dawn * 0.2 + mist * 0.2));
+    this.sunWide.setPosition(sx, sy + 20).setTint(bloomCol).setAlpha(sa * (0.1 + golden * 0.16 + dawn * 0.14 + mist * 0.22));
     // --- Moon
     const mx = w * Math.max(0.16, Math.min(0.84, l.moon.x - 0.4));
     const my = 70 + (1 - l.moon.y) * 190;
@@ -665,7 +669,7 @@ export class Landscape {
     const wantOn = p >= 0.88 || night > 0.5;
     if (wantOn !== this.necklaceOn) {
       this.necklaceOn = wantOn;
-      this.necklaceAt = this.last === l && this.t > 0 ? this.t : -100;
+      this.necklaceAt = this.t > 0 ? this.t : -100;
     }
     this.windowNight = 1 - mist * 0.6;
     for (const th of this.threads) th.line.setTint(lerpInt(hexToInt(A['water-thread']), l.mid, 0.25));
@@ -683,8 +687,8 @@ export class Landscape {
     this.waterBody.setTint(jade, jade, deep, deep);
     const sheen = lerpInt(l.horizon, l.skyMid, 0.35);
     this.waterSheen.setTint(sheen, sheen, sheen, sheen);
-    const sheenA = 0.5 + dawn * 0.2 + golden * 0.15 - night * 0.2 + mist * 0.3;
-    this.waterSheen.setAlpha(sheenA, sheenA, 0, 0);
+    const sheenA = clamp01(day * 0.22 + dawn * 0.68 + golden * 0.62 + dusk * 0.58 + night * 0.45 + rain * 0.12 + mist * 0.5);
+    this.waterSheen.setAlpha(sheenA, sheenA, sheenA * 0.12, sheenA * 0.12);
     this.reflAlpha = (0.38 - rain * 0.18) * (1 - mist * 0.95);
     const reflTint = lerpInt(WHITE, l.water, 0.35);
     this.tintRefl(this.refl.far, mulInt(lerpInt(l.far, l.haze, 0.35), reflTint));

@@ -374,12 +374,12 @@ export function drawTailOut(ctx: Ctx): void {
   tail(
     ctx,
     [
-      [-14.5, -8.6],
-      [-20.5, -10.2],
-      [-25.6, -12.8],
-      [-29.4, -16.4],
+      [-14, -8.4],
+      [-19.4, -9.8],
+      [-24, -12.4],
+      [-27.4, -16],
     ],
-    [12.5, 10.6, 8.8, 7],
+    [13, 11.4, 9.6, 7.8],
   );
 }
 
@@ -400,12 +400,12 @@ export function drawTailDangle(ctx: Ctx): void {
   tail(
     ctx,
     [
-      [-9.4, 0.4],
-      [-10, 5.6],
-      [-9.4, 10.4],
-      [-7, 14.2],
+      [-9.4, 0.2],
+      [-9.8, 4.8],
+      [-9.2, 9],
+      [-7.2, 12.6],
     ],
-    [11.6, 10, 8.4, 6.8],
+    [12, 10.6, 9, 7.4],
   );
 }
 
@@ -470,7 +470,7 @@ export function drawBall(ctx: Ctx): void {
   ctx.strokeStyle = INNER_LINE;
   ctx.stroke();
   // Upper-right scale overlapping the gap's top edge.
-  petal(ctx, cx + 11, cy - 9, 9.6, 10, 0.75, 1.3, PANGO, INNER_LINE);
+  petal(ctx, cx + 9.6, cy - 8.4, 9, 9.4, 0.6, 1.3, PANGO, INNER_LINE);
 
   // Tail tip tucked round the bottom front, curling up toward the gap.
   const tp: [number, number][] = [

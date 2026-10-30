@@ -130,10 +130,11 @@ export class FgLayer {
   }
 
   private grassClump(x: number, rnd: () => number, fiddle: boolean): void {
-    const n = 6 + Math.floor(rnd() * 2);
+    const n = 9 + Math.floor(rnd() * 3);
     for (let i = 0; i < n; i++) {
       const key = i % 3 === 0 ? 'land_bladeA' : i % 3 === 1 ? 'land_bladeB' : 'land_bladeC';
-      this.blade(key, x - 50 + i * 16 + rnd() * 8, 0.75 + rnd() * 0.3, rnd);
+      const mid = 1 - Math.abs(i - n / 2) / (n / 2);
+      this.blade(key, x - 56 + i * 11 + rnd() * 6, 0.62 + mid * 0.36 + rnd() * 0.12, rnd);
     }
     if (fiddle) {
       for (let i = 0; i < 2; i++) {

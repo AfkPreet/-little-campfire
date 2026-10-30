@@ -85,8 +85,7 @@ export default class Hud extends Phaser.Scene {
     this.money = this.add.container(0, 0).setDepth(DEPTH.ui);
     const mBg = panel(this, 'ui.pill', 150, 54);
     const mSh = shadowPanel(this, 'pill', 150, 54, 0, 4, 0.13);
-    const coin = iconObj(this, -46, 0, 'item_coin', 36);
-    if (!this.textures.exists('item_coin')) coin.setTexture('icon.coin');
+    const coin = iconObj(this, -46, 0, this.textures.exists('item_coin') ? 'item_coin' : 'icon.coin', 36);
     this.moneyText = txtObj(this, 16, 1, WORLD.money(S().money), 'label', { size: 26 });
     this.money.add([mSh, mBg, coin, this.moneyText]);
 

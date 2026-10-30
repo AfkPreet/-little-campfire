@@ -12,7 +12,7 @@ import { dir, litCircle } from './landscape-util';
 
 const SUN: [number, number] = dir(1, -0.55);
 
-export const GROUND_W = 2360;
+export const GROUND_W = 2400;
 const GX0 = BX0;
 const GX1 = BX0 + GROUND_W;
 
@@ -55,22 +55,19 @@ function mossyBoulder(ctx: Ctx, x: number, y: number, r: number, seed: number): 
   ctx.lineWidth = 1.8;
   ctx.stroke();
   ctx.clip();
-  // moss cap with a scalloped lower edge
-  const pts: [number, number][] = [];
-  const n = 9;
-  for (let i = 0; i <= n; i++) {
-    const t = i / n;
-    const a = Math.PI + t * Math.PI;
-    const k = 1.1;
-    pts.push([x + Math.cos(a) * r * 1.4 * k, y + Math.sin(a) * r * 1.2 * k]);
-  }
-  for (let i = n; i >= 0; i--) {
-    const t = i / n;
-    pts.push([x - r * 1.35 + t * r * 2.7, y + r * (0.05 + (i % 2) * 0.16 + rnd() * 0.08)]);
-  }
+  // moss cap with a soft scalloped lower edge
   ctx.beginPath();
-  smoothClosed(ctx, pts, 0.4);
-  ctx.fillStyle = vGrad(ctx, y - r, y + r * 0.2, [
+  ctx.moveTo(x - r * 1.5, y - r * 1.4);
+  ctx.lineTo(x + r * 1.5, y - r * 1.4);
+  ctx.lineTo(x + r * 1.5, y - r * 0.1);
+  const lobes = 4;
+  for (let i = 0; i < lobes; i++) {
+    const x0 = x + r * 1.5 - (i * r * 3) / lobes;
+    const x1 = x + r * 1.5 - ((i + 1) * r * 3) / lobes;
+    ctx.quadraticCurveTo((x0 + x1) / 2, y + r * (0.32 + rnd() * 0.16), x1, y - r * (0.02 + rnd() * 0.08));
+  }
+  ctx.closePath();
+  ctx.fillStyle = vGrad(ctx, y - r, y + r * 0.3, [
     [0, mix(P.sage, P.butter, 0.12)],
     [1, P.moss],
   ]);
@@ -250,16 +247,21 @@ function bakeGroundStrip(b: Baker): void {
         x += rr * (1.25 + r() * 0.4);
       }
     }
-    // Grass tufts and a few tiny flower clusters.
+    // Grass tufts in loose little families, and a few tiny flower clusters.
     const r3 = artRng(1207);
-    for (let i = 0; i < 150; i++) {
-      const x = GX0 + r3() * (2040 - GX0);
-      const y = 512 + r3() * 200;
-      tuft(ctx, x, y, 0.7 + (y - 500) / 240, rgba(shade(P.moss, 0.06), 0.45 + r3() * 0.3), r3);
+    for (let i = 0; i < 26; i++) {
+      const cx = GX0 + 40 + r3() * (2000 - GX0);
+      const cy = 520 + r3() * 186;
+      const n = 2 + Math.floor(r3() * 3);
+      for (let k = 0; k < n; k++) {
+        const x = cx + (r3() - 0.5) * 40;
+        const y = cy + (r3() - 0.5) * 12;
+        tuft(ctx, x, y, 0.75 + (y - 500) / 260, rgba(shade(P.moss, 0.04), 0.4 + r3() * 0.2), r3);
+      }
     }
-    for (let i = 0; i < 14; i++) {
+    for (let i = 0; i < 9; i++) {
       const x = 560 + r3() * 1400;
-      const y = 520 + r3() * 180;
+      const y = 530 + r3() * 170;
       const col = r3() < 0.6 ? P.cream : A.gurans;
       for (let k = 0; k < 3; k++) {
         ctx.fillStyle = rgba(col, 0.9);
@@ -327,59 +329,65 @@ function bakeGroundStrip(b: Baker): void {
 // Framing rhododendrons (hammock point) at x 1840 and 1990.
 // ---------------------------------------------------------------------------
 
-export const TREES = { x0: 1700, y0: 0, w: 460, h: 600 };
+export const TREES = { x0: 1600, y0: 0, w: 600, h: 604 };
 
-type Limb = [x0: number, y0: number, cx: number, cy: number, x1: number, y1: number, w0: number, w1: number];
+/** Tapered limb along a cubic bezier (x0,y0)->(x1,y1) with controls, widths w0 -> w1. */
+type Limb = [x0: number, y0: number, c1x: number, c1y: number, c2x: number, c2y: number, x1: number, y1: number, w0: number, w1: number];
 
-function limbPath(c: Ctx, l: Limb): void {
-  const [x0, y0, qx, qy, x1, y1, w0, w1] = l;
+function limbPts(l: Limb, N = 22): { left: [number, number][]; right: [number, number][] } {
+  const [x0, y0, ax, ay, bx, by, x1, y1, w0, w1] = l;
   const left: [number, number][] = [];
   const right: [number, number][] = [];
-  const N = 18;
   for (let i = 0; i <= N; i++) {
     const t = i / N;
-    const x = (1 - t) * (1 - t) * x0 + 2 * (1 - t) * t * qx + t * t * x1;
-    const y = (1 - t) * (1 - t) * y0 + 2 * (1 - t) * t * qy + t * t * y1;
-    const dx = 2 * (1 - t) * (qx - x0) + 2 * t * (x1 - qx);
-    const dy = 2 * (1 - t) * (qy - y0) + 2 * t * (y1 - qy);
+    const u = 1 - t;
+    const x = u * u * u * x0 + 3 * u * u * t * ax + 3 * u * t * t * bx + t * t * t * x1;
+    const y = u * u * u * y0 + 3 * u * u * t * ay + 3 * u * t * t * by + t * t * t * y1;
+    const dx = 3 * u * u * (ax - x0) + 6 * u * t * (bx - ax) + 3 * t * t * (x1 - bx);
+    const dy = 3 * u * u * (ay - y0) + 6 * u * t * (by - ay) + 3 * t * t * (y1 - by);
     const l2 = Math.hypot(dx, dy) || 1;
-    const w = (w0 + (w1 - w0) * Math.pow(t, 0.8)) / 2;
+    // gentle swelling at the joints keeps it gnarled, never stiff
+    const w = (w0 + (w1 - w0) * Math.pow(t, 0.75)) / 2 + Math.sin(t * Math.PI * 3) * 0.8;
     left.push([x - (dy / l2) * w, y + (dx / l2) * w]);
     right.push([x + (dy / l2) * w, y - (dx / l2) * w]);
   }
-  const pts = [...left, ...right.reverse()];
-  smoothClosed(c, pts, 0.3);
+  return { left, right };
+}
+
+function limbPath(c: Ctx, l: Limb): void {
+  const { left, right } = limbPts(l);
+  smoothClosed(c, [...left, ...right.reverse()], 0.3);
 }
 
 const TREE_DEFS = [
   {
     x: 1840,
     limbs: [
-      [1832, 596, 1812, 470, 1790, 330, 34, 14],
-      [1846, 596, 1852, 450, 1838, 300, 30, 13],
-      [1850, 500, 1858, 430, 1888, 386, 15, 7],
+      [1828, 598, 1818, 520, 1782, 430, 1760, 250, 30, 12],
+      [1846, 598, 1856, 500, 1832, 400, 1846, 230, 28, 12],
+      [1842, 520, 1852, 470, 1866, 412, 1890, 376, 14, 6],
     ] as Limb[],
     domes: [
-      [1792, 26, 112],
-      [1858, 92, 100],
-      [1752, 140, 90],
-      [1840, 214, 92],
-      [1770, 262, 78],
+      [1752, 46, 104],
+      [1846, 92, 90],
+      [1700, 168, 70],
+      [1784, 212, 72],
+      [1866, 216, 58],
     ] as [number, number, number][],
   },
   {
     x: 1990,
     limbs: [
-      [1996, 594, 2018, 460, 2030, 318, 32, 14],
-      [1982, 594, 1978, 450, 1986, 296, 30, 13],
-      [1980, 492, 1966, 428, 1940, 382, 15, 7],
+      [1998, 596, 2012, 500, 2042, 420, 2050, 240, 28, 12],
+      [1982, 596, 1972, 500, 1994, 400, 1978, 226, 26, 12],
+      [1986, 512, 1978, 462, 1966, 410, 1946, 378, 13, 6],
     ] as Limb[],
     domes: [
-      [2020, 30, 112],
-      [1956, 110, 98],
-      [2064, 150, 92],
-      [1990, 228, 90],
-      [2076, 262, 72],
+      [2046, 40, 106],
+      [1950, 96, 88],
+      [2112, 160, 74],
+      [2024, 206, 70],
+      [1946, 214, 56],
     ] as [number, number, number][],
   },
 ];
@@ -387,19 +395,19 @@ const TREE_DEFS = [
 function leafRosette(ctx: Ctx, x: number, y: number, s: number, rnd: () => number, base: string): void {
   const n = 5;
   for (let i = 0; i < n; i++) {
-    const a = Math.PI * 0.15 + (i / (n - 1)) * Math.PI * 0.7 + (rnd() - 0.5) * 0.2;
-    const len = (15 + rnd() * 6) * s;
+    const a = Math.PI * 0.12 + (i / (n - 1)) * Math.PI * 0.76 + (rnd() - 0.5) * 0.2;
+    const len = (16 + rnd() * 6) * s;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(a);
     ctx.beginPath();
-    ctx.ellipse(len / 2, 0, len / 2, 4.2 * s, 0, 0, Math.PI * 2);
-    ctx.fillStyle = i % 2 ? base : mix(base, P.sage, 0.25);
+    ctx.ellipse(len / 2, 0, len / 2, 4.4 * s, 0, 0, Math.PI * 2);
+    ctx.fillStyle = i % 2 ? base : mix(base, P.sage, 0.3);
     ctx.fill();
-    ctx.strokeStyle = rgba(shade(base, 0.3), 0.6);
+    ctx.strokeStyle = rgba(shade(base, 0.3), 0.55);
     ctx.lineWidth = 1;
     ctx.stroke();
-    ctx.strokeStyle = rgba(tint(base, 0.35), 0.5);
+    ctx.strokeStyle = rgba(tint(base, 0.4), 0.5);
     ctx.beginPath();
     ctx.moveTo(2, 0);
     ctx.lineTo(len - 3, 0);
@@ -416,15 +424,15 @@ function gurans(ctx: Ctx, x: number, y: number, s: number, rnd: () => number): v
     const fy = y + Math.sin(a) * 5.5 * s;
     ctx.beginPath();
     ctx.arc(fx, fy, 5.2 * s, 0, Math.PI * 2);
-    ctx.fillStyle = fy > y + 1 ? mix(A.gurans, A['gurans-deep'], 0.5) : A.gurans;
+    ctx.fillStyle = fy > y + 1 ? mix(A.gurans, A['gurans-deep'], 0.45) : tint(A.gurans, 0.08);
     ctx.fill();
-    ctx.strokeStyle = rgba(shade(A['gurans-deep'], 0.15), 0.7);
+    ctx.strokeStyle = rgba(shade(A['gurans-deep'], 0.12), 0.65);
     ctx.lineWidth = 1;
     ctx.stroke();
   }
   ctx.beginPath();
   ctx.arc(x, y - 1, 5 * s, 0, Math.PI * 2);
-  ctx.fillStyle = tint(A.gurans, 0.25);
+  ctx.fillStyle = tint(A.gurans, 0.28);
   ctx.fill();
   for (let i = 0; i < 4; i++) {
     ctx.fillStyle = rgba(P.cream, 0.85);
@@ -434,29 +442,45 @@ function gurans(ctx: Ctx, x: number, y: number, s: number, rnd: () => number): v
   }
 }
 
+/** Leafy dome: a circle with soft leaf-tip bumps around its lower rim. */
+function domePath(c: Ctx, x: number, y: number, rr: number, rnd: () => number): void {
+  c.moveTo(x + rr, y);
+  c.arc(x, y, rr, 0, Math.PI * 2);
+  const bumps = Math.round(rr / 8);
+  for (let i = 0; i < bumps; i++) {
+    const a = Math.PI * 0.08 + (i / Math.max(1, bumps - 1)) * Math.PI * 0.84;
+    const bx = x + Math.cos(a) * rr * 0.97;
+    const by = y + Math.sin(a) * rr * 0.97;
+    const br = 7 + rnd() * 5;
+    c.moveTo(bx + br, by);
+    c.arc(bx, by, br, 0, Math.PI * 2);
+  }
+}
+
 function bakeTrees(b: Baker): void {
   b.tex('land_trees', TREES.w, TREES.h, (ctx) => {
     ctx.translate(-TREES.x0, -TREES.y0);
-    const bark = P.bark;
-    const leafDeep = shade(P.moss, 0.12);
-    for (const t of TREE_DEFS) softShadow(ctx, t.x, 594, 46, 8, 0.2);
-    // trunks
+    const bark = mix(P.bark, A['shop-wood'], 0.22);
+    const leaf = P.moss;
+    const leafDeep = shade(P.moss, 0.1);
+    for (const t of TREE_DEFS) softShadow(ctx, t.x, 596, 52, 8, 0.22);
+    // trunks: 3 merged rounded curves each
     for (const t of TREE_DEFS) {
       for (const l of t.limbs) {
         withState(ctx, () => {
           ctx.beginPath();
           limbPath(ctx, l);
-          ctx.fillStyle = tint(bark, 0.28);
+          ctx.fillStyle = tint(bark, 0.3);
           ctx.fill();
           ctx.strokeStyle = shade(bark, 0.3);
           ctx.lineWidth = 2.2;
           ctx.stroke();
           ctx.clip();
-          ctx.translate(-4, 1);
+          ctx.translate(-4.5, 1);
           ctx.beginPath();
           limbPath(ctx, l);
-          ctx.fillStyle = vGrad(ctx, 300, 600, [
-            [0, shade(bark, 0.08)],
+          ctx.fillStyle = vGrad(ctx, 230, 600, [
+            [0, shade(bark, 0.1)],
             [1, bark],
           ]);
           ctx.fill();
@@ -467,80 +491,87 @@ function bakeTrees(b: Baker): void {
       smoothClosed(
         ctx,
         [
-          [t.x - 30, 598],
-          [t.x - 14, 578],
-          [t.x, 560],
-          [t.x + 14, 578],
-          [t.x + 30, 598],
-          [t.x, 602],
+          [t.x - 34, 600],
+          [t.x - 16, 584],
+          [t.x - 2, 560],
+          [t.x + 14, 582],
+          [t.x + 32, 600],
+          [t.x, 604],
         ],
         0.4,
       );
       ctx.fillStyle = bark;
       ctx.fill();
-      // bark lines
-      const r = artRng(t.x);
-      ctx.strokeStyle = rgba(shade(bark, 0.22), 0.45);
-      ctx.lineWidth = 1.3;
-      ctx.lineCap = 'round';
-      for (let i = 0; i < 9; i++) {
-        const x = t.x - 12 + r() * 24;
-        const y = 380 + r() * 190;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.quadraticCurveTo(x + (r() - 0.5) * 6, y + 12, x + (r() - 0.5) * 4, y + 22 + r() * 14);
-        ctx.stroke();
-      }
-    }
-    // canopy domes, back (top) to front (low)
-    const all = TREE_DEFS.flatMap((t) => t.domes.map((d) => ({ d, t })));
-    all.sort((a, b2) => a.d[1] - b2.d[1]);
-    const r = artRng(1300);
-    for (const { d } of all) {
-      const [x, y, rr] = d;
-      // leafy scalloped rim
-      ctx.beginPath();
-      ctx.arc(x, y, rr, 0, Math.PI * 2);
-      const bumps = Math.round(rr / 7);
-      for (let i = 0; i < bumps; i++) {
-        const a = Math.PI * 0.05 + (i / bumps) * Math.PI * 0.9;
-        const bx = x + Math.cos(a) * rr * 0.96;
-        const by = y + Math.sin(a) * rr * 0.96;
-        const br = 9 + r() * 6;
-        ctx.moveTo(bx + br, by);
-        ctx.arc(bx, by, br, 0, Math.PI * 2);
-      }
-      ctx.fillStyle = shade(leafDeep, 0.1);
-      ctx.fill();
-      ctx.strokeStyle = rgba(shade(leafDeep, 0.3), 0.7);
+      ctx.strokeStyle = shade(bark, 0.3);
       ctx.lineWidth = 2;
       ctx.stroke();
-      litCircle(ctx, x, y, rr - 3, vGrad(ctx, y - rr, y + rr, [[0, P.moss], [1, leafDeep]]), mix(P.moss, P.sage, 0.5), SUN[0], SUN[1], 0.14);
+      // bark lines and a knot
+      const r = artRng(t.x);
+      ctx.strokeStyle = rgba(shade(bark, 0.2), 0.42);
+      ctx.lineWidth = 1.3;
+      ctx.lineCap = 'round';
+      for (let i = 0; i < 8; i++) {
+        const x = t.x - 10 + r() * 20;
+        const y = 420 + r() * 150;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.quadraticCurveTo(x + (r() - 0.5) * 6, y + 12, x + (r() - 0.5) * 4, y + 20 + r() * 14);
+        ctx.stroke();
+      }
+      ctx.strokeStyle = rgba(shade(bark, 0.25), 0.6);
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.ellipse(t.x + 2, 520, 3.5, 5, 0, 0, Math.PI * 2);
+      ctx.stroke();
+      // a little moss on the root flare
+      ctx.fillStyle = rgba(P.sage, 0.7);
+      ctx.beginPath();
+      ctx.ellipse(t.x - 14, 590, 10, 4, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    // leaf tufts at the tips of the low branches (hammock / hang points)
+    const r6 = artRng(1320);
+    leafRosette(ctx, 1890, 380, 0.9, r6, leaf);
+    leafRosette(ctx, 1946, 382, 0.9, r6, leaf);
+    // canopy domes, back (top) to front (low)
+    const all = TREE_DEFS.flatMap((t) => t.domes);
+    all.sort((a, b2) => a[1] - b2[1]);
+    const r = artRng(1300);
+    for (const [x, y, rr] of all) {
+      const seed = Math.floor(x * 7 + y);
+      ctx.beginPath();
+      domePath(ctx, x, y, rr, artRng(seed));
+      ctx.fillStyle = leafDeep;
+      ctx.fill();
+      ctx.strokeStyle = rgba(shade(leafDeep, 0.25), 0.6);
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      litCircle(ctx, x, y, rr - 4, vGrad(ctx, y - rr, y + rr, [[0, mix(leaf, P.sage, 0.15)], [1, leafDeep]]), mix(leaf, P.sage, 0.55), SUN[0], SUN[1], 0.13);
       // inner leaf texture: soft lighter leaf strokes on the lit side
-      for (let i = 0; i < 10; i++) {
-        const a = -Math.PI * (0.05 + r() * 0.7);
-        const dd = rr * (0.35 + r() * 0.5);
+      for (let i = 0; i < 12; i++) {
+        const a = -Math.PI * (0.02 + r() * 0.75);
+        const dd = rr * (0.3 + r() * 0.55);
         const lx = x + Math.cos(a) * dd;
         const ly = y + Math.sin(a) * dd;
-        ctx.fillStyle = rgba(tint(P.sage, 0.2), 0.32);
+        ctx.fillStyle = rgba(tint(P.sage, 0.25), 0.3);
         ctx.beginPath();
-        ctx.ellipse(lx, ly, 9, 3.2, a + 1.2, 0, Math.PI * 2);
+        ctx.ellipse(lx, ly, 9, 3, a + 1.2, 0, Math.PI * 2);
         ctx.fill();
       }
     }
     // hanging leaf rosettes and gurans trusses (<= 8 per tree)
     const r5 = artRng(1310);
     for (const t of TREE_DEFS) {
-      const spots = t.domes.slice(1).flatMap(([x, y, rr]) => [
-        [x + rr * 0.5, y + rr * 0.62],
-        [x - rr * 0.45, y + rr * 0.72],
-      ]);
-      spots.slice(0, 7).forEach(([x, y], i) => {
-        leafRosette(ctx, x, y + 6, 1, r5, P.moss);
-        if (i < 7) gurans(ctx, x, y, 0.95 + r5() * 0.2, r5);
+      const spots: [number, number][] = [];
+      for (const [x, y, rr] of t.domes.slice(1)) {
+        spots.push([x + rr * 0.5, y + rr * 0.66], [x - rr * 0.5, y + rr * 0.7]);
+      }
+      spots.slice(0, 7).forEach(([x, y]) => {
+        leafRosette(ctx, x, y + 6, 1, r5, leaf);
+        gurans(ctx, x, y, 0.95 + r5() * 0.2, r5);
       });
-      const [lx, ly, lr] = t.domes[3];
-      gurans(ctx, lx + lr * 0.2, ly - lr * 0.35, 0.9, r5);
+      const [lx, ly, lr] = t.domes[0];
+      gurans(ctx, lx + lr * 0.35, ly + lr * 0.25, 0.9, r5);
     }
   });
 }

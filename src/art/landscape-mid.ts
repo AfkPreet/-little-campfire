@@ -70,9 +70,9 @@ function bakeMid(b: Baker): void {
         if (x > 828 && x < 1010) continue; // keep the tea flank clean
         const yy = MID_RIDGE(x) + 5 + r() * 46;
         if (n(x / 60) < 0.42) continue;
-        ctx.fillStyle = rgba(shade(body, 0.12), 0.16 + r() * 0.14);
+        ctx.fillStyle = rgba(shade(body, 0.08), 0.08 + r() * 0.08);
         ctx.beginPath();
-        ctx.arc(x, yy, 2 + r() * 3.2, 0, Math.PI * 2);
+        ctx.ellipse(x, yy, 3 + r() * 4, 2 + r() * 2, 0, 0, Math.PI * 2);
         ctx.fill();
       }
       // Lighter sunlit upper slopes on the right flanks of each hump.
@@ -82,7 +82,7 @@ function bakeMid(b: Baker): void {
       ]);
       ctx.fillRect(MID_X0, 296, MID_X1 - MID_X0, 64);
       // Tea terraces: 4 contour stripes, alternating tea-green / 8% darker.
-      const tea = A['tea-green'];
+      const tea = mix(A['tea-green'], body, 0.3);
       const tea2 = shade(tea, 0.08);
       ctx.lineCap = 'round';
       for (let i = 0; i < 4; i++) {
@@ -97,7 +97,7 @@ function bakeMid(b: Baker): void {
         ctx.lineWidth = 10.5;
         ctx.stroke();
         // bush-row bumps along the top edge, lighter
-        ctx.fillStyle = rgba(tint(tea, 0.35), 0.7);
+        ctx.fillStyle = rgba(tint(tea, 0.25), 0.5);
         for (let x = t.x0 + 2; x <= t.x1 - 2; x += 5.5) {
           ctx.beginPath();
           ctx.arc(x, t.y(x) - 4.2, 1.8, 0, Math.PI * 2);
@@ -313,40 +313,50 @@ function drawCone(ctx: Ctx, p: Extract<Prim, { k: 't' }>, base: string, lit: str
 
 function drawFan(ctx: Ctx, cx: number, seed: number): void {
   const r = artRng(seed);
-  const n = 8 + Math.floor(r() * 5);
+  const n = 9 + Math.floor(r() * 4);
   const baseY = 452;
   const col = A.malingo;
+  const leaves: [number, number, number, string][] = [];
   for (let k = 0; k < n; k++) {
     const t = k / (n - 1);
-    const ang = -Math.PI * (0.84 - t * 0.68) + (r() - 0.5) * 0.08;
-    const len = 76 + r() * 40 - Math.abs(t - 0.5) * 30;
+    const ang = -Math.PI * (0.86 - t * 0.72) + (r() - 0.5) * 0.08;
+    const len = 80 + r() * 34 - Math.abs(t - 0.5) * 34;
     const back = k % 2 === 0;
-    const c = back ? shade(col, 0.12) : col;
+    const c = back ? mix(col, P.moss, 0.35) : col;
+    const sx = cx + (t - 0.5) * 8;
     const ex = cx + Math.cos(ang) * len;
     const ey = baseY + Math.sin(ang) * len;
-    const droop = (t - 0.5) * 46;
-    const qx = cx + Math.cos(ang) * len * 0.6 + droop * 0.2;
-    const qy = baseY + Math.sin(ang) * len * 0.75;
-    const tx = ex + droop * 0.5;
-    const ty = ey + 12 + Math.abs(t - 0.5) * 18;
-    ctx.strokeStyle = c;
+    const out = (t - 0.5) * 2;
+    const qx = cx + Math.cos(ang) * len * 0.55;
+    const qy = baseY + Math.sin(ang) * len * 0.8;
+    const tx = ex + out * 14;
+    const ty = ey + 10 + Math.abs(out) * 16;
+    ctx.strokeStyle = shade(c, 0.12);
     ctx.lineCap = 'round';
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.6;
     ctx.beginPath();
-    ctx.moveTo(cx + (t - 0.5) * 6, baseY);
+    ctx.moveTo(sx, baseY);
     ctx.quadraticCurveTo(qx, qy, tx, ty);
     ctx.stroke();
-    // leaf dabs along the outer half
-    for (let j = 0; j < 6; j++) {
-      const u = 0.45 + j * 0.1;
-      const lx = (1 - u) * (1 - u) * (cx + (t - 0.5) * 6) + 2 * (1 - u) * u * qx + u * u * tx;
+    for (let j = 0; j < 7; j++) {
+      const u = 0.38 + j * 0.095;
+      const lx = (1 - u) * (1 - u) * sx + 2 * (1 - u) * u * qx + u * u * tx;
       const ly = (1 - u) * (1 - u) * baseY + 2 * (1 - u) * u * qy + u * u * ty;
-      const la = Math.atan2(ty - qy, tx - qx) + (j % 2 ? 0.9 : -0.9) + (t - 0.5) * 0.6;
-      ctx.fillStyle = j % 2 ? c : mix(c, P.sage, 0.35);
-      ctx.beginPath();
-      ctx.ellipse(lx + Math.cos(la) * 4, ly + Math.sin(la) * 4 + 2, 6, 1.9, la + 0.4, 0, Math.PI * 2);
-      ctx.fill();
+      const la = Math.atan2(ty - qy, tx - qx) + (j % 2 ? 0.75 : -0.75) * (1 - u * 0.3) + 0.5 * Math.sign(out || 1);
+      leaves.push([lx, ly, la, j % 3 === 0 ? mix(c, P.sage, 0.4) : c]);
     }
+  }
+  for (const [lx, ly, la, c] of leaves) {
+    ctx.save();
+    ctx.translate(lx, ly);
+    ctx.rotate(la);
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(6, -3, 13, 0.5);
+    ctx.quadraticCurveTo(6, 2.6, 0, 0);
+    ctx.fillStyle = c;
+    ctx.fill();
+    ctx.restore();
   }
 }
 

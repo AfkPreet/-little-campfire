@@ -53,6 +53,8 @@ class Tab extends Phaser.GameObjects.Container {
     this.offFace = panel(scene, 'ui.tab.off', w - 6, faceH - 6, 0, 3);
     this.onFace = panel(scene, 'ui.face.cream', w, faceH, 0, 0);
     this.label = txtObj(scene, 0, TEXT_NUDGE, item.label, 'label', { color: UI_INK_SOFT });
+    // Shrink long labels to fit narrow tabs.
+    if (this.label.width > w - 14) this.label.setScale((w - 14) / this.label.width);
     this.bar = panel(scene, 'ui.bar', Math.max(24, Math.min(w - 36, this.label.width * 0.7)), 7, 0, 0);
     this.add([this.onShadow, this.onLip, this.offFace, this.onFace, this.bar]);
     if (item.icon) {

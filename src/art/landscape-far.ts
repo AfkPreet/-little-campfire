@@ -32,23 +32,30 @@ interface PeakGeo {
 }
 
 function peakGeo(p: Peak): PeakGeo {
-  const h = PEAK_BASE - p.tip;
   const dl = dir(-p.sl, 1);
   const dr = dir(p.sr, 1);
   const cos = dl[0] * dr[0] + dl[1] * dr[1];
   const theta = Math.acos(Math.max(-1, Math.min(1, cos)));
-  const r = 0.22 * h;
-  const t = r / Math.tan(theta / 2);
   const bis = dir(dl[0] + dr[0], dl[1] + dr[1]);
+  // The rounded summit's top sits at p.tip: lift the virtual apex accordingly.
+  const k = 0.22;
+  let apex = p.tip;
+  for (let i = 0; i < 3; i++) {
+    const rr = k * (PEAK_BASE - apex);
+    apex = p.tip - (rr / Math.sin(theta / 2) - rr) * bis[1];
+  }
+  const h = PEAK_BASE - apex;
+  const r = k * h;
+  const t = r / Math.tan(theta / 2);
   const dc = r / Math.sin(theta / 2);
   const cx = p.x + bis[0] * dc;
-  const cy = p.tip + bis[1] * dc;
-  const tl: [number, number] = [p.x + dl[0] * t, p.tip + dl[1] * t];
-  const tr: [number, number] = [p.x + dr[0] * t, p.tip + dr[1] * t];
+  const cy = apex + bis[1] * dc;
+  const tl: [number, number] = [p.x + dl[0] * t, apex + dl[1] * t];
+  const tr: [number, number] = [p.x + dr[0] * t, apex + dr[1] * t];
   return {
     lx: p.x - p.sl * h,
     rx: p.x + p.sr * h,
-    h,
+    h: PEAK_BASE - p.tip,
     r,
     cx,
     cy,
@@ -92,55 +99,88 @@ function drawPeak(ctx: Ctx, p: Peak): void {
     ]);
     ctx.fill();
     ctx.clip();
-    // Shade face: a gentle S-curve from the summit down; shade on the left.
+    // Shade face: a gentle S-curve from the summit down; shade on the left,
+    // with a few soft shade fingers reaching into the lit face (snow gullies).
     const h = g.h;
-    ctx.beginPath();
-    ctx.moveTo(p.x + h * 0.05, p.tip - 6);
-    ctx.bezierCurveTo(p.x - h * 0.16, p.tip + h * 0.3, p.x + h * 0.12, p.tip + h * 0.56, p.x - h * 0.06, PEAK_BASE + 8);
-    ctx.lineTo(g.lx - 80, PEAK_BASE + 8);
-    ctx.lineTo(g.lx - 80, p.tip - 10);
-    ctx.closePath();
-    ctx.fillStyle = vGrad(ctx, p.tip, PEAK_BASE, [
+    const s0: [number, number] = [p.x + h * 0.04, p.tip - 4];
+    const s1: [number, number] = [p.x - h * 0.2, p.tip + h * 0.28];
+    const s2: [number, number] = [p.x + h * 0.16, p.tip + h * 0.6];
+    const s3: [number, number] = [p.x - h * 0.02, PEAK_BASE + 8];
+    const bez = (t: number): [number, number] => {
+      const u = 1 - t;
+      return [
+        u * u * u * s0[0] + 3 * u * u * t * s1[0] + 3 * u * t * t * s2[0] + t * t * t * s3[0],
+        u * u * u * s0[1] + 3 * u * u * t * s1[1] + 3 * u * t * t * s2[1] + t * t * t * s3[1],
+      ];
+    };
+    const shadeFill = vGrad(ctx, p.tip, PEAK_BASE, [
       [0, shTop],
       [0.45, sh],
       [1, mix(sh, A['ridge-far'], 0.18)],
     ]);
-    ctx.fill();
-    // Soft reflected-light band just inside the split (keeps the S readable but gentle).
-    ctx.strokeStyle = rgba(A.snow, 0.22);
-    ctx.lineWidth = 5;
     ctx.beginPath();
-    ctx.moveTo(p.x + h * 0.03, p.tip + 4);
-    ctx.bezierCurveTo(p.x - h * 0.18, p.tip + h * 0.3, p.x + h * 0.1, p.tip + h * 0.56, p.x - h * 0.08, PEAK_BASE + 8);
+    ctx.moveTo(s0[0], s0[1]);
+    ctx.bezierCurveTo(s1[0], s1[1], s2[0], s2[1], s3[0], s3[1]);
+    ctx.lineTo(g.lx - 80, PEAK_BASE + 8);
+    ctx.lineTo(g.lx - 80, p.tip - 10);
+    ctx.closePath();
+    ctx.fillStyle = shadeFill;
+    ctx.fill();
+    for (const [ft, len, drop] of [
+      [0.3, 0.2, 0.14],
+      [0.52, 0.26, 0.16],
+      [0.74, 0.18, 0.12],
+    ] as [number, number, number][]) {
+      const [fx, fy] = bez(ft);
+      const [gx2, gy2] = bez(ft + 0.08);
+      ctx.beginPath();
+      ctx.moveTo(fx - 2, fy - 2);
+      ctx.quadraticCurveTo(fx + h * len * 0.55, fy + h * drop * 0.2, fx + h * len, fy + h * drop);
+      ctx.quadraticCurveTo(fx + h * len * 0.45, fy + h * drop * 0.9, gx2 - 2, gy2);
+      ctx.closePath();
+      ctx.fillStyle = shadeFill;
+      ctx.fill();
+    }
+    // Soft reflected-light band just inside the split.
+    ctx.strokeStyle = rgba(A.snow, 0.2);
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(s0[0] - 2, s0[1] + 8);
+    ctx.bezierCurveTo(s1[0] - 2, s1[1], s2[0] - 2, s2[1], s3[0] - 2, s3[1]);
     ctx.stroke();
     // Two rounded rock wedges on the shaded face, lower half only.
-    const rock = mix(A['ridge-far'], sh, 0.25 + back);
+    const rock = mix(A['ridge-far'], sh, 0.2 + back);
     for (let i = 0; i < 2; i++) {
-      const fy = 0.56 + i * 0.2 + rnd() * 0.05;
+      const fy = 0.58 + i * 0.2 + rnd() * 0.04;
       const yy = p.tip + h * fy;
-      const xx = p.x - p.sl * h * fy * (0.45 + i * 0.22) - 4;
-      const ww = 10 + rnd() * 9 + i * 3;
-      const hh = 16 + rnd() * 12;
+      const xx = p.x - p.sl * h * fy * (0.38 + i * 0.26) - 2;
+      const ww = 20 + rnd() * 12 - i * 2;
+      const hh = 11 + rnd() * 6;
       ctx.beginPath();
       smoothClosed(
         ctx,
         [
-          [xx - 1, yy - hh * 0.55],
-          [xx + ww * 0.42, yy + hh * 0.2],
-          [xx + ww * 0.3, yy + hh * 0.48],
-          [xx - ww * 0.35, yy + hh * 0.5],
-          [xx - ww * 0.5, yy + hh * 0.15],
+          [xx - ww * 0.08, yy - hh * 0.62],
+          [xx + ww * 0.2, yy - hh * 0.3],
+          [xx + ww * 0.5, yy + hh * 0.38],
+          [xx, yy + hh * 0.5],
+          [xx - ww * 0.5, yy + hh * 0.36],
+          [xx - ww * 0.3, yy - hh * 0.1],
         ],
-        0.35,
+        0.4,
       );
-      ctx.fillStyle = rock;
+      ctx.fillStyle = vGrad(ctx, yy - hh * 0.6, yy + hh * 0.5, [
+        [0, mix(rock, sh, 0.35)],
+        [1, rock],
+      ]);
       ctx.fill();
-      // a sliver of snow ledge on top of each wedge
-      ctx.strokeStyle = rgba(shTop, 0.7);
-      ctx.lineWidth = 1.6;
+      // snow dusting along the wedge top
+      ctx.strokeStyle = rgba(shTop, 0.85);
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
       ctx.beginPath();
-      ctx.moveTo(xx - ww * 0.35, yy + hh * 0.05);
-      ctx.quadraticCurveTo(xx, yy - hh * 0.5, xx + ww * 0.3, yy + hh * 0.15);
+      ctx.moveTo(xx - ww * 0.36, yy - hh * 0.02);
+      ctx.quadraticCurveTo(xx - ww * 0.12, yy - hh * 0.62, xx + ww * 0.16, yy - hh * 0.28);
       ctx.stroke();
     }
     // Gully lines on the lit face: soft lavender strokes running down-right.
@@ -364,12 +404,12 @@ function bakeFar(b: Baker): void {
       farFrontShape(ctx);
       ctx.clip();
       const r = artRng(503);
-      for (let i = 0; i < 260; i++) {
+      for (let i = 0; i < 220; i++) {
         const x = FAR_X0 + r() * (FAR_X1 - FAR_X0);
-        const yy = FAR_FRONT(x) + 6 + r() * 26;
-        ctx.fillStyle = rgba(shade(A['ridge-far'], 0.1), 0.12 + r() * 0.1);
+        const yy = FAR_FRONT(x) + 7 + r() * 22;
+        ctx.fillStyle = rgba(shade(A['ridge-far'], 0.06), 0.07 + r() * 0.06);
         ctx.beginPath();
-        ctx.arc(x, yy, 2 + r() * 3, 0, Math.PI * 2);
+        ctx.ellipse(x, yy, 4 + r() * 5, 2 + r() * 1.5, 0, 0, Math.PI * 2);
         ctx.fill();
       }
     });
@@ -509,43 +549,45 @@ function bakeSky(b: Baker): void {
     const w = i === 2 ? 230 : i === 0 ? 200 : 170;
     const base = 74;
     b.tex(`land_cloud${i}`, w, 84, (ctx) => {
-      const shape = (c: Ctx) => {
+      const shape = (c: Ctx, grow: number) => {
         for (const [x, y, r] of cs) {
-          c.moveTo(x + r, y);
-          c.arc(x, y, r, 0, Math.PI * 2);
+          c.moveTo(x + r + grow, y);
+          c.arc(x, y, r + grow, 0, Math.PI * 2);
         }
       };
       withState(ctx, () => {
         ctx.beginPath();
         ctx.rect(0, 0, w, base);
         ctx.clip();
+        // soft outline: the union grown by 1.2 px in a darker shade
         ctx.beginPath();
-        shape(ctx);
-        ctx.fillStyle = vGrad(ctx, 10, base, [
-          [0, tint(P.cream, 0.5)],
-          [0.55, A['cloud-sea']],
-          [1, mix(A['cloud-sea'], P.lavender, 0.3)],
+        shape(ctx, 1.3);
+        ctx.fillStyle = rgba(shade(A['cloud-sea'], 0.14), 0.55);
+        ctx.fill();
+        ctx.beginPath();
+        shape(ctx, 0);
+        ctx.fillStyle = vGrad(ctx, 8, base, [
+          [0, tint(P.cream, 0.55)],
+          [0.5, mix(A['cloud-sea'], P.cream, 0.4)],
+          [1, mix(A['cloud-sea'], P.lavender, 0.32)],
         ]);
         ctx.fill();
-        // lit tops: each circle gets a cream crescent toward the upper right
+        ctx.clip();
+        // pillowy highlights toward the upper right of each lobe
         for (const [x, y, r] of cs) {
-          ctx.save();
-          ctx.beginPath();
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-          ctx.clip();
-          ctx.fillStyle = rgba(tint(P.cream, 0.6), 0.75);
-          ctx.beginPath();
-          ctx.arc(x, y, r, 0, Math.PI * 2);
-          ctx.arc(x - r * 0.18, y + r * 0.26, r * 1.02, 0, Math.PI * 2, true);
-          ctx.fill();
-          ctx.restore();
+          ctx.fillStyle = rGrad(ctx, x + r * 0.2, y - r * 0.35, 0, r * 0.95, [
+            [0, tint(P.cream, 0.7), 0.85],
+            [0.6, tint(P.cream, 0.7), 0.25],
+            [1, P.cream, 0],
+          ]);
+          ctx.fillRect(x - r, y - r, r * 2, r * 2);
         }
-        // flat base shading line
-        ctx.fillStyle = vGrad(ctx, base - 8, base, [
+        // underside shade
+        ctx.fillStyle = vGrad(ctx, base - 22, base, [
           [0, P.lavender, 0],
-          [1, P.lavender, 0.22],
+          [1, P.lavender, 0.3],
         ]);
-        ctx.fillRect(0, base - 8, w, 8);
+        ctx.fillRect(0, base - 22, w, 22);
       });
     });
   });

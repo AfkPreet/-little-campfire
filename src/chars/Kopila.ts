@@ -151,8 +151,8 @@ export class Kopila extends Rig {
 
     // Legs: dangling over an edge when sitting.
     const sit = m === 'sitDock';
-    this.legB.setPosition(sit ? -3 : KG.legs[0].x, sit ? 2.6 : KG.legs[0].y).setAngle(sit ? 12 : 0);
-    this.legF.setPosition(sit ? 9 : KG.legs[1].x, sit ? 3 : KG.legs[1].y).setAngle(sit ? -8 : 0);
+    this.legB.setPosition(sit ? -2 : KG.legs[0].x, sit ? 1.2 : KG.legs[0].y).setAngle(sit ? 12 : 0);
+    this.legF.setPosition(sit ? 9 : KG.legs[1].x, sit ? 1.6 : KG.legs[1].y).setAngle(sit ? -8 : 0);
     this.arm.setPosition(this.arm.getData('baseX') as number, this.arm.getData('baseY') as number);
     this.headC.setAngle(0).setPosition(NX, NY);
     this.inner.rotation = 0;

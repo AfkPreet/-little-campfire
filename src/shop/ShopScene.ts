@@ -33,7 +33,7 @@ import { pauseClock } from '@/systems/day';
 import { dishName } from '@/systems/inventory';
 import { hearLegend, legendDue } from '@/systems/mystery';
 import { buy, canAfford, isEssential, itemsFor, missingEssentials, owned, sell, sellRows, type SellRow, type ShopItem } from '@/systems/shop';
-import { Button, Card, Dialog, IconButton, Stepper, Tabs, fmt, iconObj, panel, shadowPanel, txtObj } from '@/ui';
+import { Button, Card, Dialog, IconButton, Stepper, Tabs, fmt, iconObj, panel, shadowPanel, txt, txtObj } from '@/ui';
 import { A, P, hexToInt, mix } from '@/palette';
 
 function icon(scene: Phaser.Scene, id: string): string {
@@ -147,9 +147,9 @@ export default class Shop extends Phaser.Scene {
     void glass;
 
     // Header + exit.
-    const hdr = txtObj(this, roomW / 2, l.safe.top + 36, STR.shop.header, 'h1', { color: P.cream, stroke: mix(P.bark, P.ink, 0.4), strokeWidth: 8 });
+    const hdr = txt(this, Math.max(roomW / 2, 250), l.safe.top + 112, STR.shop.header, 'h1', { color: P.cream, stroke: mix(P.bark, P.ink, 0.4), strokeWidth: 8 });
     hdr.setDepth(20);
-    const exit = new Button(this, Math.min(roomW / 2, 260), l.h - l.safe.bottom - 54, {
+    const exit = new Button(this, Math.max(roomW / 2 + 30, 270), l.h - l.safe.bottom - 54, {
       label: STR.shop.exit,
       variant: 'warm',
       icon: 'icon.arrowRight',
@@ -184,7 +184,7 @@ export default class Shop extends Phaser.Scene {
     const t = txtObj(this, 0, 0, text, 'body', { size: 22, wrap: maxW - 40, align: 'center' });
     const w = Math.min(maxW, t.width + 48);
     const h = t.height + 30;
-    const c = this.add.container(Math.min(Math.max(bx, w / 2 + 20), roomW - w / 2 - 10), 230 - h / 2).setDepth(21);
+    const c = this.add.container(Math.min(Math.max(bx, w / 2 + 20), roomW - w / 2 - 10), 252 - h / 2).setDepth(21);
     c.add([shadowPanel(this, 'card', w, h, 0, 4, 0.14), panel(this, 'ui.card.cream', w, h), t]);
     const tail = this.add.image(0, h / 2 - 4, 'ui.bubbleTail').setOrigin(0.5, 0).setScale(1 / ART_SCALE);
     c.add(tail);
@@ -205,15 +205,18 @@ export default class Shop extends Phaser.Scene {
 
   private catalogWidth(): number {
     const l = layout();
-    return Math.min(760, Math.max(500, l.w * 0.5));
+    return Math.min(780, Math.max(560, l.w * 0.56));
   }
 
   private buildCatalog(): void {
     const l = layout();
     this.catW = this.catalogWidth();
-    this.catH = l.h - l.safe.top - l.safe.bottom - 40;
+    // Sit between the HUD's top row (money, time) and bottom row (backpack, journal).
+    const top = l.safe.top + 92;
+    const bottom = l.h - l.safe.bottom - 104;
+    this.catH = bottom - top;
     const cx = l.w - l.safe.right - 20 - this.catW / 2;
-    const cy = l.safe.top + 20 + this.catH / 2;
+    const cy = top + this.catH / 2;
     this.card = new Card(this, cx, cy, { w: this.catW, h: this.catH });
     this.card.setDepth(10);
     const tabs = new Tabs(this, cx, cy - this.catH / 2 + 46, {
@@ -241,13 +244,13 @@ export default class Shop extends Phaser.Scene {
     }
     const items = itemsFor(this.tab);
     const cols = this.catW >= 700 ? 3 : 2;
-    const rows = 3;
+    const rows = this.catH > 620 ? 3 : 2;
     const per = cols * rows;
     const pages = Math.max(1, Math.ceil(items.length / per));
     this.page = Math.min(this.page, pages - 1);
     const cw = (this.catW - 40 - (cols - 1) * 14) / cols;
     const top = -this.catH / 2 + 96;
-    const ch = Math.min(150, (this.catH - 190) / rows - 12);
+    const ch = Math.min(160, (this.catH - 150) / rows - 12);
     items.slice(this.page * per, this.page * per + per).forEach((it, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);

@@ -18,7 +18,9 @@ export const VIEW_MAX = 1600;
 
 /** Strip width needed for a band with scroll factor f in a world of worldW. */
 export function bandW(f: number, worldW = 2800): number {
-  return Math.ceil(VIEW_MAX + Math.max(0, worldW - VIEW_MAX) * f + 60);
+  // Multiple of 96 so every strip chunk (and half-res rim chunk) is a whole
+  // number of device pixels at ART_SCALE 2, 2.25 and 2.5: no seams.
+  return Math.ceil((VIEW_MAX + Math.max(0, worldW - VIEW_MAX) * f + 60) / 96) * 96;
 }
 
 /** Parallax factors for the mist strips (WORLD 3.4). */
@@ -50,11 +52,11 @@ export interface Peak {
 }
 /** Drawn in this order (back peaks first). */
 export const PEAKS: Peak[] = [
-  { x: 528, tip: 140, sl: 0.94, sr: 0.63, back: true, seed: 11 },
-  { x: 1236, tip: 128, sl: 0.92, sr: 0.61, back: true, seed: 12 },
-  { x: 312, tip: 170, sl: 0.98, sr: 0.68, seed: 13 },
-  { x: 784, tip: 106, sl: 0.9, sr: 0.65, eldest: true, seed: 14 },
-  { x: 1024, tip: 152, sl: 0.86, sr: 0.7, seed: 15 },
+  { x: 470, tip: 150, sl: 0.94, sr: 0.63, back: true, seed: 11 },
+  { x: 1296, tip: 132, sl: 0.92, sr: 0.61, back: true, seed: 12 },
+  { x: 276, tip: 172, sl: 0.98, sr: 0.68, seed: 13 },
+  { x: 680, tip: 108, sl: 0.9, sr: 0.65, eldest: true, seed: 14 },
+  { x: 864, tip: 166, sl: 0.84, sr: 0.7, seed: 15 },
 ];
 /** Peak bases are hidden by the cloud sea; drawn down to here. */
 export const PEAK_BASE = 336;
@@ -79,29 +81,25 @@ export function ridgeFn(base: number, humps: Hump[], wobble: number, seed: numbe
 
 /** F2 far ridges: back (lighter) and front ridgelines. */
 export const FAR_BACK = ridgeFn(
-  314,
+  334,
   [
-    [140, 46, 210],
-    [470, 40, 190],
-    [960, 58, 230],
-    [1300, 44, 190],
-    [1640, 52, 220],
+    [260, 38, 150],
+    [1000, 46, 190],
+    [1580, 40, 170],
   ],
-  10,
+  8,
   301,
 );
 export const FAR_FRONT = ridgeFn(
-  336,
+  348,
   [
-    [40, 34, 150],
-    [330, 52, 160],
-    [600, 74, 128],
-    [880, 66, 140],
-    [1150, 46, 190],
-    [1440, 70, 170],
-    [1720, 40, 150],
+    [80, 44, 140],
+    [596, 84, 118],
+    [884, 72, 128],
+    [1420, 80, 150],
+    [1760, 52, 140],
   ],
-  9,
+  8,
   302,
 );
 /** Saddle on the front far ridge where the cloud spill pours through. */

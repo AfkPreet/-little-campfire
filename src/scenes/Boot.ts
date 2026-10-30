@@ -100,7 +100,13 @@ export default class Boot extends Phaser.Scene {
     const keys = this.scene.manager.getScenes(false).map((s) => s.scene.key);
     const byLower = new Map(keys.map((k) => [k.toLowerCase(), k]));
     if (target && byLower.has(target.toLowerCase())) {
-      this.scene.start(byLower.get(target.toLowerCase())!);
+      const key = byLower.get(target.toLowerCase())!;
+      this.scene.start(key);
+      // World scenes get the HUD on top, as they do through the normal flow.
+      if ((key === SCENES.camp || key === SCENES.shop) && keys.includes(SCENES.hud)) {
+        this.scene.run(SCENES.hud);
+        this.scene.bringToTop(SCENES.hud);
+      }
       return;
     }
     if (keys.includes(SCENES.title)) this.scene.start(SCENES.title);

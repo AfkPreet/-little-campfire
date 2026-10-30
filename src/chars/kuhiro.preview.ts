@@ -357,22 +357,12 @@ export default function preview(scene: Phaser.Scene): void {
     await playShootingStar(scene);
     await wait(800);
     // Dawn after rain: Monsoon Rainbow.
-    const p = { v: 1 };
-    await new Promise<void>((res) =>
-      scene.tweens.add({
-        targets: p,
-        v: 1.25,
-        duration: 1500,
-        onUpdate: () => {
-          light = lightAt(p.v >= 1.125 ? 0.1 : 1, 0);
-          relight();
-        },
-        onComplete: () => res(),
-      }),
-    );
-    kuhiro.setVisible(false);
+    light = lightAt(0.09, 0);
+    relight();
     await playRainbow(scene, { centerX: w * 0.58, hold: 6000 });
     // Night again: Moonbow.
+    rainAmt = 0.3;
+    rain.set(0.3, true);
     light = lightAt(1, 0.3);
     relight();
     showMoonbow(scene, { centerX: w * 0.58 });

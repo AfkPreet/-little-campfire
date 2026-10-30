@@ -83,6 +83,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   private readonly veil: Img;
   private readonly waterGlow: Img;
   private readonly waterline: Img;
+  private readonly wisps: Img[] = [];
+  private readonly twinkles: Img[] = [];
   private readonly drops: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly mist: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly plume: Phaser.GameObjects.Particles.ParticleEmitter;
@@ -215,6 +217,20 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.waterGlow = mk('glow', 110, 26).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['lake-glow'])).setAlpha(0);
     this.waterGlow.setScale((K * 720) / 256, (K * 120) / 256);
     this.waterline = mk('kuhiro_waterline', 110, 0).setTint(hexToInt(A['fish-glow'])).setAlpha(0);
+    // Lake-breath wisps lying on the water around the body (its breath is the lake's mist).
+    for (const [wx, wy, sw] of [
+      [-150, -4, 0.8],
+      [90, 2, 1.1],
+      [330, -2, 0.85],
+    ] as [number, number, number][]) {
+      this.wisps.push(mk('mistBlob', wx, wy).setScale(K * sw, K * 0.42).setAlpha(0).setData('x', wx));
+    }
+    // Twinkles that ride the shimmer sweep over the scales.
+    for (let i = 0; i < 3; i++) {
+      const tw = mk('sparkle', 0, 0).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['scale-glow'])).setAlpha(0);
+      this.twinkles.push(tw);
+      bc.add(tw);
+    }
 
     // Drop strings, gill mist and the breath plume.
     this.drops = scene.add.particles(0, 0, 'drop', {
@@ -250,7 +266,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       emitting: false,
     });
 
-    this.add([this.halo, this.tail, this.liftC, this.veil, this.waterGlow, this.waterline, this.drops, this.mist, this.plume]);
+    this.add([this.halo, this.tail, this.liftC, this.veil, this.waterGlow, this.waterline, ...this.wisps, this.drops, this.mist, this.plume]);
     this.setDepth(DEPTH.water + 1);
     this.setAlpha(0);
     this.setVisible(false);
@@ -273,7 +289,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       for (const p of parts) p.setTint(t);
     }
     this.veil.setTint(l.water);
-    this.mist.setParticleTint(mixInt(P.cream, l.hex.haze, 0.25));
+    const mc = mixInt(P.cream, l.hex.haze, 0.25);
+    this.mist.setParticleTint(mc);
+    for (const w of this.wisps) w.setTint(mc);
     this.plume.setParticleTint(mixInt(P.cream, A['fish-glow'], 0.3));
   }
 
@@ -604,6 +622,11 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.blushes[0].setAlpha(this.blushA * 0.85);
     this.blushes[1].setAlpha(this.blushA);
     this.waterline.setAlpha(above * (0.22 + 0.07 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
+    for (let i = 0; i < this.wisps.length; i++) {
+      const w = this.wisps[i];
+      w.x = (w.getData('x') as number) + Math.sin(t * 0.11 + i * 2.1) * 34;
+      w.setAlpha((0.2 + 0.08 * Math.sin(t * 0.3 + i)) * (0.3 + 0.7 * up) * (0.6 + 0.4 * g));
+    }
 
     // Freckles pulse on their own phases.
     const fd = Math.exp(-dt * 2.2);
@@ -614,6 +637,10 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     if (this.risen && t >= this.nextSweep) {
       this.sweepT = 0;
       this.nextSweep = t + 4;
+      for (const tw of this.twinkles) {
+        const gl = this.glints[(Math.random() * this.glints.length) | 0];
+        tw.setPosition(gl.img.x + Phaser.Math.Between(-10, 18), gl.img.y + Phaser.Math.Between(-16, 16)).setData('p', gl.p);
+      }
     }
     if (this.sweepT >= 0) {
       this.sweepT += dt;
@@ -622,9 +649,15 @@ export class Kuhiro extends Phaser.GameObjects.Container {
         const d = (s - gl.p) / 0.16;
         gl.img.setAlpha(0.42 * Math.exp(-d * d) * above);
       }
+      for (const tw of this.twinkles) {
+        const d = (s - (tw.getData('p') as number)) / 0.1;
+        const a = Math.exp(-d * d) * above;
+        tw.setAlpha(0.8 * a).setScale(K * (0.25 + 0.35 * a)).setAngle(this.sweepT * 60);
+      }
       if (this.sweepT > 1.8) {
         this.sweepT = -1;
         for (const gl of this.glints) gl.img.setAlpha(0);
+        for (const tw of this.twinkles) tw.setAlpha(0);
       }
     }
 
