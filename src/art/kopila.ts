@@ -100,38 +100,42 @@ export const kKey = (name: string): string => `kopila_${name}`;
  * A scallop petal scale: rounded teardrop, round end up (like a rhododendron
  * bud scale), soft point down. Highlight arc along the top edge.
  */
-export function petal(ctx: Ctx, x: number, y: number, w: number, h: number, rot: number, lw = 1.5, fill = PANGO): void {
+export function petal(ctx: Ctx, x: number, y: number, w: number, h: number, rot: number, lw = 1.5, fill = PANGO, line = PLINE): void {
   withState(ctx, () => {
     ctx.translate(x, y);
     ctx.rotate(rot);
     const hw = w / 2;
     const hh = h / 2;
+    // Broad scallop: wide round top, sides tuck in to a soft point.
     ctx.beginPath();
     ctx.moveTo(0, hh);
-    ctx.bezierCurveTo(-hw * 0.5, hh * 0.86, -hw, hh * 0.3, -hw, -hh * 0.12);
-    ctx.bezierCurveTo(-hw, -hh * 0.72, -hw * 0.55, -hh, 0, -hh);
-    ctx.bezierCurveTo(hw * 0.55, -hh, hw, -hh * 0.72, hw, -hh * 0.12);
-    ctx.bezierCurveTo(hw, hh * 0.3, hw * 0.5, hh * 0.86, 0, hh);
+    ctx.bezierCurveTo(-hw * 0.32, hh * 0.92, -hw, hh * 0.42, -hw, -hh * 0.1);
+    ctx.bezierCurveTo(-hw, -hh * 0.78, -hw * 0.52, -hh, 0, -hh);
+    ctx.bezierCurveTo(hw * 0.52, -hh, hw, -hh * 0.78, hw, -hh * 0.1);
+    ctx.bezierCurveTo(hw, hh * 0.42, hw * 0.32, hh * 0.92, 0, hh);
     ctx.closePath();
     ctx.fillStyle = vGrad(ctx, -hh, hh, [
-      [0, mix(fill, PLIGHT, 0.55)],
-      [0.42, fill],
-      [1, mix(fill, PLINE, 0.22)],
+      [0, mix(fill, PLIGHT, 0.6)],
+      [0.38, fill],
+      [1, mix(fill, PLINE, 0.28)],
     ]);
     ctx.fill();
     ctx.lineWidth = lw;
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = PLINE;
+    ctx.strokeStyle = line;
     ctx.stroke();
     // Highlight arc along the top edge.
     ctx.beginPath();
-    ctx.ellipse(0, -hh * 0.08, hw * 0.6, hh * 0.64, 0, Math.PI * 1.2, Math.PI * 1.8);
-    ctx.strokeStyle = rgba(tint(PLIGHT, 0.35), 0.95);
-    ctx.lineWidth = Math.max(1, lw * 0.85);
+    ctx.ellipse(0, -hh * 0.04, hw * 0.62, hh * 0.7, 0, Math.PI * 1.25, Math.PI * 1.75);
+    ctx.strokeStyle = rgba(tint(PLIGHT, 0.5), 0.85);
+    ctx.lineWidth = Math.max(0.9, lw * 0.75);
     ctx.lineCap = 'round';
     ctx.stroke();
   });
 }
+
+/** Softer line for petals inside a silhouette (the silhouette keeps PLINE). */
+const INNER_LINE = mix(PLINE, PANGO, 0.25);
 
 /** Rotation that points a petal's round end along direction (dx, dy). */
 function dirRot(dx: number, dy: number): number {

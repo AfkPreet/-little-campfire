@@ -8,7 +8,7 @@
  * Texture namespace: "hero_".
  */
 import type Phaser from 'phaser';
-import { Baker, type Ctx, OUTLINE, ellipsePath, eyeClosed, eyeHappy, lGrad, rGrad, sparklePath, softShadow, vGrad, withState } from './kit';
+import { Baker, type Ctx, OUTLINE, ellipsePath, eyeClosed, eyeHappy, lGrad, rGrad, roundRectPath, sparklePath, softShadow, vGrad, withState } from './kit';
 import { A, P, mix, rgba, shade, tint } from '@/palette';
 
 // ---------------------------------------------------------------------------
@@ -657,7 +657,7 @@ function blade(ctx: Ctx, a: number, len: number, w: number, bend: number): void 
   });
 }
 
-function stem(ctx: Ctx, pts: [number, number][], c = P.moss, w = 2): void {
+function stem(ctx: Ctx, pts: [number, number][], c: string = P.moss, w = 2): void {
   linedStroke(
     ctx,
     (cx) => {
@@ -672,7 +672,7 @@ function stem(ctx: Ctx, pts: [number, number][], c = P.moss, w = 2): void {
   );
 }
 
-function leaf(ctx: Ctx, x: number, y: number, a: number, len = 6, c = P.sage): void {
+function leaf(ctx: Ctx, x: number, y: number, a: number, len = 6, c: string = P.sage): void {
   withState(ctx, () => {
     ctx.translate(x, y);
     ctx.rotate(a);
@@ -932,7 +932,7 @@ export function drawRod(ctx: Ctx): void {
   }
   // jute grip wrap
   ctx.beginPath();
-  ctx.roundRect?.(-2.6, -5, 5.2, 11, 2.2);
+  roundRectPath(ctx, -2.6, -5, 5.2, 11, 2.2);
   fillLine(ctx, JUTE, shade(JUTE, 0.32), 1);
   ctx.strokeStyle = rgba(shade(JUTE, 0.3), 0.6);
   ctx.lineWidth = 0.8;
