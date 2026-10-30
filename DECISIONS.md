@@ -54,3 +54,27 @@ Every decision as **chosen / rejected / why**. Newest sections at the bottom of 
 | Mid-day weather change | 10% per day (not Day 1), at p 0.25-0.75; rain fades in/out over ~8 s | Abrupt switch | Serene |
 | Rod hint | Shown once per day, after 3 casts while a Willow-Rod+ fish is in season with a weaker rod | Every 3 casts | Gentle, not naggy |
 | Dish price floor | max(listed price, ceil(1.25 x ingredient value)); staples at shop price, Moon Blossom 0 | — | Spec rule; rare fish make pricier dishes |
+
+## 4. The world (M0) — full rationale in `docs/WORLD.md` section 9 and Appendix A
+
+Process: four independent concepts (Eastern Himalaya, Western Ghats, Meghalaya, open choice), three lens judges (visual-in-code, cast & originality, systems & culture), then a synthesis that fixed every judge problem and grafted the best runner-up ideas. Scores: Himalaya 25.5, Ghats 23.5, Meghalaya 21.5, Open 19.5.
+
+| Area | Chosen | Rejected | Why |
+| --- | --- | --- | --- |
+| Overall | "Himalaya", revised | "Ghats" (Little Monsoon) — finale collided with real offering rites; "Meghalaya" — see-through riverbed fights the side view, generic kitten hero | Top total, 2 of 3 judges; the mystery dish, the region's food and the title are one word; every lighting state has a code-native spectacle |
+| Title | **Moonlight Momos** | Cloud & Kettle (generic, "&"); Junkiri (one word, unparseable) | 2 words, alliterative, regional, names the mystery dish; no existing game found (WebSearch) |
+| Setting | Junkiri Danda / Jun Pokhari, fictional monsoon ridge lake | Darjeeling tea slope (rigid stripes, no lake); Teesta valley (loses snow ridges + cloud sea; kept as the teaser) | Natural depth bands from simple shapes, mist that belongs, monsoon rain as the reward |
+| Hero | **Tuki**, large-eared pika with a doko basket | Red panda (reads as Retsuko / Mei / Shifu); Himalayan marmot (generic blob) | Native, round, tailless; haying behaviour becomes the quirk; the doko silhouette is unique |
+| Shopkeeper | **Boju**, grandmother yak with knitted horn cosies | Black bear (genre default, feared); Takin (Bhutan, resists kawaii) | The high-camp animal; knitting explains the Wool Bunting and Shawl Hammock |
+| Companion | **Kopila**, pangolin pup | Collared owlet ("ullu" is an insult; genre default); slow loris (feeds pet-trade imagery) | Shy and nocturnal; curling into a bud-ball is the tap-to-hide gag |
+| Guardian | **Kuhiro**, great mist-fish | Naga/serpent (living faith, Haku); giant mahseer/koi (too close to catchable fish; Tui and La) | Mist-is-breath lore ties weather, clue 1 and the finale; freckles = constellation |
+| Currency | **Rupees, written ₹120** | Cowrie shells (ritual use, ocean shells); paisa (120 paisa = ₹1.20) | Honest and instantly understood; format rules prevent misreads |
+| Lead instrument | **Bansuri / murali** (Nepali hill-folk style) with madal by day | Sarangi (melancholy, generators flatten it); tungna (generators don't know it) | Sounds like mist and wind; easy to fake well in Web Audio for the fallback |
+| Rain gear | **Ghum** cane-and-leaf hood | Leaf umbrella (Totoro); flipped doko hat (costume cliché, spills flowers) | Regional, hands-free, keeps the ears visible |
+| Content reskin | Every name/flavour from WORLD 7; every number unchanged; ids stay the spec ids | Changing numbers to fit flavour | Balance is locked; ids keep saves stable |
+| Fish base sizes | Garra 7, Barb 12, Asala 24, Danio 9, Loach 10, Glowfin 14, Katle 38, Mahseer 55 cm | — | Spec gave ±30% but no base; real-species proportions |
+| Camp layout | WORLD 3.2 anchor lines (walk line 585, dock 575, lake horizon 452) | My earlier placeholder (612) | Fits the composition rule (top 40% sky/ridges, hero on the lower third) |
+
+### Accents (spec: every accent logged)
+
+All 74 accents from WORLD.md section 8 were added to `ACCENTS` in `src/palette.ts` with their exact names and hexes; every one is at or below 40% HSB saturation (verified by script at M0). One of my own engine values failed the check (night water tint `#3F4670`, 43.7%) and was changed to the world's night-lake colour `#4E5A7A` (36.1%). The spec-locked night sky top `#2F3558` (46.6%) is a lighting key, not an accent, and stays as specified.

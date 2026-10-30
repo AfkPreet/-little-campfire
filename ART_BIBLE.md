@@ -107,6 +107,73 @@ Pure black or white, neon, harsh red, grey drop shadows, hard-edged boxes, emoji
 
 ---
 
-## Part B — The world
+## Part B — The world: Moonlight Momos at Junkiri Danda
 
-_Filled in from `docs/WORLD.md` at M0: setting and layer plan, how each lighting key looks here, cast sheets, accents, UI motifs._
+Source of truth: `docs/WORLD.md` (section numbers in brackets). This part is the build-facing summary.
+
+### B1. Setting [3.1]
+
+- **Junkiri Danda** ("Firefly Ridge"): a fictional monsoon ridge at ~3,000 m in Sikkim/Darjeeling-style hills. Rhododendrons (*gurans*), cryptomeria (*dhupi*), hill bamboo (*malingo*).
+- **Jun Pokhari** ("Moon Pond"): a small round jade lake whose mist is the guardian breathing.
+- Beyond the lake: a **sea of cloud**, one nearer **tea-and-hill-town ridge** (4 tea stripes, 4 tin-roofed houses whose 5 windows light up at dusk like a necklace) and the **Snow Grannies**, pillow-round snow peaks that blush at dawn (never a real mountain).
+- Next campsite (teaser only): **Sunthala Bend**, a warm orange-orchard river bend.
+
+### B2. Camp layout [3.2] — implemented in `src/data/camp.ts`
+
+World 2800 x 720. Walk line y 585; dock deck y 575; lake horizon y 452; back rim of the clearing y 500; foreground band 610-720.
+
+Left to right: shop path exit + corner of Boju's store (0-160) → bamboo path with 3 slabs (160-520) → clearing (520-1990): katus tree 560, sisnu patch 660, tent spot A 780, ainselu bush 930, mossy log 1020, Bud Bush 1060 (back rim), **fire 1160**, tent spot B 1320 (default), ainselu bush 1470, mossy log 1560, tent spot C 1700, hammock trunks 1840 + 1990 → shore (1990-2240): Moon Gurans bush 2120, Moon Scale 2180 → dock (2240-2520, cast from 2500) → open water to 2800 (Kuhiro rises at 2660; first-night glow at 2700, 470).
+
+### B3. Depth bands [3.4]
+
+| Band | Scroll | Content | Key colours |
+| --- | --- | --- | --- |
+| Sky | 0 | 3 vertex-tinted gradient bands, sun with bloom, moon with lavender halo, pillow cumulus, stars, Milky Way, **the Gurans constellation** (6 stars in a flower) | lighting keys |
+| Snow Grannies | 0.07 | 5 rounded snow peaks (corner radius 20-25%, asymmetric shoulders, lit/shade split), alpenglow masks | snow, snow-shade, ridge-far, alpenglow |
+| Cloud sea | 0.08-0.1 | the signature horizon at 38-45% height; rises at dawn, in rain and on misty mornings | cloud-sea |
+| Far ridges | 0.1 | smooth ridgelines with tree-dome bumps; cloud spill through a saddle (40 s loop) | ridge-far, cloud-spill |
+| Valley ribbons | 0.18 / 0.35 | soft long mist ellipses | lavender over cream |
+| Mid ridge | 0.25 | tea terraces, 4 hill houses + window necklace, 2 waterfall threads (5 in rain) | ridge-near, tea-green, tin-* |
+| Near trees | 0.5 | far-shore forest: dhupi cones, rhododendron domes, malingo fans; reed line; rain steam curls; dusk junkiri ribbon | dhupi, moss, gurans, malingo, reed |
+| Water | 0.5 → 1.0 | jade lake, mirrored far/mid/near rows that ripple, sun/moon path, glints, rain rings, under-glow | lake-jade → lake-deep, lake-glow |
+| Lake-breath | 0.55-0.6 | low wisps hiding near-tree bases | cream |
+| Ground | 1.0 | scalloped grass, boulders, slabs, firepit, spots, pebbles, dock, shop corner, two framing rhododendrons | sage, moss, bark, stone, pebble, shop-wood |
+| Foreground | 1.3 | big rhododendron leaves, grass with seed heads, fiddleheads (≤ 20% of frame); rain beads | moss -8%, sage, butter rim |
+
+Max 3 plant species per near/foreground band. Atmospheric tint toward the horizon: snow 70%, far 55%, mid 40%, near 20%, ground 0%, foreground -8%.
+
+### B4. Lighting in this world [4]
+
+- **Dawn** — "the Grannies blush first": alpenglow on the top 30% of peaks, peach ridge rims, high lavender-cream cloud sea, thick lake-breath, window necklace switches off, dew glints.
+- **Day** — airy and legible: pillow cumulus, cloud banner off the Eldest Granny, jade lake with cream glints, drifting gurans petals.
+- **Golden hour** — two-tone rims: butter on the sun side of every rounded mass, lavender in shade; honey cloud sea; butter sun path; backlit seed heads.
+- **Dusk** — rose peaks with a lavender shadow climbing them, window necklace switching on 0.4 s apart, first junkiri.
+- **Night** — three tiers of light: stars + Milky Way + Gurans constellation above; window dots and a moon-blue ghost range across the valley; junkiri, firelight pool, tent glow and laltin pools below.
+- **Rain** — snows fade, the cloud sea swallows the far ridges, waterfall threads 2 → 5, walking mist, steam curls, drips from leaves, tent and dock; the tent doorway glows warm.
+- **Misty morning** — the cloud sea sits at camp level, everything far ghosted, ground mist burns off by midday.
+
+Band target colours per key are in WORLD 4; the engine reaches them via the `LIGHT` tints in `src/palette.ts`.
+
+### B5. Cast [5] — quick sheets
+
+| Character | Species / size | Silhouette keys | Colours | Signature |
+| --- | --- | --- | --- | --- |
+| **Tuki** (hero) | large-eared pika, 104 px | one round tea-bun bean, big round ears with pale rims, **no tail**, the **doko** cone basket always poking up behind | oat, oat-shade, oat-line, peach ears, cream muzzle; doko, doko-band | the *haymaker* quirk (plucks a flower, tucks it in the doko; fill grows with Contentment tier); the *ghum* rain hood (never a leaf umbrella) |
+| **Boju** (shopkeeper) | grandmother yak (*dri*), ~250 px bust | haystack fur mound, squircle head, 5-tuft fringe above the eyes, short horns | yak, yak-face, horn, rose + butter knitwear | knitted **horn cosies** with pom-poms, muffler, brass bell, always knitting; doubled-word speech |
+| **Kopila** (companion) | Chinese pangolin pup, 48 px (34 curled) | egg body, big head, 3 rows of rose-taupe petal scales, wrapping tail, no claws | pango, pango-light, pango-face | curls into a **bud-ball** identical to the Bud Bush's rhododendron buds; one-eye peek |
+| **Kuhiro** (guardian) | great mist-fish, ~560 x 300 visible | one huge rounded bean, cloud-scale back, petal-shaped fins, two-lobed tail, no whiskers | mist-lavender → mistfish → moonmilk; fish-glow halo; mistfish-line (the only cool outline) | 6 **Gurans freckles** that match the night constellation; gill-breath = lake mist |
+
+### B6. Accents [8]
+
+74 world accents live in `ACCENTS` (`src/palette.ts`), all at or below 40% HSB saturation. Groups: world & sky, water, plants/ground/forage, kitchen/shop/UI, Tuki, Boju, Kopila, Kuhiro, fish. Use them by their WORLD.md names: `A['lake-jade']`, `A.gurans`.
+
+### B7. UI motifs [6]
+
+- Journal: **lokta paper** (`lokta`) with fibre specks, deckled rounded edge, tied with `jute` string; catch cards share it.
+- Contentment HUD: a tiny tin **tuki lamp** whose flame grows each tier.
+- Currency: copper rupee coin (gurans emboss, ₹ stamp); amounts always `₹120`, set in Baloo 2.
+- Essentials: a small gurans-leaf tag. Basket tray icon: a mini doko.
+
+### B8. Never (this setting) [6]
+
+Prayer flags or anything that reads as them (Wool Bunting is always 3-colour **triangles** on one curved line), chortens, mani stones, prayer wheels, temple/monastery roofs, butter lamps, singing bowls, khadas, ritual masks, scripts, lotus motifs, nagas, deities; real sacred places by name; costumes on animals; khukuri, alcohol, porter imagery; leaf umbrellas; any altar/incense/lamp/garland/bowing at the offering. Kuhiro is never caught, hooked or netted.
