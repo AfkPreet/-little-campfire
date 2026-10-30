@@ -5,6 +5,7 @@
  * finale live in their own controllers (src/camp/*.ts) and share a CampCtx.
  */
 import Phaser from 'phaser';
+import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
 import { bus } from '@/core/bus';
 import { anyParam, markReady, param, registerDebug } from '@/core/debug';
@@ -134,7 +135,7 @@ export default class Camp extends Phaser.Scene {
     // Camera starts on Tuki.
     this.snapCamera();
     this.light.update(0, 16);
-    this.cameras.main.fadeIn(reduceMotion() ? 200 : 600, 47, 53, 88);
+    if (!directLaunch()) this.cameras.main.fadeIn(reduceMotion() ? 200 : 600, 47, 53, 88);
 
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
 

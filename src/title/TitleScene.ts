@@ -4,6 +4,7 @@
  * The background is the live camp at dusk: fire, fireflies, Tuki dozing.
  */
 import Phaser from 'phaser';
+import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
 import { markReady } from '@/core/debug';
 import { continueTrip, openOverlay, startTrip } from '@/core/flow';
@@ -100,7 +101,7 @@ export default class Title extends Phaser.Scene {
 
     setAmbience({ scene: 'title', p: TITLE_P, raining: false, inTent: false, nearFire: 0.8, nearWater: 0.2 });
     setMusicMood('night');
-    cam.fadeIn(reduceMotion() ? 200 : 900, 47, 53, 88);
+    if (!directLaunch()) cam.fadeIn(reduceMotion() ? 200 : 900, 47, 53, 88);
     markReady(this, 1200);
   }
 

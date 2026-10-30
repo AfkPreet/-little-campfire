@@ -6,6 +6,7 @@
  * Moon Scale. The clock is paused in here.
  */
 import Phaser from 'phaser';
+import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
 import { bus } from '@/core/bus';
 import { markReady } from '@/core/debug';
@@ -86,7 +87,7 @@ export default class Shop extends Phaser.Scene {
 
     setAmbience({ scene: 'shop', p: s.p, raining: s.weather.raining, inTent: false, nearFire: 0, nearWater: 0 });
     setMusicMood(musicMoodFor(s.p, s.weather.raining));
-    this.cameras.main.fadeIn(reduceMotion() ? 150 : 450, 47, 53, 88);
+    if (!directLaunch()) this.cameras.main.fadeIn(reduceMotion() ? 150 : 450, 47, 53, 88);
 
     if (legendDue()) this.time.delayedCall(700, () => this.legend());
     else {

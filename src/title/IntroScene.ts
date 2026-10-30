@@ -4,6 +4,7 @@
  * place by the water. Nothing to do but be cozy." / "First, a stop at the shop..."
  */
 import Phaser from 'phaser';
+import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
 import { markReady } from '@/core/debug';
 import { go } from '@/core/flow';
@@ -51,7 +52,7 @@ export default class Intro extends Phaser.Scene {
     this.showPage(0, false);
     setAmbience({ scene: 'intro', p: 0.05, raining: false, inTent: false, nearFire: 0, nearWater: 0 });
     setMusicMood('day');
-    this.cameras.main.fadeIn(reduceMotion() ? 200 : 600, 47, 53, 88);
+    if (!directLaunch()) this.cameras.main.fadeIn(reduceMotion() ? 200 : 600, 47, 53, 88);
     markReady(this, 900);
   }
 

@@ -6,6 +6,7 @@
  * little longer (free play) and Start a new trip (keeps journal and badges).
  */
 import Phaser from 'phaser';
+import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
 import { markReady } from '@/core/debug';
 import { go, startTrip } from '@/core/flow';
@@ -66,7 +67,7 @@ export default class Album extends Phaser.Scene {
     this.buildNav();
     setAmbience({ scene: 'album', p: 0.92, raining: false, inTent: false, nearFire: 0.3, nearWater: 0 });
     setMusicMood('night');
-    this.cameras.main.fadeIn(reduceMotion() ? 200 : 900, 47, 53, 88);
+    if (!directLaunch()) this.cameras.main.fadeIn(reduceMotion() ? 200 : 900, 47, 53, 88);
     markReady(this, 1200);
   }
 

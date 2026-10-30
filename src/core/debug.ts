@@ -48,3 +48,8 @@ export function markReady(scene: { time: { delayedCall: (ms: number, fn: () => v
 export function clearReady(): void {
   (window as unknown as { __shotReady?: boolean }).__shotReady = false;
 }
+
+/** True when the page was opened straight into a scene (?scene=...), e.g. for screenshots. */
+export function directLaunch(): boolean {
+  return !!param('scene');
+}
