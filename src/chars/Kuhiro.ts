@@ -118,7 +118,6 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   private dropAcc = 0;
   private happy = false;
   private bodyTint = 0xffffff;
-  private lastLift = -1;
   private lastBodyY = 9999;
   private readonly topPts: [number, number][];
 
@@ -132,7 +131,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Halo (behind everything): additive, 1.5x the body.
     const h = KH.halo;
     this.halo = mk('glow', h.x, h.y).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow-edge']));
-    this.halo.setScale(h.w / 256, h.h / 256);
+    this.halo.setScale((K * h.w) / 256, (K * h.h) / 256);
 
     // Tail: separate so it can lift and flip out at the far right.
     this.tail = mk('kuhiro_tail', KH.tail.x, 140, 0.5, 0.95);
@@ -163,15 +162,15 @@ export class Kuhiro extends Phaser.GameObjects.Container {
 
     // Heart-glow: a campfire seen through fog, deep in the chest.
     this.heartGlow = mk('glow', KH.heart.x, KH.heart.y).setTint(hexToInt(P.glow)).setAlpha(0.35);
-    this.heartGlow.setScale(200 / 256, 170 / 256);
+    this.heartGlow.setScale((K * 200) / 256, (K * 170) / 256);
     this.heartCore = mk('glow', KH.heart.x, KH.heart.y).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(P.glow)).setAlpha(0.12);
-    this.heartCore.setScale(120 / 256, 100 / 256);
+    this.heartCore.setScale((K * 120) / 256, (K * 100) / 256);
     bc.add([this.heartGlow, this.heartCore]);
 
     // Freckles: 8-12 scattered small ones, then the Gurans flower.
     const addFreckle = (fx: number, fy: number, r: number, list: Freckle[], base: number) => {
       const halo = mk('glowSmall', fx, fy).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow']));
-      halo.setScale((r * 5.2) / 48);
+      halo.setScale((K * r * 5.2) / 48);
       const core = mk('kuhiro_freckle', fx, fy).setScale((K * r) / 5.5);
       list.push({ core, halo, base, period: Phaser.Math.FloatBetween(2, 4), phase: Math.random() * TAU, lit: 0, flash: 0, r });
       bc.add([halo, core]);
@@ -213,7 +212,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // The lake in front of the submerged body.
     this.veil = mk('kuhiro_veil', -300, 0, 0, 0).setScale(2 * K);
     this.waterGlow = mk('glow', 110, 26).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['lake-glow'])).setAlpha(0);
-    this.waterGlow.setScale(720 / 256, 120 / 256);
+    this.waterGlow.setScale((K * 720) / 256, (K * 120) / 256);
     this.waterline = mk('kuhiro_waterline', 110, 0).setTint(hexToInt(A['fish-glow'])).setAlpha(0);
 
     // Drop strings, gill mist and the breath plume.
@@ -462,9 +461,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     const from = this.worldOf(src.core.x, src.core.y);
     const d = this.depth + 30;
     const halo = this.scene.add.image(from.x, from.y, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setDepth(d);
-    halo.setScale(0.36).setAlpha(0);
+    halo.setScale(K * 0.36).setAlpha(0);
     const warm = this.scene.add.image(from.x, from.y, 'glowSmall').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(P.glow)).setDepth(d);
-    warm.setScale(1.1).setAlpha(0);
+    warm.setScale(K * 1.1).setAlpha(0);
     const core = this.scene.add.image(from.x, from.y, 'kuhiro_freckle').setDepth(d).setScale(K * 1.25);
     const trail = sparkleTrail(this.scene, core, d - 0.1);
     this.tw(halo, { alpha: 0.75 }, 500, 'Sine.easeOut');
@@ -491,8 +490,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
         onComplete: () => {
           trail.stop();
           sparkleBurst(this.scene, targetX, targetY, { count: 10, color: A['fish-glow'], depth: d });
-          this.tw(halo, { alpha: 0, scale: 0.6 }, 1200, 'Sine.easeOut');
-          this.tw(warm, { alpha: 0, scale: 2 }, 900, 'Sine.easeOut');
+          this.tw(halo, { alpha: 0, scale: K * 0.6 }, 1200, 'Sine.easeOut');
+          this.tw(warm, { alpha: 0, scale: K * 2 }, 900, 'Sine.easeOut');
           this.tw(core, { alpha: 0 }, 900, 'Sine.easeIn').then(() => {
             halo.destroy();
             warm.destroy();
@@ -556,7 +555,6 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       this.waterline.x = (cs[0] + cs[1]) / 2;
       this.waterline.setScale(((w + 40) / 240) * K, K);
     }
-    this.lastLift = this.lift;
   }
 
   tick(time: number, delta: number): void {
@@ -601,7 +599,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.heartCore.setAlpha((0.1 + 0.05 * br) * g);
     this.waterGlow.setAlpha(g * (0.18 + 0.32 * up));
     this.waterGlow.y = 24 + oy * 0.22;
-    this.waterGlow.setScale((620 + 160 * (1 - up)) / 256, (110 + 30 * (1 - up)) / 256);
+    this.waterGlow.setScale((K * (620 + 160 * (1 - up))) / 256, (K * (110 + 30 * (1 - up))) / 256);
     this.gleam.setAlpha(this.gleamA * above);
     this.blushes[0].setAlpha(this.blushA * 0.85);
     this.blushes[1].setAlpha(this.blushA);
@@ -711,9 +709,9 @@ export class UnderGlow {
     depth: number = DEPTH.water + 1.5,
   ) {
     this.broad = scene.add.image(x, waterY + 18, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['lake-glow'])).setDepth(depth);
-    this.broad.setScale(1100 / 256, 210 / 256).setAlpha(0);
+    this.broad.setScale((K * 1100) / 256, (K * 210) / 256).setAlpha(0);
     this.core = scene.add.image(x + 20, waterY + 10, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setDepth(depth);
-    this.core.setScale(560 / 256, 90 / 256).setAlpha(0);
+    this.core.setScale((K * 560) / 256, (K * 90) / 256).setAlpha(0);
     const pulse = { k: 0 };
     this.breathTween = scene.tweens.add({
       targets: pulse,
@@ -766,14 +764,14 @@ export class GlowSighting {
       parts.push(im);
       return im;
     };
-    const under = add('glow', A['lake-glow']).setScale(190 / 256, 40 / 256);
-    const oval = add('glow', A['fish-glow']).setScale(64 / 256, 22 / 256);
-    const ovalCore = add('soft', A['lake-glow']).setScale(36 / 128, 11 / 128);
+    const under = add('glow', A['lake-glow']).setScale((K * 190) / 256, (K * 40) / 256);
+    const oval = add('glow', A['fish-glow']).setScale((K * 64) / 256, (K * 22) / 256);
+    const ovalCore = add('soft', A['lake-glow']).setScale((K * 36) / 128, (K * 11) / 128);
     // Three of the Gurans freckles, tiny at this distance.
     const fl = gurans(0, 0, 4.2);
     const pick = [fl[0], fl[2], fl[5]];
     const freckles = pick.map(() => add('dot', P.glow).setScale(0.36 * K));
-    const fHalo = pick.map(() => add('glowSmall', A['fish-glow']).setScale(0.32));
+    const fHalo = pick.map(() => add('glowSmall', A['fish-glow']).setScale(K * 0.32));
     const st = { a: 0, drift: 0, breath: 0 };
     const cycle = 6000;
     const total = 6400;
@@ -789,7 +787,7 @@ export class GlowSighting {
         const cx = x + (el / total) * 34;
         const cy = y + Math.sin(el / 900) * 1.2;
         under.setPosition(cx, cy + 3).setAlpha(st.a * (0.22 + 0.12 * br));
-        oval.setPosition(cx, cy).setAlpha(st.a * (0.5 + 0.35 * br)).setScale((60 + 10 * br) / 256, (20 + 3 * br) / 256);
+        oval.setPosition(cx, cy).setAlpha(st.a * (0.5 + 0.35 * br)).setScale((K * (60 + 10 * br)) / 256, (K * (20 + 3 * br)) / 256);
         ovalCore.setPosition(cx, cy).setAlpha(st.a * (0.35 + 0.3 * br));
         pick.forEach((p, i) => {
           const blink = Math.max(0, Math.sin(el / 420 + i * 2.1));

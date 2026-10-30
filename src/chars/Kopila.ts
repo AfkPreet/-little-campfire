@@ -151,8 +151,8 @@ export class Kopila extends Rig {
 
     // Legs: dangling over an edge when sitting.
     const sit = m === 'sitDock';
-    this.legB.setPosition(sit ? -3 : KG.legs[0].x, sit ? 5 : KG.legs[0].y).setAngle(sit ? 12 : 0);
-    this.legF.setPosition(sit ? 9 : KG.legs[1].x, sit ? 5.5 : KG.legs[1].y).setAngle(sit ? -8 : 0);
+    this.legB.setPosition(sit ? -3 : KG.legs[0].x, sit ? 2.6 : KG.legs[0].y).setAngle(sit ? 12 : 0);
+    this.legF.setPosition(sit ? 9 : KG.legs[1].x, sit ? 3 : KG.legs[1].y).setAngle(sit ? -8 : 0);
     this.arm.setPosition(this.arm.getData('baseX') as number, this.arm.getData('baseY') as number);
     this.headC.setAngle(0).setPosition(NX, NY);
     this.inner.rotation = 0;
@@ -429,6 +429,14 @@ export class BudBush extends Phaser.GameObjects.Container {
 
     this.img('bushBack', 0, 0, 0, 0);
 
+    // The three real buds (Kopila's ball sprite: identical colours).
+    for (const b of BUDS) {
+      const bud = this.img('ball', b.x, b.y, 0, 0);
+      bud.setScale(K * b.s);
+      bud.setData('s', b.s);
+      this.buds.push(bud);
+    }
+
     // Peeking head (eyes, snout tip, two crown scales over the leaves).
     this.peekC = new Phaser.GameObjects.Container(scene, PEEK.x, PEEK.y + PEEK.drop);
     this.add(this.peekC);
@@ -440,14 +448,6 @@ export class BudBush extends Phaser.GameObjects.Container {
     this.peekEyes = this.img('eyes', 6, -34.5, 6, -34.5, this.peekC, -hx, -hy);
     this.peekParts.push(this.peekEyes);
     this.peekC.setAlpha(0).setVisible(false);
-
-    // The three real buds (Kopila's ball sprite: identical colours).
-    for (const b of BUDS) {
-      const bud = this.img('ball', b.x, b.y, 0, 0);
-      bud.setScale(K * b.s);
-      bud.setData('s', b.s);
-      this.buds.push(bud);
-    }
 
     // Kopila's spot as a 4th bud (hidden until hide()).
     this.hideC = new Phaser.GameObjects.Container(scene, BUD4.x, BUD4.y - KG.ball.r * BUD4.s);

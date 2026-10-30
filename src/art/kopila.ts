@@ -77,7 +77,7 @@ export const KW: Record<string, Win> = {
   tailOut: { x0: -40, y0: -24, w: 32, h: 24 },
   tailWrap: { x0: -21, y0: -16, w: 36, h: 22 },
   tailDangle: { x0: -18, y0: -8, w: 18, h: 30 },
-  ball: { x0: -21, y0: -40, w: 42, h: 43 },
+  ball: { x0: -21, y0: -40, w: 42, h: 45 },
   ballEye: { x0: 1, y0: -26, w: 11, h: 11 },
   // Bud Bush (bush coords: origin at the base centre).
   bushBack: { x0: -66, y0: -72, w: 132, h: 78 },
@@ -127,15 +127,15 @@ export function petal(ctx: Ctx, x: number, y: number, w: number, h: number, rot:
     // Highlight arc along the top edge.
     ctx.beginPath();
     ctx.ellipse(0, -hh * 0.04, hw * 0.62, hh * 0.7, 0, Math.PI * 1.25, Math.PI * 1.75);
-    ctx.strokeStyle = rgba(tint(PLIGHT, 0.5), 0.85);
-    ctx.lineWidth = Math.max(0.9, lw * 0.75);
+    ctx.strokeStyle = rgba(tint(PLIGHT, 0.4), 0.5);
+    ctx.lineWidth = Math.max(0.8, lw * 0.7);
     ctx.lineCap = 'round';
     ctx.stroke();
   });
 }
 
 /** Softer line for petals inside a silhouette (the silhouette keeps PLINE). */
-const INNER_LINE = mix(PLINE, PANGO, 0.25);
+const INNER_LINE = mix(PLINE, PANGO, 0.38);
 
 /** Rotation that points a petal's round end along direction (dx, dy). */
 function dirRot(dx: number, dy: number): number {
@@ -219,9 +219,9 @@ const HIP_ROW: PetalSpec[] = [
   [4.2, -5.4, 9, 9, 0.22],
 ];
 const CROWN_ROW: PetalSpec[] = [
-  [-11, -40.2, 12, 10.6, -0.98],
-  [-5.6, -46.4, 12.6, 11, -0.52],
-  [2, -49.4, 12.6, 11, -0.1],
+  [-11.4, -39.6, 12.4, 9.6, -1.05],
+  [-6.4, -45.6, 13, 10, -0.58],
+  [1.2, -48.8, 13, 10, -0.14],
 ];
 
 export function drawRowBack(ctx: Ctx): void {
@@ -461,37 +461,35 @@ export function drawBall(ctx: Ctx): void {
   const g = KG.ballEye;
   ctx.beginPath();
   ellipsePath(ctx, g.x, g.y, 4.6, 3.3, 0.18);
-  ctx.fillStyle = rGrad(ctx, g.x, g.y + 1, 0.5, 5, [
-    [0, PFACE],
-    [1, mix(PFACE, PLINE, 0.4)],
+  ctx.fillStyle = rGrad(ctx, g.x, g.y + 1.2, 0.5, 5, [
+    [0, mix(PANGO, PLINE, 0.55)],
+    [1, mix(PANGO, PLINE, 0.25)],
   ]);
   ctx.fill();
   ctx.lineWidth = 1.4;
   ctx.strokeStyle = INNER_LINE;
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(g.x - 2.6, g.y - 0.1);
-  ctx.quadraticCurveTo(g.x, g.y + 1.5, g.x + 2.6, g.y - 0.3);
-  ctx.strokeStyle = mix(P.ink, PLINE, 0.4);
-  ctx.lineWidth = 1.1;
-  ctx.lineCap = 'round';
   ctx.stroke();
   // Upper-right scale overlapping the gap's top edge.
   petal(ctx, cx + 11, cy - 9, 9.6, 10, 0.75, 1.3, PANGO, INNER_LINE);
 
   // Tail tip tucked round the bottom front, curling up toward the gap.
   const tp: [number, number][] = [
-    [cx - 6, cy + 14.6],
-    [cx + 2.6, cy + 14.2],
-    [cx + 9.6, cy + 10.2],
-    [cx + 13, cy + 3.6],
+    [cx - 6.4, cy + 12],
+    [cx + 1.8, cy + 11.8],
+    [cx + 8.4, cy + 8.6],
+    [cx + 11.8, cy + 3],
   ];
   const sizes = [11, 9.6, 8.2, 6.6];
-  for (let i = tp.length - 1; i >= 0; i--) {
-    const a = tp[Math.max(0, i - 1)];
-    const b = tp[Math.min(tp.length - 1, i + 1)];
-    petal(ctx, tp[i][0], tp[i][1], sizes[i], sizes[i] * 0.9, dirRot(b[0] - a[0], b[1] - a[1]), 1.4, PANGO, INNER_LINE);
-  }
+  withState(ctx, () => {
+    ctx.beginPath();
+    ballShape(ctx, cx, cy, r - 0.6);
+    ctx.clip();
+    for (let i = tp.length - 1; i >= 0; i--) {
+      const a = tp[Math.max(0, i - 1)];
+      const b = tp[Math.min(tp.length - 1, i + 1)];
+      petal(ctx, tp[i][0], tp[i][1], sizes[i], sizes[i] * 0.9, dirRot(b[0] - a[0], b[1] - a[1]), 1.4, PANGO, INNER_LINE);
+    }
+  });
 
   // Silhouette outline last, so it stays bold and clean.
   ctx.beginPath();
@@ -521,14 +519,14 @@ const LEAF_LIGHT: string = P.sage;
 
 /** Bud positions (base point of the ball sprite) and scale. */
 export const BUDS: { x: number; y: number; s: number }[] = [
-  { x: -36, y: -34, s: 0.85 },
-  { x: -1, y: -49, s: 1.0 },
-  { x: 37, y: -36, s: 0.9 },
+  { x: -44, y: -31, s: 0.85 },
+  { x: -4, y: -47, s: 1.0 },
+  { x: 41, y: -35, s: 0.9 },
 ];
 /** Kopila's hidden-4th-bud spot. */
-export const BUD4 = { x: -19, y: -42, s: 0.95 };
+export const BUD4 = { x: -25, y: -39, s: 0.92 };
 /** Peek: where Kopila's head centre sits when peeking (bush coords). */
-export const PEEK = { x: 18, y: -40, drop: 32 };
+export const PEEK = { x: 16, y: -36, drop: 34 };
 
 /** A rhododendron leaf: long rounded oval with a midrib. */
 function leaf(ctx: Ctx, x: number, y: number, len: number, wid: number, rot: number, fill = LEAF): void {
@@ -569,56 +567,96 @@ function whorl(ctx: Ctx, x: number, y: number, s: number, seed: number): void {
   });
 }
 
-/** A soft leafy dome: smooth body with leaf-tip scallops along the top. */
-function dome(ctx: Ctx, cx: number, cy: number, rx: number, ry: number, seed: number, top = mix(LEAF, LEAF_LIGHT, 0.35)): void {
+type DomeSpec = [cx: number, cy: number, rx: number, ry: number, seed: number];
+
+/** A soft leafy dome path: smooth body with leaf-tip scallops along the top. */
+function domePath(ctx: Ctx, [cx, cy, rx, ry, seed]: DomeSpec): void {
   const pts: [number, number][] = [];
-  const n = 16;
+  const n = 14;
   for (let i = 0; i <= n; i++) {
     const a = Math.PI + (i / n) * Math.PI;
-    const bump = i % 2 ? 1.06 + 0.03 * Math.sin(seed + i) : 0.97;
+    const bump = i % 2 ? 1.05 + 0.03 * Math.sin(seed * 3 + i) : 0.975;
     pts.push([cx + Math.cos(a) * rx * bump, cy + Math.sin(a) * ry * bump]);
   }
-  pts.push([cx + rx * 0.95, cy + ry * 0.35]);
-  pts.push([cx, cy + ry * 0.5]);
-  pts.push([cx - rx * 0.95, cy + ry * 0.35]);
-  ctx.beginPath();
+  pts.push([cx + rx * 0.92, cy + ry * 0.4]);
+  pts.push([cx, cy + ry * 0.52]);
+  pts.push([cx - rx * 0.92, cy + ry * 0.4]);
   smoothClosed(ctx, pts, 0.55);
-  ctx.fillStyle = vGrad(ctx, cy - ry, cy + ry * 0.5, [
-    [0, top],
-    [0.55, LEAF],
-    [1, mix(LEAF, LEAF_DEEP, 0.6)],
-  ]);
-  ctx.fill();
-  ctx.lineWidth = 2.2;
+}
+
+/**
+ * A cluster of domes with ONE outline round the union (stroke all wide,
+ * then fill all), soft top-lit gradient, and a few leaf glints.
+ */
+function domes(ctx: Ctx, list: DomeSpec[], y0: number, y1: number, light = 0.4): void {
   ctx.lineJoin = 'round';
   ctx.strokeStyle = shade(LEAF, 0.3);
-  ctx.stroke();
+  ctx.lineWidth = 4.6;
+  for (const d of list) {
+    ctx.beginPath();
+    domePath(ctx, d);
+    ctx.stroke();
+  }
+  const g = vGrad(ctx, y0, y1, [
+    [0, mix(LEAF, LEAF_LIGHT, light)],
+    [0.5, LEAF],
+    [1, mix(LEAF, LEAF_DEEP, 0.65)],
+  ]);
+  for (const d of list) {
+    ctx.beginPath();
+    domePath(ctx, d);
+    ctx.fillStyle = g;
+    ctx.fill();
+  }
+  // Soft seams: a shadowy arc under each upper dome, and a light rim on top.
+  for (const [cx, cy, rx, ry] of list) {
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - ry * 0.05, rx * 0.8, ry * 0.75, 0, Math.PI * 1.15, Math.PI * 1.85);
+    ctx.strokeStyle = rgba(tint(LEAF_LIGHT, 0.3), 0.35);
+    ctx.lineWidth = 2;
+    ctx.lineCap = 'round';
+    ctx.stroke();
+  }
 }
 
 export function drawBushBack(ctx: Ctx): void {
-  softShadow(ctx, 0, 1, 58, 6, 0.2);
-  dome(ctx, -30, -18, 30, 22, 1);
-  dome(ctx, 26, -20, 32, 24, 4);
-  dome(ctx, -2, -26, 30, 24, 7);
+  softShadow(ctx, 0, 1, 60, 6, 0.2);
+  domes(
+    ctx,
+    [
+      [-30, -16, 28, 22, 1],
+      [28, -18, 30, 24, 4],
+      [-2, -26, 30, 26, 7],
+    ],
+    -52,
+    0,
+    0.45,
+  );
   // Leaf whorls under the three buds.
   BUDS.forEach((b, i) => whorl(ctx, b.x, b.y + 1, b.s, i * 13 + 3));
   // A loose leaf fan where Kopila nestles (no bud: it's Kopila's spot).
-  leaf(ctx, BUD4.x - 2, BUD4.y + 4, 15, 4.2, Math.PI - 0.3, mix(LEAF, LEAF_DEEP, 0.25));
-  leaf(ctx, BUD4.x + 2, BUD4.y + 5, 14, 4, 0.35);
+  leaf(ctx, BUD4.x - 3, BUD4.y + 3, 15, 4.2, Math.PI - 0.35, mix(LEAF, LEAF_DEEP, 0.25));
+  leaf(ctx, BUD4.x + 3, BUD4.y + 4, 14, 4, 0.4);
 }
 
 export function drawBushFront(ctx: Ctx): void {
   // Low front band of leaf clusters; its top edge dips a little where
   // Kopila peeks, so the snout tip shows.
-  dome(ctx, -38, -10, 24, 16, 11);
-  dome(ctx, 40, -9, 24, 15, 14);
-  dome(ctx, 2, -8, 40, 20, 17);
-  // Leaves tucked along the front edge.
-  leaf(ctx, -50, -12, 16, 4.4, Math.PI + 0.35);
-  leaf(ctx, 52, -10, 16, 4.4, -0.3);
-  leaf(ctx, -20, -24, 15, 4.2, Math.PI + 0.75, mix(LEAF, LEAF_LIGHT, 0.2));
-  leaf(ctx, 24, -23, 15, 4.2, -0.65, mix(LEAF, LEAF_LIGHT, 0.2));
-  leaf(ctx, 2, -27, 13, 4, -Math.PI / 2 - 0.2, mix(LEAF, LEAF_LIGHT, 0.15));
+  domes(
+    ctx,
+    [
+      [-40, -9, 22, 15, 11],
+      [42, -8, 22, 14, 14],
+      [0, -7, 40, 18, 17],
+    ],
+    -26,
+    2,
+    0.3,
+  );
+  leaf(ctx, -54, -10, 15, 4.2, Math.PI + 0.3);
+  leaf(ctx, 56, -9, 15, 4.2, -0.28);
+  leaf(ctx, -22, -21, 14, 4, Math.PI + 0.8, mix(LEAF, LEAF_LIGHT, 0.2));
+  leaf(ctx, 30, -19, 14, 4, -0.7, mix(LEAF, LEAF_LIGHT, 0.2));
 }
 
 // ---------------------------------------------------------------------------
