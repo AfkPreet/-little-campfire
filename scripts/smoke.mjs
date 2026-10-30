@@ -29,6 +29,12 @@ try {
   check('title loads', await page.evaluate(() => !!window.__game && typeof window.__game.startTrip === 'function'));
 
   await g('startTrip');
+  await page.waitForFunction(() => ['Intro', 'Shop'].includes(window.__game.sceneKey()), null, { timeout: 30000 });
+  if ((await g('sceneKey')) === 'Intro') {
+    check('intro plays on a first trip', true);
+    await page.waitForTimeout(800);
+    await g('goto', 'Shop');
+  }
   await page.waitForFunction(() => window.__game.sceneKey() === 'Shop', null, { timeout: 30000 });
   check('shop opens on day 1', true);
 

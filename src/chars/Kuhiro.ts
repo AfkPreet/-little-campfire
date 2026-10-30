@@ -15,7 +15,7 @@ import { reduceMotion } from '@/core/settings';
 import { lightAt, type ResolvedLight } from '@/fx/lighting';
 import { ripple, sparkleBurst, sparkleTrail } from '@/fx/particles';
 import { A, P, hexToInt, mixInt } from '@/palette';
-import { BODY_BOX, KH, LID_FRAMES, crossSection, gurans, scaleList, topContour } from '@/art/kuhiro';
+import { BODY_BOX, KH, LID_FRAMES, crossSectionInto, gurans, scaleList, topContour } from '@/art/kuhiro';
 
 const K = 1 / ART_SCALE;
 /** How far below the waterline the body waits before it rises. */
@@ -120,6 +120,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   private bodyTint = 0xffffff;
   private lastBodyY = 9999;
   private readonly topPts: [number, number][];
+  private readonly cs = { x0: 0, x1: 0 };
 
   constructor(scene: Phaser.Scene, x: number, waterY: number) {
     super(scene, x, waterY);
@@ -410,9 +411,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.tw(this, { rumble: 1 }, 300, 'Sine.easeOut').then(() => this.tw(this, { rumble: 0 }, 1900, 'Sine.easeIn', 300));
     for (let i = 0; i < 4; i++) {
       this.scene.time.delayedCall(i * 480, () => {
-        const cs = crossSection(-this.bodyOffset());
-        const x0 = cs ? cs[0] : -170;
-        const x1 = cs ? cs[1] : 390;
+        const ok = crossSectionInto(-this.bodyOffset(), this.cs);
+        const x0 = ok ? this.cs.x0 : -170;
+        const x1 = ok ? this.cs.x1 : 390;
         for (const lx of [x0 + 40, (x0 + x1) / 2, x1 - 30]) {
           const p = this.localToWorld(lx, 2);
           ripple(this.scene, p.x, p.y, { rings: 2, size: 1.3 + i * 0.35, depth: this.depth + 0.4, tint: A['fish-glow'] });
@@ -529,9 +530,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   }
 
   private surfaceRings(size: number): void {
-    const cs = crossSection(-this.bodyOffset());
-    const x0 = cs ? cs[0] : -160;
-    const x1 = cs ? cs[1] : 380;
+    const ok = crossSectionInto(-this.bodyOffset(), this.cs);
+    const x0 = ok ? this.cs.x0 : -160;
+    const x1 = ok ? this.cs.x1 : 380;
     for (const lx of [x0 + 10, x1 - 10]) {
       const p = this.localToWorld(lx, 2);
       ripple(this.scene, p.x, p.y, { rings: 2, size, depth: this.depth + 0.4, tint: A['fish-glow'] });
@@ -549,10 +550,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.liftC.y = oy;
     this.halo.y = KH.halo.y + oy;
     // Waterline sheen across the body's cross-section at the surface.
-    const cs = crossSection(-oy);
-    if (cs) {
-      const w = cs[1] - cs[0];
-      this.waterline.x = (cs[0] + cs[1]) / 2;
+    if (crossSectionInto(-oy, this.cs)) {
+      const w = this.cs.x1 - this.cs.x0;
+      this.waterline.x = (this.cs.x0 + this.cs.x1) / 2;
       this.waterline.setScale(((w + 40) / 240) * K, K);
     }
   }
@@ -607,15 +607,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
 
     // Freckles pulse on their own phases.
     const fd = Math.exp(-dt * 2.2);
-    const pulseF = (f: Freckle) => {
-      f.flash *= fd;
-      const pulse = 0.5 + 0.5 * Math.sin((t * TAU) / f.period + f.phase);
-      const level = Math.min(1, f.base + (1 - f.base) * f.lit + f.flash * 0.6);
-      f.core.setAlpha(Math.min(1, (0.35 + 0.65 * level) * (0.8 + 0.2 * pulse)));
-      f.halo.setAlpha(Math.min(1, level * (0.5 + 0.35 * pulse) * (0.4 + 0.6 * g)));
-    };
-    this.flowerF.forEach(pulseF);
-    this.scatterF.forEach(pulseF);
+    for (const f of this.flowerF) this.pulseFreckle(f, t, fd, g);
+    for (const f of this.scatterF) this.pulseFreckle(f, t, fd, g);
 
     // Shimmer sweep head -> tail every 4 s.
     if (this.risen && t >= this.nextSweep) {
@@ -665,13 +658,20 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Small lapping rings where the body meets the water.
     if (this.risen && t >= this.nextLap) {
       this.nextLap = t + Phaser.Math.FloatBetween(1.4, 2.6);
-      const cs = crossSection(-oy);
-      if (cs) {
-        const lx = Math.random() < 0.5 ? cs[0] + 16 : cs[1] - 16;
+      if (crossSectionInto(-oy, this.cs)) {
+        const lx = Math.random() < 0.5 ? this.cs.x0 + 16 : this.cs.x1 - 16;
         const p = this.localToWorld(lx, 3);
         ripple(this.scene, p.x, p.y, { rings: 1, size: 0.7, depth: this.depth + 0.4, tint: A['fish-glow'] });
       }
     }
+  }
+
+  private pulseFreckle(f: Freckle, t: number, fd: number, g: number): void {
+    f.flash *= fd;
+    const pulse = 0.5 + 0.5 * Math.sin((t * TAU) / f.period + f.phase);
+    const level = Math.min(1, f.base + (1 - f.base) * f.lit + f.flash * 0.6);
+    f.core.setAlpha(Math.min(1, (0.35 + 0.65 * level) * (0.8 + 0.2 * pulse)));
+    f.halo.setAlpha(Math.min(1, level * (0.5 + 0.35 * pulse) * (0.4 + 0.6 * g)));
   }
 
   private applyEyes(): void {

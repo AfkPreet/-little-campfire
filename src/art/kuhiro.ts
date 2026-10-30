@@ -138,6 +138,34 @@ export function crossSection(y: number): [number, number] | null {
   return [Math.min(...xs), Math.max(...xs)];
 }
 
+const CS_Y0 = -320;
+const CS_N = 520;
+let csTable: Float32Array | null = null;
+/**
+ * Allocation-free cross-section for per-frame use: writes [x0, x1] into out
+ * and returns false when y misses the body. Integer-y table, lerped.
+ */
+export function crossSectionInto(y: number, out: { x0: number; x1: number }): boolean {
+  if (!csTable) {
+    csTable = new Float32Array(CS_N * 2);
+    for (let i = 0; i < CS_N; i++) {
+      const c = crossSection(CS_Y0 + i);
+      csTable[i * 2] = c ? c[0] : NaN;
+      csTable[i * 2 + 1] = c ? c[1] : NaN;
+    }
+  }
+  const f = y - CS_Y0;
+  const i = Math.floor(f);
+  if (i < 0 || i >= CS_N - 1) return false;
+  const u = f - i;
+  const a0 = csTable[i * 2];
+  const b0 = csTable[i * 2 + 2];
+  if (Number.isNaN(a0) || Number.isNaN(b0)) return false;
+  out.x0 = a0 + (b0 - a0) * u;
+  out.x1 = csTable[i * 2 + 1] + (csTable[i * 2 + 3] - csTable[i * 2 + 1]) * u;
+  return true;
+}
+
 /** Top of the outline at x (min y), or null. */
 export function topY(x: number): number | null {
   const d = silDense();
