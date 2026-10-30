@@ -82,8 +82,9 @@ export class CampfireProp implements Lightable {
 
     this.hl = new Highlight(scene, sil, 112, 64, this.root);
 
-    // Warm light pool: ground ellipse + soft air glow + a hot core.
-    this.poolGround = glowSprite(scene, x, groundY - 6, REACH * 2, 120, POOL_INT, DEPTH.light);
+    // Warm light pool: a ground ellipse (under the props and actors, so it
+    // lights the grass without washing them out) + soft air glow + a hot core.
+    this.poolGround = glowSprite(scene, x, groundY - 4, REACH * 2, 130, POOL_INT, DEPTH.ground + 5);
     this.poolAir = glowSprite(scene, x, groundY - 70, 380, 300, EMBER_INT, DEPTH.light);
     this.poolCore = glowSprite(scene, x, groundY + FIRE.flameY - 18, 150, 130, GLOW_INT, DEPTH.light);
 
@@ -102,11 +103,11 @@ export class CampfireProp implements Lightable {
   private applyPool(): void {
     const w = this.warm;
     const f = this.flicker;
-    this.poolGround.setAlpha(w * 0.75 * f);
-    this.poolAir.setAlpha(w * 0.32 * f);
-    this.poolCore.setAlpha((0.08 + w * 0.26) * f);
-    this.halo.setAlpha((0.12 + w * 0.16) * f);
-    this.rim.setAlpha((0.2 + w * 0.42) * f);
+    this.poolGround.setAlpha(w * 0.7 * f);
+    this.poolAir.setAlpha(w * 0.24 * f);
+    this.poolCore.setAlpha((0.05 + w * 0.15) * f);
+    this.halo.setAlpha((0.1 + w * 0.14) * f);
+    this.rim.setAlpha((0.15 + w * 0.32) * f);
   }
 
   setHighlight(on: boolean): void {

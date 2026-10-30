@@ -89,7 +89,7 @@ function sheet(scene: Phaser.Scene, l: ResolvedLight, all: Lightable[]): void {
   label(scene, 1010, R1 + 34, 'Moon Scale', night);
 
   // Hammock between two simple posts (the real trunks are the landscape's).
-  const posts = scene.add.graphics();
+  const posts = scene.add.graphics().setDepth(2);
   posts.fillStyle(hexToInt(mix(P.bark, l.hex.actor, 0.3)), 1);
   for (const px of [1180 - 75, 1180 + 75]) posts.fillRoundedRect(px - 9, R1 - 110, 18, 124, 8);
   const ham = new DecorProp(scene, 'hammock', 1180, R1 - 65);
@@ -167,7 +167,7 @@ function sheet(scene: Phaser.Scene, l: ResolvedLight, all: Lightable[]): void {
     label(scene, x, R4 + 34, name, night);
   }
   const BY = 790;
-  const branch = scene.add.graphics();
+  const branch = scene.add.graphics().setDepth(2);
   branch.lineStyle(9, hexToInt(mix(P.bark, l.hex.actor, 0.3)), 1);
   branch.beginPath();
   branch.moveTo(760, BY - 4);

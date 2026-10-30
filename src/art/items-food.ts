@@ -179,14 +179,20 @@ function drawFish(ctx: Ctx, o: FishOpts): void {
 
   // Pectoral fin on the side.
   withState(ctx, () => {
-    ctx.translate(nx + bl * 0.33, cy + h * 0.1);
-    ctx.rotate(0.5);
-    shape(ctx, (c) => {
-      c.moveTo(0, 0);
-      c.bezierCurveTo(4, -h * 0.12, h * 0.34, -h * 0.06, h * 0.36, h * 0.04);
-      c.bezierCurveTo(h * 0.3, h * 0.14, 4, h * 0.1, 0, 0);
-      c.closePath();
-    }, finFill(ctx, o, -h * 0.1, h * 0.12), finLine, 1.8);
+    // Small translucent fin tucked behind the gill, sweeping back.
+    ctx.translate(nx + bl * 0.27, cy + h * 0.08);
+    ctx.rotate(0.35);
+    const fl = Math.min(12, h * 0.3);
+    ctx.beginPath();
+    ctx.moveTo(0, -1.5);
+    ctx.quadraticCurveTo(fl * 0.7, -fl * 0.35, fl, fl * 0.1);
+    ctx.quadraticCurveTo(fl * 0.5, fl * 0.3, 0, 1.5);
+    ctx.closePath();
+    ctx.fillStyle = rgba(o.finEdge ?? o.fin, 0.7);
+    ctx.fill();
+    ctx.strokeStyle = rgba(finLine, 0.45);
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
   });
 
   // Face.
@@ -250,8 +256,14 @@ const bubbleBarb: Draw = (ctx) => {
   });
   // Three cream bubbles trailing up from the mouth.
   for (const [x, y, r] of [[13, 36, 5], [9, 22, 3.8], [16, 11, 2.8]] as const) {
-    oval(ctx, x, y, r, r, rgba(P.cream, 0.55), A['powder'], 0, 1.6);
-    dot(ctx, x - r * 0.35, y - r * 0.35, r * 0.3, P.cream, 0.95);
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = rgba(tint(P.powder, 0.55), 0.55);
+    ctx.fill();
+    ctx.strokeStyle = rgba(P.powder, 0.95);
+    ctx.lineWidth = 1.6;
+    ctx.stroke();
+    dot(ctx, x - r * 0.35, y - r * 0.35, r * 0.32, P.cream, 0.95);
   }
 };
 
@@ -611,7 +623,7 @@ function gurans5(ctx: Ctx, x: number, y: number, r: number, rot: number): void {
         c.bezierCurveTo(-r * 0.55, -r * 0.2, -r * 0.5, -r * 1.05, 0, -r);
         c.bezierCurveTo(r * 0.5, -r * 1.05, r * 0.55, -r * 0.2, 0, 0);
         c.closePath();
-      }, lGrad(ctx, 0, -r, 0, 0, [[0, base], [1, mix(base, A['mist-lavender'], 0.25)]]), A['mist-lavender'], 1.7);
+      }, lGrad(ctx, 0, -r, 0, 0, [[0, base], [1, mix(base, P.blush, 0.18)]]), mix(A['cream-line'], A['mist-lavender'], 0.35), 1.7);
     });
   }
   dot(ctx, x, y, r * 0.22, mix(P.butter, A['gurans'], 0.25));
@@ -958,7 +970,7 @@ const sisnuTea: Draw = (ctx) => {
 };
 
 const honeyChiya: Draw = (ctx) => {
-  const chiya = mix(A['katus'], P.cream, 0.5);
+  const chiya = mix(mix(A['katus'], P.glow, 0.45), P.cream, 0.25);
   chiyaGlass(ctx, chiya, 0.76, tint(chiya, 0.55));
   // Honey dipper leaning in.
   withState(ctx, () => {
@@ -1049,7 +1061,7 @@ function bowl(ctx: Ctx, soup: string, toppings?: (ctx: Ctx) => void, mound = 0, 
 
 const chyauSoup: Draw = (ctx) => {
   bowl(ctx, mix(A['sisnu'], A['chyau'], 0.3), (c) => {
-    for (const [x, y, s] of [[38, 44, 1], [58, 46, 0.9]] as const) {
+    for (const [x, y, s] of [[37, 44, 1.35], [59, 45, 1.2]] as const) {
       // Mushroom slice (cap + stem silhouette).
       withState(c, () => {
         c.translate(x, y);
@@ -1065,7 +1077,7 @@ const chyauSoup: Draw = (ctx) => {
         }, mix(A['chyau'], P.cream, 0.3), A['chyau'], 1.8);
       });
     }
-    scallopLeaf(c, 46, 42, 13, 5, -0.4, A['sisnu']);
+    scallopLeaf(c, 44, 46, 16, 6, -0.5, A['sisnu']);
     dot(c, 30, 47, 1.6, P.cream, 0.7);
     dot(c, 66, 44, 1.4, P.cream, 0.7);
   }, 2);
@@ -1080,21 +1092,22 @@ const fishJaulo: Draw = (ctx) => {
       fillOnly(c, (cc) => cc.ellipse(48 + Math.cos(a) * r, 44 + Math.sin(a) * r * 0.25, 2.4, 1.3, a, 0, Math.PI * 2), rgba(A['cream-line'], 0.75));
     }
     // Flakes of pink fish.
-    for (const [x, y, r] of [[44, 41, 0.3], [54, 43, -0.4], [49, 38, 0.1]] as const) oval(c, x, y, 5, 3, mix(A['katle'], P.peach, 0.3), A['katle'], r, 1.5);
+    for (const [x, y, r] of [[42, 41, 0.3], [56, 42, -0.4], [49, 36, 0.1]] as const) oval(c, x, y, 7, 4.4, mix(A['katle'], P.peach, 0.45), mix(A['katle'], P.peach, 0.5), r, 1.6);
     // Green herb bits.
-    for (const [x, y] of [[36, 44], [60, 41], [42, 46]] as const) oval(c, x, y, 2, 1.2, A['sisnu'], A['sisnu'], 0.5, 1);
-  }, 3, A['lokta']);
+    for (const [x, y] of [[34, 44], [62, 46], [50, 46]] as const) oval(c, x, y, 2.6, 1.6, A['sisnu'], A['sisnu'], 0.5, 1);
+  }, 4, A['lokta']);
   steam(ctx, 48, 28, 14, 0.65);
 };
 
 const campfireJhol: Draw = (ctx) => {
-  bowl(ctx, mix(P.peach, A['ainselu'], 0.45), (c) => {
-    oval(c, 40, 43, 8, 4.5, mix(A['asala'], P.cream, 0.4), A['asala'], 0.1, 1.8);
+  bowl(ctx, mix(P.peach, P.ember, 0.18), (c) => {
+    oval(c, 39, 42, 10.5, 6, mix(A['asala'], P.cream, 0.45), A['asala'], 0.1, 1.8);
+    hi(c, 36, 40, 4, 1.4, 0.1, 0.8);
     withState(c, () => {
-      c.translate(58, 44);
+      c.translate(59, 44);
       shape(c, (cc) => {
-        cc.moveTo(-6, 0);
-        cc.bezierCurveTo(-6, -7, 6, -7, 6, 0);
+        cc.moveTo(-8, 0);
+        cc.bezierCurveTo(-8, -10, 8, -10, 8, 0);
         cc.closePath();
       }, A['chyau'], A['chyau'], 1.6);
     });
@@ -1107,12 +1120,12 @@ const campfireJhol: Draw = (ctx) => {
 
 const ainseluKhir: Draw = (ctx) => {
   bowl(ctx, mix(P.cream, P.butter, 0.25), (c) => {
-    raspberry(c, 40, 40, 6, A['ainselu']);
-    raspberry(c, 54, 38, 6.5, A['ainselu']);
-    raspberry(c, 47, 44, 5.5, tint(A['ainselu'], 0.1));
-    leaf(c, 58, 42, 12, 4.5, -0.3, P.sage);
+    leaf(c, 56, 36, 15, 5, -0.4, P.sage);
+    raspberry(c, 39, 38, 8, A['ainselu']);
+    raspberry(c, 56, 39, 7.5, A['ainselu']);
+    raspberry(c, 47, 32, 8, tint(A['ainselu'], 0.1));
     for (const [x, y] of [[32, 46], [64, 45]] as const) fillOnly(c, (cc) => cc.ellipse(x, y, 2.4, 1.3, 0.4, 0, Math.PI * 2), rgba(A['cream-line'], 0.8));
-  }, 5);
+  }, 6);
 };
 
 const katusPorridge: Draw = (ctx) => {
@@ -1122,10 +1135,10 @@ const katusPorridge: Draw = (ctx) => {
       cc.moveTo(30, 44);
       cc.bezierCurveTo(40, 36, 46, 48, 54, 40);
       cc.quadraticCurveTo(60, 36, 66, 44);
-    }, rgba(P.glow, 0.95), 3);
-    chestnut(c, 42, 42, 5.5);
-    chestnut(c, 55, 44, 5);
-    chestnut(c, 49, 37, 4.5);
+    }, rgba(P.glow, 0.95), 4);
+    chestnut(c, 40, 41, 7.5);
+    chestnut(c, 57, 42, 7);
+    chestnut(c, 49, 34, 6.5);
   }, 4);
   steam(ctx, 48, 28, 12, 0.55);
 };
@@ -1306,24 +1319,28 @@ const katusTingmo: Draw = (ctx) => {
 };
 
 function momo(ctx: Ctx, x: number, y: number, r: number): void {
-  const cream = mix(P.cream, A['moonmilk'], 0.4);
-  glowDisc(ctx, x, y + 1, r * 1.5, A['fish-glow'], 0.75);
+  const cream = mix(P.cream, A['lokta'], 0.3);
+  // Plump body with a softly gathered top.
   shape(ctx, (c) => {
-    c.moveTo(x - r, y + r * 0.45);
-    c.bezierCurveTo(x - r * 1.05, y - r * 0.4, x - r * 0.4, y - r * 0.9, x, y - r * 0.95);
-    c.bezierCurveTo(x + r * 0.4, y - r * 0.9, x + r * 1.05, y - r * 0.4, x + r, y + r * 0.45);
-    c.quadraticCurveTo(x, y + r * 0.8, x - r, y + r * 0.45);
+    c.moveTo(x - r, y + r * 0.42);
+    c.bezierCurveTo(x - r * 1.12, y - r * 0.3, x - r * 0.5, y - r * 0.78, x, y - r * 0.72);
+    c.bezierCurveTo(x + r * 0.5, y - r * 0.78, x + r * 1.12, y - r * 0.3, x + r, y + r * 0.42);
+    c.quadraticCurveTo(x, y + r * 0.72, x - r, y + r * 0.42);
     c.closePath();
-  }, rGrad(ctx, x, y + r * 0.1, 0, r * 1.1, [[0, A['fish-glow']], [0.45, tint(A['fish-glow'], 0.4)], [1, cream]]), A['cream-line'], 2);
-  // Pleats gathering to the top knot.
+  }, rGrad(ctx, x, y + r * 0.12, 0, r * 1.1, [[0, mix(A['fish-glow'], P.powder, 0.35)], [0.35, A['fish-glow']], [0.72, cream], [1, mix(cream, A['cream-line'], 0.35)]]), A['cream-line'], 2);
+  glowDisc(ctx, x, y + r * 0.12, r * 0.5, A['scale-glow'], 0.9);
+  // Pleats: little crescents swirling into the top knot.
   line(ctx, (c) => {
-    for (const k of [-0.55, -0.25, 0.05, 0.35]) {
-      c.moveTo(x + k * r, y + r * 0.1);
-      c.quadraticCurveTo(x + k * r * 0.6, y - r * 0.4, x, y - r * 0.85);
+    for (let i = 0; i < 5; i++) {
+      const a = Math.PI * (1.08 + i * 0.21);
+      const sx = x + Math.cos(a) * r * 0.55;
+      const sy = y - r * 0.5 + Math.sin(a) * r * 0.22 + r * 0.12;
+      c.moveTo(sx, sy);
+      c.quadraticCurveTo((sx + x) / 2, sy - r * 0.18, x, y - r * 0.68);
     }
-  }, rgba(A['cream-line'], 0.85), 1.4);
-  dot(ctx, x, y - r * 0.9, r * 0.14, tint(A['cream-line'], 0.3));
-  hi(ctx, x - r * 0.45, y - r * 0.3, r * 0.18, r * 0.1, -0.7, 0.85);
+  }, rgba(shade(A['cream-line'], 0.1), 0.8), 1.3);
+  oval(ctx, x, y - r * 0.72, r * 0.2, r * 0.13, tint(cream, 0.3), A['cream-line'], 0, 1.3);
+  hi(ctx, x - r * 0.5, y - r * 0.15, r * 0.16, r * 0.1, -0.8, 0.85);
 }
 
 const moonlightMomos: Draw = (ctx) => {
@@ -1331,29 +1348,25 @@ const moonlightMomos: Draw = (ctx) => {
   ground(ctx, 86, 36);
   const st = A['steamer'];
   // Steamer tier back rim.
-  shape(ctx, (c) => c.ellipse(48, 56, 38, 14, 0, 0, Math.PI * 2), shade(st, 0.12), st);
-  // Inner floor.
-  fillOnly(ctx, (c) => c.ellipse(48, 57, 34, 11, 0, 0, Math.PI * 2), mix(st, A['lokta'], 0.6));
-  momo(ctx, 34, 54, 11);
-  momo(ctx, 61, 53, 11);
-  momo(ctx, 40, 63, 11.5);
-  momo(ctx, 57, 64, 11.5);
+  shape(ctx, (c) => c.ellipse(48, 62, 40, 14, 0, 0, Math.PI * 2), shade(st, 0.1), st);
+  // Inner floor (lined with a leaf-green mat).
+  fillOnly(ctx, (c) => c.ellipse(48, 63, 36, 11, 0, 0, Math.PI * 2), mix(A['tea-green'], A['lokta'], 0.45));
+  momo(ctx, 33, 52, 13);
+  momo(ctx, 63, 51, 13);
+  momo(ctx, 39, 64, 14);
+  momo(ctx, 58, 65, 14);
   // Front wall of the tier.
   shape(ctx, (c) => {
-    c.moveTo(10, 58);
-    c.quadraticCurveTo(48, 80, 86, 58);
-    c.lineTo(86, 66);
-    c.quadraticCurveTo(48, 90, 10, 66);
+    c.moveTo(8, 64);
+    c.quadraticCurveTo(48, 86, 88, 64);
+    c.lineTo(88, 71);
+    c.quadraticCurveTo(48, 94, 8, 71);
     c.closePath();
-  }, lGrad(ctx, 10, 0, 86, 0, [[0, tint(st, 0.4)], [0.5, st], [1, shade(st, 0.12)]]), st);
-  line(ctx, (c) => {
-    c.moveTo(12, 61);
-    c.quadraticCurveTo(48, 83, 84, 61);
-  }, rgba(shade(st, 0.2), 0.5), 1.3);
-  hi(ctx, 22, 66, 5, 1.6, 0.35, 0.7);
-  twinkle(ctx, 80, 22, 5);
-  twinkle(ctx, 18, 30, 3.5);
-  steam(ctx, 48, 36, 14, 0.6);
+  }, lGrad(ctx, 8, 0, 88, 0, [[0, tint(st, 0.4)], [0.5, st], [1, shade(st, 0.12)]]), st);
+  hi(ctx, 20, 70, 5, 1.6, 0.35, 0.7);
+  twinkle(ctx, 82, 26, 5);
+  twinkle(ctx, 14, 34, 3.5);
+  steam(ctx, 48, 34, 14, 0.65);
 };
 
 const mysteryMush: Draw = (ctx) => {

@@ -89,6 +89,8 @@ export class TentProp implements Lightable {
   setState(s: TentState, type?: TentId): void {
     const typeChanged = !!type && type !== this.type;
     if (s === this.state && !typeChanged) return;
+    // A bigger tent bought while pitched swaps in place with a pop.
+    if (s === 'pitched' && this.state === 'pitched' && typeChanged) return this.setType(type!);
     if (typeChanged) this.setTexturesFor(type!);
     if (s === 'flat' && (this.state !== 'flat' || typeChanged)) this.pegIn = [false, false, false, false];
     if (s === 'pitched') this.pegIn = [true, true, true, true];

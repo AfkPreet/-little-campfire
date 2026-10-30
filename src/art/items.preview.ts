@@ -78,7 +78,7 @@ export default function preview(scene: Phaser.Scene): void {
   const cols = Math.floor((l.w - 24) / cw);
   let col = 0;
   let row = 0;
-  const rowH = 104;
+  const rowH = 108;
   const y0 = 14;
   for (const g of ICON_GROUPS) {
     if (col + Math.min(g.ids.length, 3) > cols) {
@@ -86,16 +86,16 @@ export default function preview(scene: Phaser.Scene): void {
       row++;
     }
     const startX = 12 + col * cw;
-    txt(scene, startX + 4, y0 + row * rowH + 6, g.group.toUpperCase(), 'small', { size: 11, fixed: true, align: 'left', color: mix(P.rose, P.ink, 0.35) });
+    txt(scene, startX + 4, y0 + row * rowH + 2, g.group.toUpperCase(), 'small', { size: 11, fixed: true, align: 'left', color: mix(P.rose, P.ink, 0.35) });
     g.ids.forEach((id) => {
       if (col >= cols) {
         col = 0;
         row++;
       }
       const x = 12 + col * cw + cw / 2;
-      const y = y0 + row * rowH + 50;
+      const y = y0 + row * rowH + 44;
       icon(scene, x, y, id, 64);
-      txt(scene, x, y + 40, nameOf(id), 'small', { size: 10.5, fixed: true, color: ink, wrap: cw - 4, align: 'center' }).setOrigin(0.5, 0);
+      txt(scene, x, y + 34, nameOf(id), 'small', { size: 10.5, fixed: true, color: ink, wrap: cw - 4, align: 'center' }).setOrigin(0.5, 0);
       col++;
     });
     col += 0.25;

@@ -225,7 +225,7 @@ export class ForageSpotProp implements Lightable {
     if (this.bud) this.bud.setTint(t);
     if (this.kind === 'moon') {
       // The white truss glows: it keeps most of its own colour at night.
-      this.items.setTint(liftTint(l, 0.55 + l.night * 0.3));
+      this.items.setTint(liftTint(l, 0.45 + l.night * 0.2));
       this.halo!.setBlendMode(Phaser.BlendModes.ADD);
     } else {
       this.items.setTint(t);
@@ -245,7 +245,7 @@ export class ForageSpotProp implements Lightable {
     if (this.halo && this.halo.visible) {
       const p = 0.5 + 0.5 * Math.sin(t * ((Math.PI * 2) / 2.5) + this.phase);
       const n = 0.25 + this.night * 0.75;
-      this.halo.setAlpha((0.45 + 0.4 * p) * n);
+      this.halo.setAlpha((0.3 + 0.3 * p) * n);
       this.haloAir!.setAlpha((0.18 + 0.2 * p) * n);
     }
   }

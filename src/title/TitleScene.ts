@@ -78,7 +78,7 @@ export default class Title extends Phaser.Scene {
 
     // Buttons.
     const save = hasSave() ? load() : null;
-    const by = l.h - l.safe.bottom - 150;
+    const by = l.h - l.safe.bottom - 78;
     const btns: Button[] = [];
     const begin = new Button(this, 0, 0, { label: STR.title.begin, variant: 'primary', w: 300, onTap: () => this.begin(!!save) });
     btns.push(begin);
@@ -94,7 +94,7 @@ export default class Title extends Phaser.Scene {
       b.setScrollFactor(0).setDepth(DEPTH.ui);
       x += widths[i] + gap;
     });
-    txt(this, l.w / 2, l.h - l.safe.bottom - 52, STR.title.footer, 'small', { color: mix(P.cream, P.lavender, 0.3), size: 18 })
+    txt(this, l.w / 2, l.h - l.safe.bottom - 22, STR.title.footer, 'small', { color: mix(P.cream, P.lavender, 0.3), size: 18 })
       .setScrollFactor(0)
       .setDepth(DEPTH.ui);
     void sub;
