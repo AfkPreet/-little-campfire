@@ -5,6 +5,8 @@ import '@fontsource/patrick-hand/400.css';
 import Phaser from 'phaser';
 import { gameConfigSize, installResize, refreshLayout } from '@/core/layout';
 import { installAutosaveHooks } from '@/core/state';
+import { initFlow } from '@/core/flow';
+import { installHooks } from '@/core/hooks';
 import { SCENE_CLASSES } from '@/scenes';
 
 function preventGestures(): void {
@@ -52,6 +54,8 @@ function start(): void {
   });
   installResize(game);
   installAutosaveHooks();
+  initFlow(game);
+  installHooks();
   (window as unknown as { __phaser: Phaser.Game }).__phaser = game;
 }
 
