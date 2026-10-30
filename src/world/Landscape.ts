@@ -171,10 +171,6 @@ export class Landscape {
   private ringTimer = 0;
   private t = 0;
   private starVis = 0;
-  private sunX = 0;
-  private sunY = 0;
-  private moonX = 0;
-  private moonY = 0;
   private pathCol = WHITE;
   private pathAlpha = 0;
   private pathX = 0;
@@ -593,8 +589,6 @@ export class Landscape {
     const w = this.viewW;
     const sx = w * (0.64 + 0.24 * l.sun.x);
     const sy = 300 - 236 * Math.pow(Math.max(0, l.sun.y), 1.3);
-    this.sunX = sx;
-    this.sunY = sy;
     const sunCol = lerpInt(hexToInt(P.cream), l.horizon, 0.45 + golden * 0.25);
     const bloomCol = lerpInt(l.horizon, hexToInt(P.butter), 0.35 + day * 0.3);
     const sa = l.sun.a;
@@ -604,8 +598,6 @@ export class Landscape {
     // --- Moon
     const mx = w * Math.max(0.16, Math.min(0.84, l.moon.x - 0.4));
     const my = 70 + (1 - l.moon.y) * 190;
-    this.moonX = mx;
-    this.moonY = my;
     const ma = clamp01(l.moon.a);
     this.moonDisc.setPosition(mx, my).setAlpha(ma);
     this.moonHalo.setPosition(mx, my).setTint(hexToInt(P.lavender)).setAlpha(ma * 0.42);

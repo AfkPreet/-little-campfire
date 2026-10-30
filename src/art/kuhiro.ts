@@ -66,10 +66,10 @@ export const KH = {
     [112, -168, 1.8],
   ] as [number, number, number][],
   heart: { x: 76, y: -92 },
-  finNear: { x: 22, y: -54, angle: 38 },
-  finFar: { x: -150, y: -18, angle: 150 },
-  crest: { x: 200, y: -240 },
-  tail: { x: 478 },
+  finNear: { x: 28, y: -88, angle: 30 },
+  finFar: { x: -126, y: -50, angle: 166 },
+  crest: { x: 196, y: -236 },
+  tail: { x: 446 },
   halo: { x: 110, y: -140, w: 900, h: 500 },
   /** Pivot for head tilts (in the face). */
   pivot: { x: -110, y: -140 },
@@ -313,11 +313,18 @@ function drawSkin(ctx: Ctx, details: boolean): void {
     const top = topContour(-182, 398, 3).filter((p) => p[1] < -40);
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
-    ctx.strokeStyle = rgba(C.glow, 0.16);
-    ctx.lineWidth = 22;
+    // A soft band of spine lavender just inside the back.
+    ctx.strokeStyle = rgba(C.spine, 0.22);
+    ctx.lineWidth = 80;
+    strokeOpen(
+      ctx,
+      top.filter((p) => p[0] > -60).map((p) => [p[0], p[1] + 34] as [number, number]),
+    );
+    ctx.strokeStyle = rgba(C.glow, 0.12);
+    ctx.lineWidth = 26;
     strokeOpen(ctx, top);
-    ctx.strokeStyle = rgba(C.glow, 0.34);
-    ctx.lineWidth = 7;
+    ctx.strokeStyle = rgba(C.glow, 0.2);
+    ctx.lineWidth = 8;
     strokeOpen(ctx, top);
   });
 }
@@ -337,24 +344,27 @@ function drawScales(ctx: Ctx): void {
         ctx.beginPath();
         ctx.arc(0, 0, s.r, -Math.PI / 2, Math.PI / 2);
         ctx.closePath();
-        ctx.fillStyle = rGrad(ctx, -s.r * 0.2, 0, 0, s.r, [
+        ctx.fillStyle = rGrad(ctx, -s.r * 0.25, 0, 0, s.r, [
           [0, C.belly, 0],
-          [0.55, C.belly, 0.05],
-          [0.88, C.belly, 0.2],
-          [1, C.belly, 0.3],
+          [0.6, C.belly, 0.04],
+          [0.9, C.belly, 0.16],
+          [1, C.belly, 0.22],
         ]);
         ctx.fill();
-        // The lighter arc (moonmilk 0.35)...
+        // The lighter arc (moonmilk 0.35, feathered)...
         ctx.beginPath();
-        ctx.arc(0, 0, s.r - 4, -1.38, 1.38);
-        ctx.strokeStyle = rgba(C.belly, 0.35);
-        ctx.lineWidth = 7;
+        ctx.arc(0, 0, s.r - 4, -1.36, 1.36);
+        ctx.strokeStyle = rgba(C.belly, 0.14);
+        ctx.lineWidth = 10;
+        ctx.stroke();
+        ctx.strokeStyle = rgba(C.belly, 0.24);
+        ctx.lineWidth = 5;
         ctx.stroke();
         // ...with a fish-glow inner edge.
         ctx.beginPath();
-        ctx.arc(0, 0, s.r - 9, -1.26, 1.26);
-        ctx.strokeStyle = rgba(C.glow, 0.8);
-        ctx.lineWidth = 1.8;
+        ctx.arc(0, 0, s.r - 8.5, -1.22, 1.22);
+        ctx.strokeStyle = rgba(C.glow, 0.5);
+        ctx.lineWidth = 1.3;
         ctx.stroke();
       });
     }
@@ -390,6 +400,16 @@ function drawBody(ctx: Ctx): void {
   ctx.strokeStyle = C.line;
   ctx.lineWidth = 3;
   ctx.stroke();
+  // The part that always stays under the lake fades, so only a soft ghost shows through the water.
+  withState(ctx, () => {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = vGrad(ctx, 8, 190, [
+      [0, '#FFFFFF', 0],
+      [0.3, '#FFFFFF', 0.5],
+      [1, '#FFFFFF', 0.85],
+    ]);
+    ctx.fillRect(-260, 8, 720, 200);
+  });
 }
 
 /** Eyelid frame k of LID_FRAMES (k = LID_FRAMES is fully closed, no lash). */
@@ -495,24 +515,24 @@ function drawPetalFin(ctx: Ctx, len: number, wid: number): void {
 
 function crestPath(ctx: Ctx): void {
   // Low rounded crest, swept back; base along y = 0 from x -70 to 80.
-  ctx.moveTo(-74, 6);
-  ctx.bezierCurveTo(-64, -18, -40, -40, -8, -42);
-  ctx.bezierCurveTo(30, -44, 62, -26, 84, 4);
-  ctx.lineTo(84, 14);
-  ctx.lineTo(-74, 14);
+  ctx.moveTo(-66, 8);
+  ctx.bezierCurveTo(-58, -12, -38, -31, -10, -33);
+  ctx.bezierCurveTo(24, -35, 54, -20, 74, 6);
+  ctx.lineTo(74, 14);
+  ctx.lineTo(-66, 14);
   ctx.closePath();
 }
 
 function tailPath(ctx: Ctx): void {
   // Two broad soft lobes in a V, peduncle at (0, 0) at the bottom.
-  ctx.moveTo(-16, 0);
-  ctx.bezierCurveTo(-22, -26, -40, -46, -66, -70);
-  ctx.bezierCurveTo(-94, -96, -92, -134, -62, -138);
-  ctx.bezierCurveTo(-34, -142, -14, -112, -2, -84);
-  ctx.quadraticCurveTo(4, -76, 10, -84);
-  ctx.bezierCurveTo(24, -114, 48, -146, 78, -140);
-  ctx.bezierCurveTo(106, -134, 104, -96, 76, -70);
-  ctx.bezierCurveTo(50, -46, 30, -26, 22, 0);
+  ctx.moveTo(-13, 0);
+  ctx.bezierCurveTo(-15, -30, -42, -62, -80, -98);
+  ctx.bezierCurveTo(-98, -116, -88, -142, -64, -130);
+  ctx.bezierCurveTo(-42, -116, -18, -88, -2, -64);
+  ctx.quadraticCurveTo(3, -58, 8, -64);
+  ctx.bezierCurveTo(22, -88, 46, -118, 68, -132);
+  ctx.bezierCurveTo(92, -146, 102, -118, 84, -100);
+  ctx.bezierCurveTo(46, -64, 18, -30, 15, 0);
   ctx.closePath();
 }
 
@@ -767,12 +787,12 @@ export function bake(b: Baker): void {
       ctx.strokeStyle = rgba(C.line, 0.34);
       ctx.lineWidth = 1.7;
       for (const [x, y] of [
-        [-70, -118],
-        [-48, -92],
-        [-24, -88],
-        [30, -96],
-        [56, -108],
-        [82, -118],
+        [-74, -114],
+        [-46, -100],
+        [-20, -76],
+        [26, -78],
+        [52, -106],
+        [80, -118],
       ]) {
         ctx.beginPath();
         ctx.moveTo(x * 0.12, -8);

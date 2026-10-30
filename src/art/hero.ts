@@ -165,6 +165,8 @@ function bodyShapes(c: Ctx): void {
   c.moveTo(34, -60);
   c.arc(0, -60, 34, 0, TAU);
   ellipsePath(c, 0, -24, 30, 24);
+  // Waist fillet: melts head and body into one tea-bun bean (no snowman notch).
+  ellipsePath(c, 0, -37, 29.4, 15);
 }
 
 export function drawBody(ctx: Ctx): void {
@@ -1173,9 +1175,9 @@ export function drawHeroPortrait(ctx: CanvasRenderingContext2D, size: number, op
   ctx.restore();
   // The tipped-out gurans, drifting down beside the doko (unrotated).
   ctx.save();
-  ctx.translate(size * 0.16, size * 0.36);
-  ctx.scale(k * 1.05, k * 1.05);
-  ctx.rotate(0.5);
+  ctx.translate(size * 0.13, size * 0.74);
+  ctx.scale(k * 0.95, k * 0.95);
+  ctx.rotate(0.7);
   drawEarFlower(ctx);
   ctx.restore();
 }

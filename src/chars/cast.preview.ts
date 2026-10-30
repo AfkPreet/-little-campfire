@@ -4,6 +4,7 @@
  *   ?show=boju    Boju idling, then pourChiya, then surprisedScale (loops)
  *   ?show=bush    Bud Bush loop: peek -> hide -> one-eye blink -> emerge
  *   ?show=zoom    Kopila + ball + bush at 3x for detail checks
+ *   &night=1      tint everything with LIGHT_PRESETS.night().actor on an indigo ground
  */
 import Phaser from 'phaser';
 import { anyParam } from '@/core/debug';
@@ -11,9 +12,10 @@ import { layout } from '@/core/layout';
 import { LIGHT_PRESETS } from '@/fx/lighting';
 import { A, P, hexToInt, mix } from '@/palette';
 import { txt } from '@/ui/text';
+import { Boju, type BojuExpr } from './Boju';
 import { BudBush, Kopila, type KopilaMode } from './Kopila';
 
-type Tickable = { tick(time: number, delta: number): void };
+type Tickable = { tick(time: number, delta: number): void; setLightTint?(c: number): unknown };
 
 const MODES: KopilaMode[] = ['stand', 'follow', 'peek', 'curled', 'sitDock', 'sleepFire', 'nibble', 'wiggle', 'roll', 'hidden'];
 
@@ -37,9 +39,46 @@ function dockEdge(scene: Phaser.Scene, x: number, y: number): void {
   g.strokeRoundedRect(x - 30, y, 60, 14, 5);
 }
 
+/** A simple shop-wood counter edge drawn in front of Boju. */
+function counter(scene: Phaser.Scene, x0: number, x1: number, y: number): void {
+  const wood = A['shop-wood'];
+  const g = scene.add.graphics().setDepth(10);
+  g.fillStyle(hexToInt(mix(wood, P.bark, 0.25)), 1);
+  g.fillRoundedRect(x0, y, x1 - x0, 30, 6);
+  g.fillStyle(hexToInt(wood), 1);
+  g.fillRoundedRect(x0, y - 2, x1 - x0, 9, 4);
+  g.lineStyle(2, hexToInt(mix(wood, P.bark, 0.6)), 1);
+  g.strokeRoundedRect(x0, y - 2, x1 - x0, 32, 6);
+  g.lineStyle(1.5, hexToInt(mix(wood, P.bark, 0.45)), 0.6);
+  g.lineBetween(x0 + 8, y + 17, x1 - 8, y + 17);
+}
+
+const EXPRS: BojuExpr[] = ['smile', 'happy', 'talking', 'surprised'];
+
 function sheet(scene: Phaser.Scene, ticks: Tickable[]): void {
   const l = layout();
   const night = LIGHT_PRESETS.night();
+
+  // Boju row: four expressions at real size behind a counter.
+  const cy = 286;
+  const bstep = 250;
+  const count = l.w > 1300 ? 5 : 4;
+  const bx0 = l.w / 2 - ((count - 1) * bstep) / 2;
+  for (let i = 0; i < count; i++) {
+    const b = new Boju(scene, bx0 + i * bstep, cy).setDepth(1);
+    if (i < 4) b.setExpression(EXPRS[i]);
+    else b.setLightTint(night.actor);
+    ticks.push(b);
+  }
+  if (count === 5) {
+    const g = scene.add.graphics().setDepth(0.5);
+    g.fillStyle(hexToInt('#2F3558'), 1);
+    g.fillRoundedRect(bx0 + 4 * bstep - 125, 8, 250, cy, 20);
+  }
+  counter(scene, 16, l.w - 16, cy);
+  for (let i = 0; i < count; i++) {
+    txt(scene, bx0 + i * bstep, cy + 16, i < 4 ? EXPRS[i] : 'night', 'small', { color: P.ink, size: 15, fixed: true }).setDepth(11);
+  }
 
   // Kopila modes row.
   const rowY = 420;
@@ -141,6 +180,36 @@ function zoom(scene: Phaser.Scene, ticks: Tickable[]): void {
   ticks.push(b2);
 }
 
+function bojuLoop(scene: Phaser.Scene, ticks: Tickable[]): void {
+  const l = layout();
+  const cy = 520;
+  const b = new Boju(scene, l.w / 2, cy);
+  b.setScale(1.6);
+  ticks.push(b);
+  counter(scene, 40, l.w - 40, cy);
+  const status = txt(scene, l.w / 2, cy + 60, '', 'small', { color: P.cream, size: 18, fixed: true }).setDepth(11);
+  b.onClick = () => status.setText('click');
+  const cycle = async () => {
+    status.setText('idle');
+    await new Promise((r) => scene.time.delayedCall(2500, r));
+    status.setText('talk');
+    b.talk(2200);
+    await new Promise((r) => scene.time.delayedCall(2600, r));
+    status.setText('pourChiya');
+    await b.pourChiya();
+    await new Promise((r) => scene.time.delayedCall(1500, r));
+    status.setText('surprisedScale');
+    await b.surprisedScale();
+    await new Promise((r) => scene.time.delayedCall(3500, r));
+    b.hideChiya();
+    status.setText('nod');
+    b.nod();
+    await new Promise((r) => scene.time.delayedCall(2000, r));
+    void cycle();
+  };
+  void cycle();
+}
+
 function bushLoop(scene: Phaser.Scene, ticks: Tickable[]): void {
   const l = layout();
   ground(scene, 40, l.w - 40, 520);
@@ -166,7 +235,13 @@ export default function preview(scene: Phaser.Scene): void {
   const ticks: Tickable[] = [];
   if (show === 'zoom') zoom(scene, ticks);
   else if (show === 'bush') bushLoop(scene, ticks);
+  else if (show === 'boju') bojuLoop(scene, ticks);
   else sheet(scene, ticks);
+  if (anyParam('night') === '1') {
+    // (pass &bg=%232F3558 for an indigo backdrop)
+    const c = LIGHT_PRESETS.night().actor;
+    for (const o of ticks) o.setLightTint?.(c);
+  }
   scene.events.on('update', (t: number, d: number) => {
     for (const o of ticks) o.tick(t, d);
   });

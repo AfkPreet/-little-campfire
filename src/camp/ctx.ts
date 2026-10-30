@@ -35,6 +35,10 @@ export interface CampCtx {
   onUpdate(fn: (time: number, delta: number) => void): () => void;
   /** A controller may claim world taps first (fishing bite window). Return true to consume. */
   setTapInterceptor(fn: ((wx: number, wy: number) => boolean) | null): void;
+  /** Rebuild placed decor props after a placement change. */
+  rebuildDecor(): void;
+  /** Snap-point id of a placed decor item under a world point, if any. */
+  decorHit(wx: number, wy: number): string | null;
   /** Current activity Tuki is in (for ambience + clock rules). */
   activity: 'idle' | 'walk' | 'fish' | 'sit' | 'rest' | 'cook' | 'decor' | 'sleep' | 'finale' | 'read' | 'nap';
 }

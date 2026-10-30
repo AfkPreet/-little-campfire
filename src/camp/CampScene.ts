@@ -326,6 +326,14 @@ export default class Camp extends Phaser.Scene {
       focus: (x) => {
         this.focusX = x;
       },
+      rebuildDecor: () => this.rebuildDecor(),
+      decorHit: (wx, wy) => {
+        for (const d of this.decorProps) {
+          const r = d.hitArea();
+          if (r.contains(wx, wy)) return (d as unknown as { point?: string }).point ?? null;
+        }
+        return null;
+      },
       setTapInterceptor: (fn) => {
         this.tapInterceptor = fn;
       },
@@ -787,6 +795,7 @@ export default class Camp extends Phaser.Scene {
         y = hp.y;
       }
       const d = new DecorProp(this, p.id, x, y, to ? { to } : undefined);
+      (d as unknown as { point?: string }).point = p.point;
       d.onChime = () => playSfx('tinkle', { vol: 0.5 });
       this.decorProps.push(d);
       this.light.add(d);

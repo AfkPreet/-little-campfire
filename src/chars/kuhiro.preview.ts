@@ -212,7 +212,7 @@ export default function preview(scene: Phaser.Scene): void {
   let light = lightAt(1, rainAmt);
   const rain = new Rain(scene, w, 720, DEPTH.rain, 640);
   rain.set(rainAmt, true);
-  const ff = new Fireflies(scene, { x0: 40, x1: w - 40, y0: 360, y1: 560 }, 24);
+  const ff = new Fireflies(scene, { x0: 30, x1: Math.max(200, kx - 240), y0: 380, y1: 560 }, 20);
   ff.setAmount(0.6, true);
 
   const kuhiro = new Kuhiro(scene, kx, WATER_Y);

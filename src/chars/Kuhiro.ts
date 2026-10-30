@@ -130,8 +130,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
 
     // Halo (behind everything): additive, 1.5x the body.
     const h = KH.halo;
-    this.halo = mk('glow', h.x, h.y).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow-edge']));
-    this.halo.setScale((K * h.w) / 256, (K * h.h) / 256);
+    this.halo = mk('soft', h.x, h.y).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow-edge']));
+    this.halo.setScale((K * h.w) / 128, (K * h.h) / 128);
 
     // Tail: separate so it can lift and flip out at the far right.
     this.tail = mk('kuhiro_tail', KH.tail.x, 140, 0.5, 0.95);
@@ -170,14 +170,14 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Freckles: 8-12 scattered small ones, then the Gurans flower.
     const addFreckle = (fx: number, fy: number, r: number, list: Freckle[], base: number) => {
       const halo = mk('glowSmall', fx, fy).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow']));
-      halo.setScale((K * r * 5.2) / 48);
+      halo.setScale((K * r * 6.5) / 48);
       const core = mk('kuhiro_freckle', fx, fy).setScale((K * r) / 5.5);
       list.push({ core, halo, base, period: Phaser.Math.FloatBetween(2, 4), phase: Math.random() * TAU, lit: 0, flash: 0, r });
       bc.add([halo, core]);
     };
-    for (const [fx, fy, r] of KH.scattered) addFreckle(fx, fy, r, this.scatterF, 0.55);
+    for (const [fx, fy, r] of KH.scattered) addFreckle(fx, fy, r, this.scatterF, 0.25);
     const fl = KH.flower;
-    for (const p of gurans(fl.x, fl.y, fl.ring)) addFreckle(p.x, p.y, p.centre ? fl.rc : fl.r, this.flowerF, 0.5);
+    for (const p of gurans(fl.x, fl.y, fl.ring)) addFreckle(p.x, p.y, p.centre ? fl.rc : fl.r, this.flowerF, 0.32);
 
     // Face.
     const bn = KH.blushNear;
@@ -597,22 +597,22 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.halo.setAlpha(0.35 * g * (0.9 + 0.1 * br));
     this.heartGlow.setAlpha(0.3 + 0.08 * br + (this.happy ? 0.08 : 0));
     this.heartCore.setAlpha((0.1 + 0.05 * br) * g);
-    this.waterGlow.setAlpha(g * (0.18 + 0.32 * up));
+    this.waterGlow.setAlpha(g * (0.1 + 0.2 * up));
     this.waterGlow.y = 24 + oy * 0.22;
     this.waterGlow.setScale((K * (620 + 160 * (1 - up))) / 256, (K * (110 + 30 * (1 - up))) / 256);
     this.gleam.setAlpha(this.gleamA * above);
     this.blushes[0].setAlpha(this.blushA * 0.85);
     this.blushes[1].setAlpha(this.blushA);
-    this.waterline.setAlpha(above * (0.5 + 0.12 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
+    this.waterline.setAlpha(above * (0.36 + 0.1 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
 
     // Freckles pulse on their own phases.
     const fd = Math.exp(-dt * 2.2);
     const pulseF = (f: Freckle) => {
       f.flash *= fd;
       const pulse = 0.5 + 0.5 * Math.sin((t * TAU) / f.period + f.phase);
-      const level = Math.min(1, f.base * 0.55 + f.lit * 0.55 + f.flash * 0.6);
-      f.core.setAlpha(Math.min(1, (0.55 + 0.45 * level) * (0.82 + 0.18 * pulse)));
-      f.halo.setAlpha(Math.min(1, level * (0.45 + 0.4 * pulse) * (0.4 + 0.6 * g)));
+      const level = Math.min(1, f.base + (1 - f.base) * f.lit + f.flash * 0.6);
+      f.core.setAlpha(Math.min(1, (0.35 + 0.65 * level) * (0.8 + 0.2 * pulse)));
+      f.halo.setAlpha(Math.min(1, level * (0.5 + 0.35 * pulse) * (0.4 + 0.6 * g)));
     };
     this.flowerF.forEach(pulseF);
     this.scatterF.forEach(pulseF);
@@ -710,7 +710,7 @@ export class UnderGlow {
   ) {
     this.broad = scene.add.image(x, waterY + 18, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['lake-glow'])).setDepth(depth);
     this.broad.setScale((K * 1100) / 256, (K * 210) / 256).setAlpha(0);
-    this.core = scene.add.image(x + 20, waterY + 10, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setDepth(depth);
+    this.core = scene.add.image(x + 20, waterY + 12, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['lake-glow'])).setDepth(depth);
     this.core.setScale((K * 560) / 256, (K * 90) / 256).setAlpha(0);
     const pulse = { k: 0 };
     this.breathTween = scene.tweens.add({
@@ -726,7 +726,7 @@ export class UnderGlow {
 
   private apply(k: number): void {
     this.broad.setAlpha(this.level * k);
-    this.core.setAlpha(this.level * 0.7 * k);
+    this.core.setAlpha(this.level * 0.4 * k);
   }
 
   /** Fade to alpha (0..0.5) over ms. */
