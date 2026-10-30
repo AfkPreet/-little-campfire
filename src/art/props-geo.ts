@@ -137,6 +137,6 @@ export const CHIME = { lengths: [22, 31, 37, 29, 20], xs: [-12, -6, 0, 6, 12], d
 /** Laltin: globe centre + flame base (hang-local). */
 export const LALTIN = { globeY: 30, flameY: 37, h: 54 };
 /** Kuhiro's Lantern: star centre (hang-local). */
-export const KLANTERN = { starY: 31, h: 52 };
+export const KLANTERN = { starY: 28, h: 46 };
 /** Brass Star-Scope objective tip (ground-local). */
-export const SCOPE_TIP: [number, number] = [26, -68];
+export const SCOPE_TIP: [number, number] = [26, -65];

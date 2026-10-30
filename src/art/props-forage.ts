@@ -4,7 +4,7 @@
  * items. Keys: prop_katus_trunk, prop_katus_crown, prop_katus_burrs,
  * prop_sisnu_base, prop_sisnu_tops, prop_ainselu_bush, prop_ainselu_berries,
  * prop_log, prop_log_caps3, prop_log_caps6, prop_moon_bush, prop_moon_bud,
- * prop_moon_truss, prop_scale, prop_forage_sil_<kind>.
+ * prop_moon_truss, prop_scale.
  */
 import { type Baker, type Ctx, OUTLINE, artRng, rGrad, roundRectPath, smoothClosed, softShadow, vGrad, withState, lGrad } from './kit';
 import { AINSELU_BERRIES, CHYAU_CAPS3, CHYAU_CAPS6, KATUS_BURRS, MOON_TRUSS, SISNU_TOPS, ptex } from './props-geo';

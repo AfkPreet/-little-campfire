@@ -10,7 +10,9 @@ import Phaser from 'phaser';
 import { anyParam } from '@/core/debug';
 import { layout } from '@/core/layout';
 import { LIGHT_PRESETS } from '@/fx/lighting';
-import { A, P, hexToInt, mix } from '@/palette';
+import { A, LIGHT, P, hexToInt, mix } from '@/palette';
+
+const NIGHT_SKY = LIGHT.night.skyTop;
 import { txt } from '@/ui/text';
 import { Boju, type BojuExpr } from './Boju';
 import { BudBush, Kopila, type KopilaMode } from './Kopila';
@@ -26,7 +28,7 @@ function label(scene: Phaser.Scene, x: number, y: number, s: string): void {
 /** A strip of ground to stand things on. */
 function ground(scene: Phaser.Scene, x0: number, x1: number, y: number, night = false): void {
   const g = scene.add.graphics();
-  g.fillStyle(hexToInt(night ? mix(P.moss, '#2F3558', 0.55) : mix(P.sage, P.cream, 0.35)), 1);
+  g.fillStyle(hexToInt(night ? mix(P.moss, NIGHT_SKY, 0.55) : mix(P.sage, P.cream, 0.35)), 1);
   g.fillRoundedRect(x0, y - 2, x1 - x0, 16, 8);
 }
 
@@ -72,7 +74,7 @@ function sheet(scene: Phaser.Scene, ticks: Tickable[]): void {
   }
   if (count === 5) {
     const g = scene.add.graphics().setDepth(0.5);
-    g.fillStyle(hexToInt('#2F3558'), 1);
+    g.fillStyle(hexToInt(NIGHT_SKY), 1);
     g.fillRoundedRect(bx0 + 4 * bstep - 125, 8, 250, cy, 20);
   }
   counter(scene, 16, l.w - 16, cy);
@@ -129,7 +131,7 @@ function sheet(scene: Phaser.Scene, ticks: Tickable[]): void {
   // Night copies.
   const nx = 560;
   const g2 = scene.add.graphics();
-  g2.fillStyle(hexToInt('#2F3558'), 1);
+  g2.fillStyle(hexToInt(NIGHT_SKY), 1);
   g2.fillRoundedRect(nx - 20, by - 130, Math.min(420, l.w - nx), 170, 20);
   ground(scene, nx - 10, nx + Math.min(400, l.w - nx - 20), by + 2, true);
   const nb = new BudBush(scene, nx + 70, by);
