@@ -4,6 +4,7 @@
  * window (1.4 s, 1.9 s with a Rattan/Firefly rod); auto-reel 1.2 s; catch card
  * (Keep / Let go). A miss just swims away. Bait toggle beside the rod.
  */
+import { pinToScreen } from '@/ui/pin';
 import Phaser from 'phaser';
 import { DEPTH } from '@/config';
 import { bus } from '@/core/bus';
@@ -369,6 +370,7 @@ export class Fishing {
         this.updateBaitText();
       },
     });
+    pinToScreen(c);
     this.baitUi = c;
     this.updateBaitText();
   }

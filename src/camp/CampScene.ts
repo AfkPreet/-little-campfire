@@ -4,6 +4,7 @@
  * events, the tent, forage, fire and sleep flows. Fishing, decor mode and the
  * finale live in their own controllers (src/camp/*.ts) and share a CampCtx.
  */
+import { pinToScreen } from '@/ui/pin';
 import Phaser from 'phaser';
 import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
@@ -852,7 +853,7 @@ export default class Camp extends Phaser.Scene {
       },
       depth: DEPTH.overlay,
     } as never);
-    this.dialog.setScrollFactor(0);
+    pinToScreen(this.dialog);
   }
 
   private sleeping = false;

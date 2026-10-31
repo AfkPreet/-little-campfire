@@ -23,3 +23,4 @@ export { Stepper } from './Stepper';
 export type { StepperOpts } from './Stepper';
 export { txt, txtObj, fmt } from './text';
 export { ICONS, iconObj, panel, shadowPanel, addGrain, type IconKey, type CardTint, type FaceTint } from '@/art/ui';
+export { pinToScreen } from './pin';

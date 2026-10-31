@@ -4,6 +4,7 @@
  * ground points ring the clearing, the hammock needs the two-tree point, and
  * string lights span two hang points. Tap a placed item to move or store it.
  */
+import { pinToScreen } from '@/ui/pin';
 import Phaser from 'phaser';
 import { DEPTH } from '@/config';
 import { bus } from '@/core/bus';
@@ -105,6 +106,7 @@ export class DecorMode {
     });
     const done = new Button(sc, W / 2 + 90, 0, { label: STR.actions.done, variant: 'primary', w: 140, onTap: () => this.exit() });
     c.add(done);
+    pinToScreen(c);
     this.ui = c;
   }
 

@@ -1,5 +1,6 @@
 /**
- * Kuhiro preview: ?scene=preview&what=kuhiro&beat=idle|rise|finale|glow|moments
+ * Kuhiro preview: ?scene=preview&what=kuhiro&beat=idle|rise|finale|glow|moments|sky|end
+ * (sky and end jump straight to the finale's 30-37 s and 37-45 s beats.)
  * A simple night-lake backdrop (palette colours only) with a dock on the left.
  */
 import Phaser from 'phaser';
@@ -316,6 +317,18 @@ export default function preview(scene: Phaser.Scene): void {
     void runFinale();
   } else if (beat === 'moments') {
     void runMoments();
+  } else if (beat === 'end') {
+    // Finale 37-45 s: a freckle-light drifts to the dock, a last slow blink, it sinks in rings.
+    const ug = new UnderGlow(scene, kx + 60, WATER_Y);
+    ug.set(0.5, 10);
+    void kuhiro.rise(10).then(async () => {
+      kuhiro.setHappy(true);
+      await kuhiro.lightFreckles();
+      await kuhiro.releaseFreckle(dockEnd - 30, DOCK_Y - 40);
+      await kuhiro.slowBlink();
+      ug.set(0, 3200);
+      await kuhiro.sink(3200);
+    });
   } else if (beat === 'sky') {
     // Straight to the plume and the sky opening (finale 30-37 s), for quick checks.
     const ug = new UnderGlow(scene, kx + 60, WATER_Y);

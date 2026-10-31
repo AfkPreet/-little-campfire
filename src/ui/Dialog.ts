@@ -4,6 +4,7 @@
  * ink-tinted scrim (never black) that swallows input beneath, and pops a
  * paper card in with easeOutBack. Esc cancels, Enter confirms.
  */
+import { pinToScreen } from './pin';
 import Phaser from 'phaser';
 import { DEPTH } from '@/config';
 import { layout, onLayout } from '@/core/layout';
@@ -115,7 +116,9 @@ export class Dialog extends Phaser.GameObjects.Container {
       this.card.add(ok);
     }
 
-    this.setDepth(depth).setScrollFactor(0);
+    // Pin every child too: Phaser hit-tests container children with their own scroll factor.
+    this.setDepth(depth);
+    pinToScreen(this);
     // Pop in.
     const rm = reduceMotion();
     this.setAlpha(0);

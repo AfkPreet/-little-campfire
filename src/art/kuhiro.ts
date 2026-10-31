@@ -888,10 +888,11 @@ export function bake(b: Baker): void {
     withState(ctx, () => {
       ctx.beginPath();
       tailPath(ctx);
+      // Luminous like the body: glow-pale lobes deepening to lavender at the root.
       ctx.fillStyle = vGrad(ctx, -140, 0, [
-        [0, mix(C.spine, C.glow, 0.6), 0.6],
-        [0.55, mix(C.spine, C.glow, 0.2), 0.75],
-        [1, C.spine, 0.95],
+        [0, mix(C.spine, C.glow, 0.8), 0.78],
+        [0.55, mix(C.spine, C.glow, 0.5), 0.86],
+        [1, mix(C.spine, C.flank, 0.4), 0.95],
       ]);
       ctx.fill();
       ctx.lineCap = 'round';

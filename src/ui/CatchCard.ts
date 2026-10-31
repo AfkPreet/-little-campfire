@@ -2,6 +2,7 @@
  * Catch card (spec section 5, Fishing step 4): name, size in cm, rarity stars
  * and a "NEW!" ribbon on first catch; Keep / Let go.
  */
+import { pinToScreen } from './pin';
 import Phaser from 'phaser';
 import { DEPTH } from '@/config';
 import { layout } from '@/core/layout';
@@ -65,6 +66,8 @@ export class CatchCard extends Phaser.GameObjects.Container {
     const letGo = new Button(scene, 78, H / 2 - 52, { label: STR.fishing.letGo, variant: 'secondary', w: 140, onTap: () => this.close(o.onLetGo) });
     this.add([card, well, fish, name, size, stars, rarity, keep, letGo]);
     void panel;
+    // Pin children: Phaser hit-tests container children with their own scroll factor.
+    pinToScreen(this);
     scene.add.existing(this);
     if (reduceMotion()) {
       this.setAlpha(0);

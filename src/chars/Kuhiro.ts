@@ -318,6 +318,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       const parts: Img[] = [this.bodyImg, this.crest, this.finNear, this.finFar, this.tail, this.gills, this.mouthSmile, this.mouthO, ...this.blushes];
       for (const e of this.eyes) parts.push(e.eye, e.lidA, e.lidB, e.closed, e.happy);
       for (const p of parts) p.setTint(t);
+      // The tail has no glow sprites of its own: keep it nearly self-lit so it never reads as a dark silhouette.
+      this.tail.setTint(mixInt(l.hex.actor, '#FFFFFF', 0.8));
     }
     this.veil.setTint(l.water);
     const mc = mixInt(P.cream, l.hex.haze, 0.25);
@@ -511,8 +513,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     const src = this.flowerF[5];
     const from = this.worldOf(src.core.x, src.core.y);
     const d = this.depth + 30;
-    const halo = this.scene.add.image(from.x, from.y, 'glow').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setDepth(d);
-    halo.setScale(K * 0.36).setAlpha(0);
+    const halo = this.scene.add.image(from.x, from.y, 'glowSmall').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setDepth(d);
+    halo.setScale(K * 1.9).setAlpha(0);
     const warm = this.scene.add.image(from.x, from.y, 'glowSmall').setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(P.glow)).setDepth(d);
     warm.setScale(K * 1.1).setAlpha(0);
     const core = this.scene.add.image(from.x, from.y, 'kuhiro_freckle').setDepth(d).setScale(K * 1.25);
@@ -541,7 +543,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
         onComplete: () => {
           trail.stop();
           sparkleBurst(this.scene, targetX, targetY, { count: 10, color: A['fish-glow'], depth: d });
-          this.tw(halo, { alpha: 0, scale: K * 0.6 }, 1200, 'Sine.easeOut');
+          this.tw(halo, { alpha: 0, scale: K * 3.2 }, 1200, 'Sine.easeOut');
           this.tw(warm, { alpha: 0, scale: K * 2 }, 900, 'Sine.easeOut');
           this.tw(core, { alpha: 0 }, 900, 'Sine.easeIn').then(() => {
             halo.destroy();
@@ -851,21 +853,27 @@ export class GlowSighting {
       return im;
     };
     const under = add('glow', A['lake-glow']).setScale((K * 190) / 256, (K * 40) / 256);
-    const oval = add('glow', A['fish-glow']).setScale((K * 64) / 256, (K * 22) / 256);
-    const ovalCore = add('soft', A['lake-glow']).setScale((K * 36) / 128, (K * 11) / 128);
+    // Small sprites use the 48 px glow: downscaling the 256 px one 4x aliases into a diamond.
+    const oval = add('glowSmall', A['fish-glow']).setScale((K * 64) / 48, (K * 22) / 48);
+    const ovalCore = add('glowSmall', A['lake-glow']).setScale((K * 34) / 48, (K * 10) / 48);
     // Three of the Gurans freckles, tiny at this distance.
     const fl = gurans(0, 0, 4.2);
     const pick = [fl[0], fl[2], fl[5]];
-    const freckles = pick.map(() => add('dot', P.glow).setScale(0.36 * K));
-    const fHalo = pick.map(() => add('glowSmall', A['fish-glow']).setScale(K * 0.32));
+    const freckles = pick.map(() => add('dot', P.glow).setScale(0.5 * K));
+    const fHalo = pick.map(() => add('glowSmall', P.glow).setScale(K * 0.34));
     const st = { a: 0, drift: 0, breath: 0 };
     const cycle = 6000;
     const total = 6400;
     return new Promise((res) => {
-      const start = s.time.now;
+      // Elapsed from the update deltas (scene clock 'now' is not valid yet if this starts during create()).
+      let el = 0;
       const puffAt = new Set<number>();
-      const upd = () => {
-        const el = s.time.now - start;
+      const upd = (_t: number, delta: number) => {
+        el += Math.min(delta, 250);
+        if (el >= total) {
+          finish();
+          return;
+        }
         const fadeIn = smooth(el / 1300);
         const fadeOut = 1 - smooth((el - (total - 1500)) / 1500);
         st.a = fadeIn * fadeOut;
@@ -873,13 +881,13 @@ export class GlowSighting {
         const cx = x + (el / total) * 34;
         const cy = y + Math.sin(el / 900) * 1.2;
         under.setPosition(cx, cy + 3).setAlpha(st.a * (0.22 + 0.12 * br));
-        oval.setPosition(cx, cy).setAlpha(st.a * (0.5 + 0.35 * br)).setScale((K * (60 + 10 * br)) / 256, (K * (20 + 3 * br)) / 256);
-        ovalCore.setPosition(cx, cy).setAlpha(st.a * (0.35 + 0.3 * br));
+        oval.setPosition(cx, cy).setAlpha(st.a * (0.34 + 0.22 * br)).setScale((K * (60 + 10 * br)) / 48, (K * (20 + 3 * br)) / 48);
+        ovalCore.setPosition(cx, cy).setAlpha(st.a * (0.16 + 0.14 * br));
         pick.forEach((p, i) => {
           const blink = Math.max(0, Math.sin(el / 420 + i * 2.1));
           const a = st.a * (0.25 + 0.75 * blink * blink);
-          freckles[i].setPosition(cx + p.x * 1.6, cy + p.y * 0.6).setAlpha(a);
-          fHalo[i].setPosition(cx + p.x * 1.6, cy + p.y * 0.6).setAlpha(a * 0.5);
+          freckles[i].setPosition(cx + p.x * 2.2, cy + p.y * 0.8).setAlpha(a);
+          fHalo[i].setPosition(cx + p.x * 2.2, cy + p.y * 0.8).setAlpha(a * 0.45);
         });
         // A tiny mist puff on each breath peak.
         const peak = Math.floor((el + cycle / 2) / cycle);
@@ -899,9 +907,18 @@ export class GlowSighting {
           s.time.delayedCall(2600, () => em.destroy());
         }
       };
-      s.events.on(Phaser.Scenes.Events.UPDATE, upd);
-      s.time.delayedCall(total, () => {
+      let done = false;
+      /** Called with the scene systems on SHUTDOWN (just clean up), or with nothing when the sighting ends. */
+      const finish = (shutdown?: unknown) => {
+        if (done) return;
+        done = true;
         s.events.off(Phaser.Scenes.Events.UPDATE, upd);
+        s.events.off(Phaser.Scenes.Events.SHUTDOWN, finish);
+        if (shutdown !== undefined) {
+          parts.forEach((p) => p.destroy());
+          res();
+          return;
+        }
         const cx = x + 34;
         for (let i = 0; i < 3; i++) {
           s.time.delayedCall(i * 380, () => {
@@ -910,7 +927,9 @@ export class GlowSighting {
         }
         parts.forEach((p) => p.destroy());
         s.time.delayedCall(1500, () => res());
-      });
+      };
+      s.events.on(Phaser.Scenes.Events.UPDATE, upd);
+      s.events.once(Phaser.Scenes.Events.SHUTDOWN, finish);
     });
   }
 }

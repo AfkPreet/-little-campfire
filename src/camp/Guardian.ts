@@ -3,6 +3,7 @@
  * first-night glow far out on the lake, the guardian-night ear perk, the
  * dock offering and the ~45 s finale (skippable on replays).
  */
+import { pinToScreen } from '@/ui/pin';
 import Phaser from 'phaser';
 import { DEPTH } from '@/config';
 import { bus } from '@/core/bus';
@@ -200,7 +201,7 @@ export class Guardian {
   private showSkip(): void {
     const l = layout();
     this.skipBtn = new Button(this.ctx.scene, l.w - l.safe.right - 90, l.safe.top + 120, { label: STR.skip, variant: 'quiet', w: 140, onTap: () => (this.skipped = true) });
-    this.skipBtn.setScrollFactor(0).setDepth(DEPTH.ui + 3);
+    pinToScreen(this.skipBtn).setDepth(DEPTH.ui + 3);
   }
 
   private endFinale(momos: Phaser.GameObjects.Image): void {
