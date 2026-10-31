@@ -45,6 +45,8 @@ npm run playtest     # drives the real touch paths (pegs, bush, water, bite, Kee
 npm run trip         # a whole trip: 5 clues, the finale, Night 7, Trip Album, free play, mid-day reload
 npm run shots -- m4  # milestone screenshots (iPad + phone @2x) to shots/m4/
 npm run icons        # app icons + social image from the game's own art
+npm run screens      # 1x shots of every journal tab, shop tab, settings, summary and album page (dev server running)
+npm run perf         # objects, live particles, tweens, texture MB per scene; bundle size (after a build)
 ```
 
 Playwright uses its bundled Chromium. On a fresh machine run `npx playwright install chromium` once.

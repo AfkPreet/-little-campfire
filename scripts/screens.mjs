@@ -1,12 +1,16 @@
-// Scratch: 1x review shots of screens the milestone list doesn't cover.
+// npm run screens -- <outDir> [only=prefix1,prefix2] — 1x review shots of the
+// screens the milestone list doesn't cover: every journal tab, shop tabs,
+// settings, intro, the summary card and every Trip Album page. Needs a running
+// dev server (BASE_URL, default http://127.0.0.1:5173).
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { launch, openGame, VIEWPORTS } from './lib/browser.mjs';
 
-const out = process.argv[2];
-const only = (process.argv[3] || '').split(',').filter(Boolean);
+const args = process.argv.slice(2);
+const out = args.find((a) => !a.startsWith('only=')) || 'shots/screens';
+const only = (args.find((a) => a.startsWith('only=')) || '').slice(5).split(',').filter(Boolean);
 mkdirSync(out, { recursive: true });
-const base = 'http://127.0.0.1:5173';
+const base = (process.env.BASE_URL || 'http://127.0.0.1:5173').replace(/\/$/, '');
 const browser = await launch();
 const vp = { ...VIEWPORTS[process.env.VP || 'ipad'], deviceScaleFactor: 1 };
 
