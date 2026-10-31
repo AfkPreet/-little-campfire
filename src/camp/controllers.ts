@@ -2,3 +2,6 @@
 import './Fishing';
 import './DecorMode';
 import './Guardian';
+import './Moments';
+import './DecorUse';
+import './CompanionCtl';

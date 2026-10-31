@@ -15,7 +15,7 @@ import { reduceMotion } from '@/core/settings';
 import { lightAt, type ResolvedLight } from '@/fx/lighting';
 import { ripple, sparkleBurst, sparkleTrail } from '@/fx/particles';
 import { A, P, hexToInt, mixInt } from '@/palette';
-import { BODY_BOX, KH, LID_FRAMES, crossSectionInto, gurans, scaleList, topContour } from '@/art/kuhiro';
+import { AURA_BOX, BODY_BOX, KH, LID_FRAMES, crossSectionInto, gurans, scaleList, topContour } from '@/art/kuhiro';
 
 const K = 1 / ART_SCALE;
 /** How far below the waterline the body waits before it rises. */
@@ -61,6 +61,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   onNuzzle?: () => void;
 
   private readonly halo: Img;
+  private readonly aura: Img;
   private readonly tail: Img;
   private readonly liftC: Ctr;
   private readonly pivotC: Ctr;
@@ -91,6 +92,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
   private readonly drops: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly mist: Phaser.GameObjects.Particles.ParticleEmitter;
   private readonly plume: Phaser.GameObjects.Particles.ParticleEmitter;
+  /** Slow motes of light lifting off the lake around the body while risen. */
+  private readonly motes: Phaser.GameObjects.Particles.ParticleEmitter;
+  private motesOn = false;
 
   // Animated state (tweened, applied in tick).
   private clock = 0;
@@ -149,6 +153,9 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.pivotC.add(this.bodyC);
 
     const bc = this.bodyC;
+    // Aura: light bleeding past the silhouette, behind the body (additive).
+    this.aura = mk('kuhiro_aura', AURA_BOX.x0, AURA_BOX.y0, 0, 0).setScale(2 * K).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow-edge'])).setAlpha(0);
+    bc.add(this.aura);
     this.crest = mk('kuhiro_crest', KH.crest.x, KH.crest.y, 86 / 176, 50 / 66).setAngle(24);
     this.finFar = mk('kuhiro_fin', KH.finFar.x, KH.finFar.y, 6 / 112, 0.5).setAngle(KH.finFar.angle);
     this.finFar.setScale(K * 0.72);
@@ -275,7 +282,21 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       emitting: false,
     });
 
-    this.add([this.halo, this.tail, this.liftC, this.veil, this.reflA, this.reflB, this.reflWarm, this.waterGlow, this.waterline, ...this.wisps, this.drops, this.mist, this.plume]);
+    this.motes = scene.add.particles(0, 0, 'glowSmall', {
+      emitZone: { type: 'random', source: new Phaser.Geom.Rectangle(-230, -40, 680, 44) } as Phaser.Types.GameObjects.Particles.EmitZoneData,
+      speedY: { min: -26, max: -10 },
+      speedX: { min: -6, max: 6 },
+      accelerationX: { min: -3, max: 3 },
+      lifespan: { min: 4200, max: 6800 },
+      scale: { min: 0.1 * K, max: 0.24 * K },
+      alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.8 * Math.sin(Math.PI * t) },
+      tint: [hexToInt(A['fish-glow']), hexToInt(A['lake-glow']), hexToInt(P.glow)],
+      blendMode: Phaser.BlendModes.ADD,
+      frequency: 240,
+      emitting: false,
+    });
+
+    this.add([this.halo, this.tail, this.liftC, this.veil, this.reflA, this.reflB, this.reflWarm, this.waterGlow, this.waterline, ...this.wisps, this.motes, this.drops, this.mist, this.plume]);
     this.setDepth(DEPTH.water + 1);
     this.setAlpha(0);
     this.setVisible(false);
@@ -624,6 +645,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Glow.
     const g = this.glowLevel;
     this.halo.setAlpha(0.35 * g * (0.9 + 0.1 * br));
+    this.aura.setAlpha(Math.min(1, g * (0.62 + 0.06 * br + 0.12 * this.gleamA)));
     this.heartGlow.setAlpha(0.3 + 0.06 * br + (this.happy ? 0.08 : 0));
     this.heartCore.setAlpha((0.14 + 0.06 * br + (this.happy ? 0.06 : 0)) * g);
     this.waterGlow.setAlpha(g * (0.06 + 0.12 * up));
@@ -649,6 +671,13 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       const w = this.wisps[i];
       w.x = (w.getData('x') as number) + Math.sin(t * 0.11 + i * 2.1) * 34;
       w.setAlpha((0.2 + 0.08 * Math.sin(t * 0.3 + i)) * (0.3 + 0.7 * up) * (0.6 + 0.4 * g));
+    }
+
+    const wantMotes = !rm && g > 0.5 && up > 0.6 && this.lift > 0.6 && (this.risen || this.busy) && this.presence > 0.5;
+    if (wantMotes !== this.motesOn) {
+      this.motesOn = wantMotes;
+      if (wantMotes) this.motes.start();
+      else this.motes.stop();
     }
 
     // Freckles pulse on their own phases.

@@ -799,13 +799,16 @@ export class Ambience {
   private lastScene: AmbienceScene | null = null;
   private appliedLP = -1;
   private appliedLevel = -1;
+  /** Open (unfiltered) cutoff, kept under Nyquist so low-rate contexts never warn. */
+  private readonly maxLP: number;
 
   constructor(ctx: BaseAudioContext, dest: Out, noise: NoiseBank) {
     this.ctx = ctx;
     const mix = ctx.createGain();
     this.outdoorLP = ctx.createBiquadFilter();
     this.outdoorLP.type = 'lowpass';
-    this.outdoorLP.frequency.value = 16000;
+    this.maxLP = Math.min(16000, ctx.sampleRate * 0.45);
+    this.outdoorLP.frequency.value = this.maxLP;
     this.outdoorLP.Q.value = 0.5;
     this.outdoorLevel = ctx.createGain();
     this.outdoorLevel.gain.value = 0;
@@ -840,7 +843,7 @@ export class Ambience {
     const rain = c.raining ? 1 : 0;
     const tent = c.inTent && sc !== 'shop' ? 1 : 0;
     const level = SCENE_LEVEL[sc] ?? 1;
-    const lp = sc === 'shop' ? SCENE_LP.shop : Math.min(SCENE_LP[sc] ?? 16000, tent ? 2600 : 16000);
+    const lp = Math.min(this.maxLP, sc === 'shop' ? SCENE_LP.shop : Math.min(SCENE_LP[sc] ?? 16000, tent ? 2600 : 16000));
 
     if (Math.abs(level - this.appliedLevel) > 0.005) {
       this.appliedLevel = level;

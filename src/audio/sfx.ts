@@ -545,8 +545,8 @@ const R: Record<SfxId, Recipe> = {
       o2.frequency.exponentialRampToValueAtTime(800 * p * k, tt + 0.18);
       v.done();
     };
-    one(t, 1, 0.2);
-    one(t + 0.14, 1.12, 0.12);
+    one(t, 1, 0.18);
+    one(t + 0.14, 1.12, 0.11);
   },
 
   // Reel: a soft pulsing whirr over a rising spool tone (~1.2 s).
@@ -636,7 +636,7 @@ const R: Record<SfxId, Recipe> = {
 
   // Tent spring: a wobbly boing and a sparkly jingle.
   spring(s, t, p, pan, vol) {
-    const v = s.voice(0.17 * vol, pan, 0.2);
+    const v = s.voice(0.14 * vol, pan, 0.2);
     const a = v.gain(0, v.filter('lowpass', 1600, 0.7));
     const end = perc(a.gain, t, 1, 0.01, 0.55);
     const o = v.osc('sine', 180 * p, t, end, a);
@@ -649,7 +649,7 @@ const R: Record<SfxId, Recipe> = {
     const o2 = v.osc('triangle', 360 * p, t, end, tri);
     glide(o2.frequency, t, 360 * p, 840 * p, 0.35);
     v.done();
-    [86, 90, 93, 98].forEach((m, i) => bell(s, t + 0.2 + i * 0.07, mtof(m) * p, { vol: 0.06 * vol, pan: pan + (i - 1.5) * 0.2, wet: 0.4, decay: 0.7, ratio: 3.5, index: 1.2 }));
+    [86, 90, 93, 98].forEach((m, i) => bell(s, t + 0.2 + i * 0.07, mtof(m) * p, { vol: 0.05 * vol, pan: pan + (i - 1.5) * 0.2, wet: 0.4, decay: 0.7, ratio: 3.5, index: 1.2 }));
   },
 
   // Page flip: a papery swish and a soft flap.
@@ -761,8 +761,8 @@ const R: Record<SfxId, Recipe> = {
       v.osc('sine', 22, tt, end, v.paramGain(o.frequency, 30 * p));
       v.done();
     };
-    one(t, 1, 0.1);
-    if (Math.random() < 0.5) one(t + 0.17, 1.12, 0.07);
+    one(t, 1, 0.09);
+    if (Math.random() < 0.5) one(t + 0.17, 1.12, 0.065);
   },
 
   // Gentle "nope": two soft falling notes, never a buzzer.
@@ -815,7 +815,7 @@ const R: Record<SfxId, Recipe> = {
   rumble(s, t, p, pan, vol) {
     const dur = 2.4;
     const end = t + dur + 0.2;
-    const v = s.voice(0.065 * vol, pan, 0.3);
+    const v = s.voice(0.052 * vol, pan, 0.3);
     const env = v.gain(0, v.filter('lowpass', 700, 0.6));
     swell(env.gain, t, 1, 0.5, dur - 1.3, 0.8);
     const purr = v.gain(0.7, env);

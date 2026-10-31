@@ -259,6 +259,7 @@ export class Fishing {
     this.phase = 'bite';
     this.biteDeadline = sc.time.now + (this.cast?.window ?? 1.4) * 1000;
     playSfx('bite');
+    bus.emit('camp:activity', { activity: 'bite' });
     if (this.bobber) sc.tweens.add({ targets: this.bobber, y: this.bobY + 9, duration: 120, ease: 'Sine.easeOut' });
     ripple(sc, this.bobX, this.bobY + 4, { rings: 3, size: 1.3, depth: DEPTH.water + 1, tint: P.glow });
     this.ctx.hero.surprised();

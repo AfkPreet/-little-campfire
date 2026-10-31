@@ -68,7 +68,7 @@ export default class Camp extends Phaser.Scene {
   private decorProps: DecorProp[] = [];
   private scaleSparkle?: ScaleSparkle;
   private bush!: BudBush;
-  private kopila: Kopila | null = null;
+  kopila: Kopila | null = null;
   private bubbleGroup: BubbleGroup | null = null;
   private busy = 0;
   private focusX: number | null = null;
@@ -140,7 +140,11 @@ export default class Camp extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.cleanup());
 
     if (data.dawnMoment) this.time.delayedCall(1800, () => triggerMoment(data.dawnMoment!));
-    if (data.woke) this.time.delayedCall(400, () => bus.emit('hud:hint', { text: null }));
+    if (data.woke) {
+      // Tuki 'dries' the doko flowers overnight.
+      this.hero.emptyDoko();
+      this.time.delayedCall(400, () => bus.emit('hud:hint', { text: null }));
+    }
 
     // First visit with a tent but nothing pitched: hint.
     this.time.delayedCall(900, () => this.hintTentIfNeeded());
@@ -1008,7 +1012,8 @@ export default class Camp extends Phaser.Scene {
     this.hero.tick(time, delta);
     if (this.kopila) {
       const kx = this.hero.x - 46 * this.hero.facing;
-      if (Math.abs(this.kopila.x - kx) > 30 && !this.kopila.walking) this.kopila.walkTo(kx);
+      const following = !['fish', 'sit', 'sleep'].includes(this.activity);
+      if (following && Math.abs(this.kopila.x - kx) > 30 && !this.kopila.walking) this.kopila.walkTo(kx);
       this.kopila.y = this.walkYAt(this.kopila.x);
       this.kopila.tick(time, delta);
     }

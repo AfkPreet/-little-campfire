@@ -127,7 +127,8 @@ try {
     await page.waitForTimeout(150);
   }
   check('a bite appears and can be hooked by tapping', hooked);
-  await page.waitForTimeout(2600);
+  await until(() => window.__phaser.scene.getScene('Camp').children.list.some((o) => o.constructor && o.constructor.name === 'CatchCard'), 30000).catch(() => {});
+  await page.waitForTimeout(800);
   const card = await page.evaluate(() => window.__phaser.scene.getScene('Camp').children.list.some((o) => o.constructor && o.constructor.name === 'CatchCard'));
   check('catch card shows', card);
   check('tap Keep on the catch card', await tapButton('Camp', 'Keep'));

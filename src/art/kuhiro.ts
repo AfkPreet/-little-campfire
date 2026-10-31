@@ -41,6 +41,8 @@ export const SIL: [number, number][] = [
 
 /** Body texture bounds in body-local px. */
 export const BODY_BOX = { x0: -232, y0: -334, w: 664, h: 532 };
+/** Aura texture bounds in body-local px (the silhouette plus its soft bleed). */
+export const AURA_BOX = { x0: -280, y0: -400, w: 760, h: 440 };
 
 /** Where every part sits (body-local px). */
 export const KH = {
@@ -492,7 +494,7 @@ function drawLid(ctx: Ctx, k: number, ex: number, ey: number, sx: number): void 
       drawSkin(ctx, false);
     });
     // A whisper of mistfish so the lid reads as a lid.
-    ctx.fillStyle = rgba(A.mistfish, 0.35);
+    ctx.fillStyle = rgba(A.mistfish, 0.16);
     ctx.fillRect(-R - 4, -H - 4, 2 * R + 8, 2 * H + 8);
   });
   if (k < LID_FRAMES) {
@@ -593,6 +595,52 @@ export function bake(b: Baker): void {
   b.tex('kuhiro_body', bb.w, bb.h, (ctx) => {
     ctx.translate(-bb.x0, -bb.y0);
     drawBody(ctx);
+  });
+
+  // Aura: light bleeding softly past the silhouette (white, tinted and added at
+  // runtime behind the body). Half size; it is all softness.
+  const ab = { x0: AURA_BOX.x0, y0: AURA_BOX.y0, w: AURA_BOX.w, h: AURA_BOX.h };
+  b.tex('kuhiro_aura', ab.w / 2, ab.h / 2, (ctx) => {
+    ctx.scale(0.5, 0.5);
+    ctx.translate(-ab.x0, -ab.y0);
+    // Gaussian bleed via canvas shadows: draw the silhouette far off-canvas and
+    // keep only its blurred shadow, offset back into place (shadow params are
+    // in device px, so scale them by the current transform).
+    const dev = ctx.getTransform().a;
+    const away = 4000;
+    for (const [blur, a] of [
+      [90, 0.85],
+      [44, 0.7],
+      [16, 0.55],
+    ] as [number, number][]) {
+      withState(ctx, () => {
+        ctx.shadowColor = rgba('#FFFFFF', a);
+        ctx.shadowBlur = blur * dev;
+        ctx.shadowOffsetX = -away * dev;
+        ctx.translate(away, 0);
+        ctx.beginPath();
+        bodyPath(ctx);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+      });
+    }
+    // Stronger over the head and back, where the moonlight would catch it.
+    withState(ctx, () => {
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.fillStyle = lGrad(ctx, ab.x0, 0, ab.x0 + ab.w, 0, [
+        [0, '#FFFFFF', 0.9],
+        [0.4, '#FFFFFF', 1],
+        [1, '#FFFFFF', 0.6],
+      ]);
+      ctx.fillRect(ab.x0, ab.y0, ab.w, ab.h);
+      // Nothing below the waterline: the lake veil takes over there.
+      ctx.fillStyle = vGrad(ctx, -40, 20, [
+        [0, '#FFFFFF', 1],
+        [1, '#FFFFFF', 0],
+      ]);
+      ctx.globalCompositeOperation = 'destination-in';
+      ctx.fillRect(ab.x0, ab.y0, ab.w, ab.h);
+    });
   });
 
   // Back gleam: soft light along the upper outline (drawn at half size; it is all softness).

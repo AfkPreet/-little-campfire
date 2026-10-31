@@ -139,7 +139,7 @@ function build(c: AudioContext): Engine {
   hp.frequency.value = 32;
   const lp = c.createBiquadFilter();
   lp.type = 'lowpass';
-  lp.frequency.value = 12000;
+  lp.frequency.value = Math.min(12000, c.sampleRate * 0.45);
   lp.Q.value = 0.5;
   const comp = c.createDynamicsCompressor();
   comp.threshold.value = -18;
@@ -225,6 +225,9 @@ function hasActivation(): boolean {
  */
 export function unlockAudio(): void {
   try {
+    // Outside a gesture, creating or resuming a context only earns a browser
+    // warning (Chrome) or a silent refusal (iOS); the first-tap listener retries.
+    if ((!ctx || ctx.state !== 'running') && !hasActivation()) return;
     if (!ctx) {
       const C = audioCtor();
       if (!C) return;
