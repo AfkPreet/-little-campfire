@@ -53,15 +53,34 @@ Playwright uses its bundled Chromium. On a fresh machine run `npx playwright ins
 
 `window.__game` (dev or `?debug=1`): `state()`, `money(n)`, `buy(id)`, `pitch(spot)`, `fish()`, `forage(spot)`, `cook(cookware, ings, then)`, `place(id, point)`, `setTime(t)`, `setRain(b)`, `sleepNow()`, `startTrip()`, `continueTrip()`, `goto(scene)`, `sceneKey()`, `finale()`, `w2s(x,y)`, `interAt(x,y)`, `act(id, action?)` (run any camp interactable, e.g. `scale`, `offering`, `fire`), `content(n)`, `skipNight(sec)`, `campInfo()`, `fishPhase()`, and in the album `albumInfo()`, `albumTurn(d)`, `albumStay()`, `albumNewTrip()`.
 
-## 4. Known issues
+## 4. Deploying
 
-_Updated at M4._
+The repo carries `vercel.json` (Vite preset, `npm ci`, `npm run build`, output `dist/`, long cache on hashed assets). Either:
 
-## 5. Top 5 next ideas
+- **One-time import (recommended):** vercel.com → Add New → Project → import `AfkPreet/-little-campfire`, set the production branch to `claude/new-session-4zrkb5` (or merge it into `main` first), Deploy. Every push redeploys.
+- **CLI:** `npx vercel login`, then `npx vercel --prod` from the repo root.
 
-_Updated at M4._
+On Vercel builds `og:image` becomes absolute automatically (`VERCEL_PROJECT_PRODUCTION_URL`); elsewhere set `SITE_URL=https://your.host` when building. `npm run icons` regenerates the app icons and `public/social.png`.
 
-## 6. Paste-ready prompt to resume
+## 5. Known issues
+
+1. **Not deployed from the build box.** The connected Vercel account returned 403 on project create and deploy, and the container has no Vercel CLI login. See section 4; it is a one-time import.
+2. **Frame rate unmeasured on real hardware.** The build box renders WebGL in software, so 60 fps on iPad is unverified. `npm run perf` reports the budgets that do carry over (objects, live particles, textures, bundle); first thing to check on a real iPad.
+3. **iOS Safari specifics** (audio unlock on first tap, safe areas, Add to Home Screen) were exercised in Chromium's iPad emulation only.
+4. **Balance is untested by a human.** `npm run trip` proves the whole trip flows (all 5 clues, finale, Album, free play, reload) but fast-forwards the night timer and tops Contentment up if it is short of 70 on the finale night.
+5. **Phone landscape is secondary:** journal body text is about 10 CSS px on a 390 px-tall phone. Large text helps.
+6. **Cosmetic:** in the finale the moon shows as a bright smudge inside the moonbow; the shop's warm-wood room is pale behind the cream catalog.
+7. **No music files yet.** The generated score plays; drop the four files from `MUSIC_BRIEF.md` into `public/audio/`.
+
+## 6. Top 5 next ideas
+
+1. **Real-iPad pass:** profile in Safari, tune particle counts and glow sizes, confirm audio unlock and safe areas.
+2. **Music:** generate the four Higgsfield tracks from `MUSIC_BRIEF.md` (no code change needed).
+3. **Sunthala Bend:** the second campsite the postcard teases (an orange-orchard river bend; new fish, a new guardian-adjacent mystery).
+4. **Photo postcard:** a camera button that frames the camp and saves a shareable postcard PNG.
+5. **Seasonal nights:** rare festival moments (a Tihar lights night, a monsoon frog chorus) that feed the Moments tab.
+
+## 7. Paste-ready prompt to resume
 
 ```
 You are continuing "Moonlight Momos" (repo AfkPreet/-little-campfire, branch claude/new-session-4zrkb5).

@@ -333,7 +333,9 @@ export default class Journal extends Phaser.Scene {
       const k = new Kopila(this, 0, 70).setMode('stand').setExpression('happy');
       k.setScale(2.6);
       portrait.add(k);
-      this.events.on('update', (t: number, dt: number) => k.active && k.tick(t, dt));
+      const tick = (t: number, dt: number) => k.active && k.tick(t, dt);
+      this.events.on('update', tick);
+      k.once(Phaser.GameObjects.Events.DESTROY, () => this.events.off('update', tick));
     } else if (this.textures.exists('kopila_ball')) {
       const img = this.add.image(0, 0, 'kopila_ball').setScale(2.6 / ART_SCALE);
       if (!known) img.setTintFill(hexToInt(mix(A.lokta, P.lavender, 0.55))).setAlpha(0.7);

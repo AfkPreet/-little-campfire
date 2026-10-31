@@ -52,6 +52,17 @@ function start(): void {
     fps: { target: 60, smoothStep: true },
     scene: SCENE_CLASSES,
   });
+  // Phaser's RAF loop requests the next frame only after the step returns, so
+  // a single uncaught error would freeze the camp for good. Log it (tests fail
+  // on console errors) and keep the game running.
+  const step = game.step;
+  game.step = function (time: number, delta: number): void {
+    try {
+      step.call(game, time, delta);
+    } catch (err) {
+      console.error(err);
+    }
+  };
   installResize(game);
   installAutosaveHooks();
   initFlow(game);

@@ -129,7 +129,9 @@ export default class Album extends Phaser.Scene {
     const tuki = new Hero(this, -250, 130).setPose('sit').setExpression('happy');
     tuki.setScale(1.15).setAngle(-4);
     c.add(tuki);
-    this.events.on('update', (t: number, d: number) => tuki.active && tuki.tick(t, d));
+    const tick = (t: number, d: number) => tuki.active && tuki.tick(t, d);
+    this.events.on('update', tick);
+    tuki.once(Phaser.GameObjects.Events.DESTROY, () => this.events.off('update', tick));
     c.add(txtObj(this, 0, 190, `${WORLD.place} · ${WORLD.water}`, 'hand', { size: 28, color: SOFT }));
     this.tape(c, -300, -230, -20, P.rose);
     this.tape(c, 300, 230, -20, A['lake-jade']);

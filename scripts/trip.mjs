@@ -7,7 +7,10 @@ import { launch, startServer, VIEWPORTS } from './lib/browser.mjs';
 
 const server = await startServer('dev');
 const browser = await launch();
-const vp = VIEWPORTS.ipad;
+// A small iPad-shaped viewport: this checks flow and state, and software
+// WebGL runs several times faster with fewer pixels.
+const vp = { width: 708, height: 492 };
+void VIEWPORTS;
 const context = await browser.newContext({ viewport: { width: vp.width, height: vp.height }, deviceScaleFactor: 1, isMobile: true, hasTouch: true });
 const page = await context.newPage();
 const errors = [];
@@ -124,8 +127,11 @@ try {
     await g('content', 70 - s.contentment.value);
   }
   await page.waitForTimeout(500);
+  // The ~45 s finale plays in scene time; speed it up on slow machines.
+  await g('timeScale', 4);
   check('offering available at the dock', (await g('act', 'offering')) === true);
-  await until(() => window.__game.state().mystery.step >= 5, 300000);
+  await until(() => window.__game.state().mystery.step >= 5, 600000);
+  await g('timeScale', 1);
   s = await st();
   check('clue 5: the guardian', s.mystery.step === 5 && (s.decor.guardian_lantern ?? 0) > 0, `lantern=${s.decor.guardian_lantern}`);
   await page.waitForTimeout(2500);

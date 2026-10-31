@@ -11,7 +11,7 @@ public/audio/music_night.mp3
 public/audio/finale.mp3
 ```
 
-Then rebuild/redeploy (`npm run build`, then `npx vercel --prod`). Any missing file falls back to the generated score for that mood. `finale.mp3`, when present, replaces the loop during the guardian finale. Music ducks by 30% under the catch fanfare automatically.
+Then commit and push (Vercel rebuilds from the repo), or run `npx vercel --prod` locally. Any missing file falls back to the generated score for that mood. `finale.mp3`, when present, replaces the loop during the guardian finale. Music ducks by 30% under the catch fanfare automatically.
 
 ## Shared direction (all four)
 

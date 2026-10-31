@@ -11,7 +11,7 @@ import { DEPTH, SCENES } from '@/config';
 import { bus } from '@/core/bus';
 import { anyParam, markReady, param, registerDebug } from '@/core/debug';
 import { go, openOverlay } from '@/core/flow';
-import { layout, setupCamera } from '@/core/layout';
+import { layout, onLayout, setupCamera } from '@/core/layout';
 import { applyDebugOnce } from '@/core/presets';
 import { reduceMotion } from '@/core/settings';
 import { autosave, S, save } from '@/core/state';
@@ -300,7 +300,9 @@ export default class Camp extends Phaser.Scene {
     const l = layout();
     const zone = this.add.zone(0, 0, l.w, l.h).setOrigin(0).setScrollFactor(0).setDepth(-1000).setInteractive();
     zone.on('pointerdown', (p: Phaser.Input.Pointer) => this.onWorldTap(p));
-    this.events.on('resize-zone', () => zone.setSize(layout().w, layout().h));
+    // Rotation, Split View or Safari's URL bar collapsing change the logical size.
+    const offLayout = onLayout((nl) => zone.setSize(nl.w, nl.h));
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, offLayout);
     const kb = this.input.keyboard;
     if (kb) {
       this.keys = kb.addKeys('A,D,LEFT,RIGHT,E,SPACE,J,B,ESC') as Record<string, Phaser.Input.Keyboard.Key>;
@@ -372,6 +374,11 @@ export default class Camp extends Phaser.Scene {
     registerDebug('interAt', ((x: number, y: number) => {
       const it = this.inter.at(x, y);
       return it ? { id: it.id, actions: it.actions(), hit: it.hit() } : null;
+    }) as never);
+    // Tests on slow machines: speed up scene timers and tweens (e.g. the finale).
+    registerDebug('timeScale', ((n = 1) => {
+      this.time.timeScale = n;
+      this.tweens.timeScale = n;
     }) as never);
     registerDebug('act', ((id: string, action?: string) => {
       const it = this.inter.get(id);

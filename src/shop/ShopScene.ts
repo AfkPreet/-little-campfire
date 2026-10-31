@@ -169,7 +169,11 @@ export default class Shop extends Phaser.Scene {
       this.boju.nod();
       this.say(this.nextLine());
     });
-    this.events.on('update', (t: number, d: number) => this.boju.tick(t, d));
+    // Scene events outlive a shutdown: remove the listener so a later visit
+    // never ticks a destroyed Boju.
+    const tick = (t: number, d: number) => this.boju?.active && this.boju.tick(t, d);
+    this.events.on('update', tick);
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => this.events.off('update', tick));
   }
 
   private nextLine(): string {

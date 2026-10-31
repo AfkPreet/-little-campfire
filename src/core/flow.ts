@@ -65,10 +65,15 @@ export function go(key: string, data?: object, fadeMs = 380): void {
     transitioning = true;
     const cam = fromScene.cameras.main;
     cam.fadeOut(fadeMs, 47, 53, 88);
-    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, finish);
+    // The fade completes inside the old scene's own step: stopping it there
+    // lets its update() run on a torn-down scene. Finish after the frame.
+    cam.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => window.setTimeout(() => transitioning && finish(), 0));
     // Safety: never get stuck if the fade event is missed.
     window.setTimeout(() => transitioning && finish(), fadeMs + 400);
-  } else finish();
+  } else {
+    transitioning = true;
+    window.setTimeout(finish, 0);
+  }
 }
 
 /** Open an overlay on top (pauses the clock via the overlay itself). */
