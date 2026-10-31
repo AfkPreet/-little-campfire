@@ -42,6 +42,7 @@ npm run dev          # http://localhost:5173
 npm run build        # typecheck + production build to dist/
 npm run smoke        # plays Day 1 via debug hooks, reloads, checks the save
 npm run playtest     # drives the real touch paths (pegs, bush, water, bite, Keep, fire, sleep dialog)
+npm run trip         # a whole trip: 5 clues, the finale, Night 7, Trip Album, free play, mid-day reload
 npm run shots -- m4  # milestone screenshots (iPad + phone @2x) to shots/m4/
 npm run icons        # app icons + social image from the game's own art
 ```
@@ -50,7 +51,7 @@ Playwright uses its bundled Chromium. On a fresh machine run `npx playwright ins
 
 **Debug URL params** (dev builds, or add `?debug=1`): `?scene=camp|shop|title|intro|album|journal|cooking|styleboard|preview`, `?state=fresh|midtrip|decorated|finale`, `?time=dawn|day|golden|dusk|night`, `?weather=clear|rain|mist|golden`, `?day=N`, `?seed=N`, `?shot=fire|bite|catch|cook|journal|finale|star|rainbow`, `?page=1..3` (style board), `?what=<module>` (previews, e.g. `hero`, `landscape`, `props`, `items`, `cast`, `kuhiro`, `ui`, `audio`).
 
-`window.__game` (dev or `?debug=1`): `state()`, `money(n)`, `buy(id)`, `pitch(spot)`, `fish()`, `forage(spot)`, `cook(cookware, ings, then)`, `place(id, point)`, `setTime(t)`, `setRain(b)`, `sleepNow()`, `startTrip()`, `continueTrip()`, `goto(scene)`, `sceneKey()`, `finale()`, `w2s(x,y)`, `interAt(x,y)`, `campInfo()`, `fishPhase()`.
+`window.__game` (dev or `?debug=1`): `state()`, `money(n)`, `buy(id)`, `pitch(spot)`, `fish()`, `forage(spot)`, `cook(cookware, ings, then)`, `place(id, point)`, `setTime(t)`, `setRain(b)`, `sleepNow()`, `startTrip()`, `continueTrip()`, `goto(scene)`, `sceneKey()`, `finale()`, `w2s(x,y)`, `interAt(x,y)`, `act(id, action?)` (run any camp interactable, e.g. `scale`, `offering`, `fire`), `content(n)`, `skipNight(sec)`, `campInfo()`, `fishPhase()`, and in the album `albumInfo()`, `albumTurn(d)`, `albumStay()`, `albumNewTrip()`.
 
 ## 4. Known issues
 

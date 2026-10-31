@@ -15,6 +15,7 @@ import { pick } from '@/systems/forage';
 import { addMoney } from '@/systems/inventory';
 import { buy, itemsFor } from '@/systems/shop';
 import { setProgress } from '@/systems/day';
+import { gain } from '@/systems/contentment';
 import { DECOR } from '@/data/decor';
 import { GEAR, PANTRY } from '@/data/items';
 
@@ -85,6 +86,13 @@ export function installHooks(): void {
   registerDebug('setRain', ((on: boolean) => {
     S().weather.raining = on;
     bus.emit('weather:rain', { raining: on });
+  }) as never);
+
+  registerDebug('content', ((n: number) => gain(n, 'debug')) as never);
+
+  // Fast-forward the night timer (glow, moments); slow test machines tick it at a few fps.
+  registerDebug('skipNight', ((sec = 15) => {
+    S().nightSecs += sec;
   }) as never);
 
   registerDebug('save', () => save('debug'));

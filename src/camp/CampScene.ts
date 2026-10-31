@@ -373,6 +373,14 @@ export default class Camp extends Phaser.Scene {
       const it = this.inter.at(x, y);
       return it ? { id: it.id, actions: it.actions(), hit: it.hit() } : null;
     }) as never);
+    registerDebug('act', ((id: string, action?: string) => {
+      const it = this.inter.get(id);
+      if (!it || (it.enabled && !it.enabled())) return false;
+      const acts = it.actions();
+      if (!acts.length) return false;
+      it.act(action ?? acts[0]);
+      return true;
+    }) as never);
     registerDebug('campInfo', () => ({
       heroX: this.hero.x,
       activity: this.activity,

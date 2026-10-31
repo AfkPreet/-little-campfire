@@ -336,10 +336,12 @@ export class Landscape {
       const o = this.img(`land_cloud${k}`, 0, y, 0, DEPTH.celestial + 0.5, 0.5, 0.5, 1);
       this.clouds.push({ o, x: fx, y, speed: 1.6 + i * 0.5 });
     });
-    // Rain cloud ceiling: the cloud-sea tiles flipped, plus a solid band above.
+    // Rain cloud ceiling: the cloud-sea tile flipped, plus a solid band above.
+    // One self-tiling texture only: the A and B tiles are baked in different
+    // tones, so alternating them left a hard vertical step at every seam.
     for (let k = 0; k < 4; k++) {
       const bx = -420 + k * SEA_TILE.w;
-      const o = this.img(k % 2 ? 'land_seaB' : 'land_seaA', bx, 168, 0, DEPTH.celestial + 0.8);
+      const o = this.img('land_seaA', bx, 168, 0, DEPTH.celestial + 0.8);
       o.setScale(K, -K * 1.15).setAlpha(0);
       this.ceiling.push({ o, bx });
     }

@@ -316,7 +316,7 @@ export default async function preview(scene: Phaser.Scene): Promise<void> {
   banner.setX(M + banner.bw / 2 - 6);
   add(banner);
   banner.twinkle();
-  add(new Toast(scene, DW / 2 + 60, rowA - 12, { text: 'Caught a Pebble Minnow! (12 cm)', icon: 'icon.star' }));
+  add(new Toast(scene, DW / 2 + 60, rowA - 12, { text: 'Caught a Pebble Garra! (12 cm)', icon: 'icon.star' }));
   const hud = ['icon.backpack', 'icon.journal', 'icon.settings', 'icon.close'];
   hud.forEach((ic, i) => {
     add(
@@ -345,13 +345,13 @@ export default async function preview(scene: Phaser.Scene): Promise<void> {
     const wellY = c.top + 90;
     c.add(artObj(scene, 0, wellY, 'preview.water'));
     c.add(artObj(scene, 2, wellY + 2, 'preview.fish').setScale(0.92 / ART_SCALE));
-    c.add(txtObj(scene, 0, c.top + 188, 'Pebble Minnow', 'h2', { color: UI_INK }));
+    c.add(txtObj(scene, 0, c.top + 188, 'Pebble Garra', 'h2', { color: UI_INK }));
     c.add(txtObj(scene, 0, c.top + 222, '12 cm', 'body', { color: UI_INK_SOFT, size: 22 }));
     [true, true, false].forEach((f, i) => c.add(iconObj(scene, -40 + i * 40, c.top + 262, f ? 'icon.star' : 'icon.starEmpty', 36)));
     c.add(txtObj(scene, 0, c.top + 293, 'uncommon', 'small', { color: UI_INK_SOFT, size: 17 }));
     const bw = (colW - 48 - 14) / 2;
     const by = c.top + cardH - 52;
-    c.add(new Button(scene, -bw / 2 - 7, by, { label: 'Keep', w: bw, onTap: () => toasts.show('Caught a Pebble Minnow! (12 cm)', 'icon.star') }));
+    c.add(new Button(scene, -bw / 2 - 7, by, { label: 'Keep', w: bw, onTap: () => toasts.show('Caught a Pebble Garra! (12 cm)', 'icon.star') }));
     c.add(new Button(scene, bw / 2 + 7, by, { label: 'Let go', variant: 'secondary', w: bw, onTap: () => toasts.show('It slipped away... maybe next time!') }));
   }
 
@@ -445,7 +445,7 @@ export default async function preview(scene: Phaser.Scene): Promise<void> {
     add(tabs);
     const rowCard = add(new Card(scene, xTab + tabW / 2, topC + 164, { w: tabW, h: 116, tint: 'butter' }));
     rowCard.add(artObj(scene, -tabW / 2 + 50, 4, 'preview.fish').setScale(0.44 / ART_SCALE));
-    rowCard.add(txtObj(scene, -tabW / 2 + 90, -15, 'Pebble Minnow', 'label', { color: UI_INK, align: 'left' }));
+    rowCard.add(txtObj(scene, -tabW / 2 + 90, -15, 'Pebble Garra', 'label', { color: UI_INK, align: 'left' }));
     rowCard.add(iconObj(scene, -tabW / 2 + 103, 20, 'icon.coin', 26));
     rowCard.add(txtObj(scene, -tabW / 2 + 121, 21, '8 each', 'small', { color: UI_INK_SOFT, align: 'left' }));
     const st = new Stepper(scene, 0, 0, { value: 2, min: 1, max: 3, valueW: 58 });
@@ -470,7 +470,7 @@ export default async function preview(scene: Phaser.Scene): Promise<void> {
   // ---- Live demos ------------------------------------------------------------
   const demo = anyParam('demo');
   if (demo === 'toasts') {
-    toasts.show('Caught a Pebble Minnow! (12 cm)', 'icon.star');
+    toasts.show('Caught a Pebble Garra! (12 cm)', 'icon.star');
     scene.time.delayedCall(300, () => toasts.show('New recipe: Honey Tea!', 'icon.journal'));
     scene.time.delayedCall(600, () => toasts.show('Journal updated'));
     scene.time.delayedCall(900, () => toasts.show('It slipped away... maybe next time!'));
