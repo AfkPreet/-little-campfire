@@ -137,3 +137,28 @@ Rendered with a scratch driver over the debug hooks (journal tabs via `?shot=jou
 | Album · friend | 5/5/5/–/5/5/5/5 | — |
 | Album · mystery (unmet) | 3/4/4/–/4/2/5/3 | Near-white additive glow on an empty page → a night-lake snapshot with the glow out on the water (freckle flower above it once met) |
 | Album · postcard | 5/5/5/–/5/5/5/5 | — |
+
+---
+
+## M4 — polish, performance, audio mix, ship
+
+**Tests.** `npm run smoke` PASSED, `npm run playtest` PASSED, `npm run trip` PASSED (Day 1 → all 5 clues → full finale → Night 7 → Trip Album → postcard → free play → mid-day reload; no console errors). The trip run found two real bugs, both fixed: a per-visit shop `update` listener that ticked a destroyed Boju, and scene switches that stopped a scene inside its own frame. It also showed that one uncaught error froze Phaser's loop for good; the game step now logs and carries on.
+
+**Performance (`npm run perf`, iPad 1180 x 820 @2x, art scale 2.25).**
+
+| Scene | Display objects | Emitters | Live particles | Tweens |
+| --- | --- | --- | --- | --- |
+| Title | 887 | 1 | 6 | 1 |
+| Camp · day | 1049 | 6 | 5 | 3 |
+| Camp · night + fire | 1093 | 6 | 9 | 3 |
+| Camp · rain | 1049 | 6 | 75 | 3 |
+| Finale | 1227 | 15 | 249 | 8 |
+| Shop | 190 | 0 | 0 | 1 |
+
+Peak 249 live particles (budget ~400). Baked textures ≈ 227 MB RGBA at art scale 2.25 (landscape 78, shop 41, journal 19, guardian 15, cooking 15, album 13); if an older iPad runs short of memory, cap `ART_SCALE` at 2 (≈ -20%). Bundle 578 KB gzip (Phaser 332, game 104, art modules lazy). Frame rate itself can't be measured on this box (software WebGL).
+
+**Audio mix (`npm run mix`, relative dBFS).** Music −21.8 RMS by day, −24.2 in rain, −26.2 at night (quieter as the day winds down); ambience beds sit 6-9 dB under the music (−30.7 day, −28.2 rain, −30.0 night); everything together peaks at −16.7 dBFS (no clipping). The catch fanfare peaks at −13.4 with the music ducked 30%; the bite (−24.4 peak) and chime (−23.5) sit just above the music bed. Interaction clicks are short transients the probe under-reads; their recipe amplitudes (0.15-0.26) put them over the music's ≈0.08 RMS.
+
+**Accessibility.** Reduce motion (no camera easing or shake, fewer particles, stir becomes hold, finale beats shortened), Large text (every label rebuilds, HUD included), a visual cue for every audio cue (bite "!" bubble and bobber dip, toasts and banners for discoveries, which stay visible above the cooking pot and journal), nothing by colour alone (stars plus a rarity word, locked entries as "???" silhouettes with hints, labelled tabs).
+
+**Icons and share card.** `npm run icons`: 32/180/192/512 from Tuki's portrait; `public/social.png` (1200 x 630) is the title scene without its controls. `og:image` becomes absolute on Vercel builds.

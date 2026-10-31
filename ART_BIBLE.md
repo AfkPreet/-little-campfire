@@ -53,9 +53,10 @@ How relighting works (cheap, no per-frame redraws):
 1. **Art is drawn in neutral daylight colours.** Each band is multiply-tinted by its key colour (`far`, `mid`, `near`, `ground`, `actor`, `water` in `LIGHT`).
 2. **Haze bands** (white gradient textures tinted with the key's `haze` colour, alpha by `hazeAlpha`) sit between depth bands to give atmospheric perspective and mist; rain and misty mornings raise them.
 3. **Sky** is white textures with 4-corner vertex tints (a free gradient) in 2-3 stacked bands: skyTop → skyMid → horizon.
-4. **Warm light** (fire, lanterns) is additive glow sprites scaled by `warmLight`; they also warm actors near them.
-5. **Rain** blends every colour 40% toward #9AA6B8 and desaturates 30% inside `lightAt`, so everything that reads a `ResolvedLight` relights automatically.
-6. **Vignette**: the `vignette` texture stretched over the view, alpha = key `vignette` (stronger at night).
+4. **Warm light** (fire, lanterns) is additive glow sprites scaled by `warmLight`; they also warm actors near them (by multiply tint, never by an additive halo drawn over a face). A glow sits just above its source's own layer: decor light stays under the actor layer.
+5. **Additive glows never land on cream paper or cards** (they clamp to pure white there); on UI use a normal-blend tinted halo.
+6. **Rain** blends every colour 40% toward #9AA6B8 and desaturates 30% inside `lightAt`, so everything that reads a `ResolvedLight` relights automatically.
+7. **Vignette**: the `vignette` texture stretched over the view, alpha = key `vignette` (stronger at night).
 
 ### A4. Depth and atmosphere
 
