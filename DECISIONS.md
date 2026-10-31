@@ -92,3 +92,13 @@ All 74 accents from WORLD.md section 8 were added to `ACCENTS` in `src/palette.t
 | Interrupted agents | Agents write a compiling first version within their first steps, then improve in place | Plan-then-write | The usage limit cut agents off three times; incremental files survive |
 | Deploy route | Vercel via the connected Vercel account (git-based deploy of the GitHub repo) if available, else `npx vercel --prod` | Only the CLI | The CLI needs an interactive login in this environment |
 | Deploy (M4) | Ship `vercel.json` (Vite preset, `npm ci`, `npm run build`, `dist/`, long cache on hashed assets) so a one-click Vercel import of the GitHub repo just works | Deploying from this container | The connected Vercel account returned 403 on project create and deploy; this container has no Vercel CLI login. The owner imports the repo once (or runs `npx vercel --prod` locally) |
+
+## 6. Review rounds and verification (M1 → M3)
+
+| Area | Chosen | Rejected | Why |
+| --- | --- | --- | --- |
+| Decor light layer | Decor glows (lanterns, string lights, jars) draw just under the actor layer | The global light layer above actors | Every decor item sits behind the actors; an additive halo above Tuki blew the face out whenever Tuki stood in front of a lantern |
+| Rain ceiling | One self-tiling cloud texture, a solid band behind it that matches its top colour, and a dissolve when the sky opens | Alternating A/B tiles; sliding tiles apart to "part" the clouds | The two tiles are baked in different tones (vertical step at every seam); sliding exposed square tile ends. The plume moment already sells the parting |
+| Journal over HUD | The HUD hides while the journal is open | A darker scrim over the HUD | The book fills the screen; pills peeking between tabs read as clutter even when dimmed |
+| Whole-trip test | `npm run trip` plays Day 1 to the Album through the debug hooks, fast-forwarding the night timer and topping Contentment up only if needed | Real-time play | Software WebGL on the build box runs at a few fps and the clock clamps each frame to 50 ms, so night 1 alone took minutes; the test checks flow and state, not pacing |
+| Static perf probe | `npm run perf` reports display objects, live particles, tweens, texture MB per scene and the gzip bundle | Measuring fps on the build box | Software rendering says nothing about iPad frame rates; object, particle and texture budgets do carry over |

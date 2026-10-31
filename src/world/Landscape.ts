@@ -347,7 +347,10 @@ export class Landscape {
       o.setScale(K, -K * 1.15).setAlpha(0);
       this.ceiling.push({ o, bx });
     }
-    this.ceilFill = this.quad(-40, -20, SKY_W, 60, 0, DEPTH.celestial + 0.8).setAlpha(0);
+    // Solid band above the flipped tiles, behind them, ending just under their
+    // top edge (where the tile colour is exactly SEA_LOW x tint): no seam.
+    const tileTop = 168 - SEA_TILE.h * 1.15;
+    this.ceilFill = this.quad(-40, -20, SKY_W, tileTop + 20 + 3, 0, DEPTH.celestial + 0.79).setAlpha(0);
     this.shaft = this.img('glow', 0, 0, 0, DEPTH.celestial + 0.9, 0.5, 0.5, 1.6).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
   }
 

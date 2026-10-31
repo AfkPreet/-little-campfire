@@ -9,7 +9,7 @@ import Phaser from 'phaser';
 import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
 import { bus } from '@/core/bus';
-import { markReady } from '@/core/debug';
+import { anyParam, markReady } from '@/core/debug';
 import { go } from '@/core/flow';
 import { ART_SCALE, layout, setupCamera } from '@/core/layout';
 import { applyDebugOnce } from '@/core/presets';
@@ -78,7 +78,9 @@ export default class Shop extends Phaser.Scene {
     this.busy = false;
     this.warned = !!s.flags[`essWarned${s.day}`];
     this.page = 0;
-    this.tab = 'camp';
+    // Debug/screenshot: ?tab=<shop tab> opens that tab.
+    const qTab = anyParam('tab') as ShopTab | null;
+    this.tab = qTab && SHOP_TABS.includes(qTab) ? qTab : 'camp';
     const l = layout();
 
     this.buildRoom();
@@ -223,7 +225,7 @@ export default class Shop extends Phaser.Scene {
     this.card.setDepth(10);
     const tabs = new Tabs(this, cx, cy - this.catH / 2 + 46, {
       tabs: SHOP_TABS.map((t) => SHOP_TAB_LABELS[t]),
-      selected: 0,
+      selected: SHOP_TABS.indexOf(this.tab),
       height: 54,
       gap: 6,
       tabW: Math.floor((this.catW - 40) / 6) - 6,

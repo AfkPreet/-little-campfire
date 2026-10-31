@@ -9,6 +9,8 @@ import Phaser from 'phaser';
 import { DEPTH, SCENES } from '@/config';
 import { bus } from '@/core/bus';
 import { anyParam, markReady, registerDebug } from '@/core/debug';
+import { registerShot } from '@/camp/registry';
+import { openOverlay } from '@/core/flow';
 import { ART_SCALE, layout, setupCamera } from '@/core/layout';
 import { reduceMotion } from '@/core/settings';
 import { S, type DishItem } from '@/core/state';
@@ -147,7 +149,7 @@ export default class Cooking extends Phaser.Scene {
     else this.showPicker(owned);
     this.buildTray();
 
-    if (data.shot === 'result' || anyParam('shot') === 'cook') this.time.delayedCall(200, () => this.shotResult());
+    if (data.shot === 'result' || (anyParam('shot') === 'cook' && !data.shot && this.scene.isActive(SCENES.camp) === false)) this.time.delayedCall(200, () => this.shotResult());
     markReady(this, data.shot ? 1600 : 700);
   }
 
@@ -434,6 +436,8 @@ export default class Cooking extends Phaser.Scene {
   private showResult(res: CookResult): void {
     this.phase = 'result';
     this.updateHint();
+    // The cookware tabs sit where the result card's top lands; tuck them away.
+    if (this.picker) this.tweens.add({ targets: this.picker, alpha: 0, duration: 160 });
     const l = layout();
     const c = this.add.container(l.w / 2, l.h / 2 - 20).setDepth(DEPTH.overlay + 8);
     this.result = c;
@@ -486,6 +490,7 @@ export default class Cooking extends Phaser.Scene {
     if (c) this.tweens.add({ targets: c, alpha: 0, scale: 0.8, duration: 220, onComplete: () => c.destroy() });
     this.phase = 'fill';
     this.updateHint();
+    if (this.picker) this.tweens.add({ targets: this.picker, alpha: 1, duration: 200, delay: 120 });
     this.buildTray();
     // Nothing left to cook with: close after a beat.
     if (!this.available().length) this.time.delayedCall(700, () => this.close());
@@ -512,3 +517,6 @@ export default class Cooking extends Phaser.Scene {
 }
 
 void A;
+
+// `?scene=camp&shot=cook`: open the pot over the live camp and show a result card.
+registerShot('cook', () => openOverlay(SCENES.cooking, { shot: 'result' }));

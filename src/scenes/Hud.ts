@@ -72,15 +72,17 @@ export default class Hud extends Phaser.Scene {
       if (e.tierChanged) this.bounce('lamp');
     });
     bus.onScene(this, 'state:changed', () => this.refresh(true));
-    // The journal is a full-screen book: tuck the HUD away so its pills don't
-    // peek out between the journal's tabs.
+    // The journal and the cooking pot are full-screen: tuck the HUD away so
+    // its pills don't peek out between their tabs or under their close button.
+    // Toasts and banners stay: they are the visual cue for discoveries.
+    const full: string[] = [SCENES.journal, SCENES.cooking];
     bus.onScene(this, 'overlay:open', (e) => {
-      if (e.key === SCENES.journal) this.cameras.main.setAlpha(0);
+      if (full.includes(e.key)) this.tuck(true);
     });
     bus.onScene(this, 'overlay:close', (e) => {
-      if (e.key === SCENES.journal) this.cameras.main.setAlpha(1);
+      if (full.includes(e.key) && !full.some((k) => k !== e.key && this.scene.isActive(k))) this.tuck(false);
     });
-    if (this.scene.isActive(SCENES.journal)) this.cameras.main.setAlpha(0);
+    if (full.some((k) => this.scene.isActive(k))) this.tuck(true);
     // Large text: rebuild the HUD so every label picks up the new size.
     let large = settingsGet().largeText;
     bus.onScene(this, 'settings:changed', () => {
@@ -95,6 +97,24 @@ export default class Hud extends Phaser.Scene {
       this.unpause?.();
     });
     this.refresh(true);
+  }
+
+  private tucked: Phaser.GameObjects.GameObject[] = [];
+  /** Hide (or restore) every HUD element below the toast/banner layers. */
+  private tuck(on: boolean): void {
+    if (on) {
+      if (this.tucked.length) return;
+      for (const o of this.children.list) {
+        const v = o as Phaser.GameObjects.GameObject & Phaser.GameObjects.Components.Visible & Phaser.GameObjects.Components.Depth;
+        if (v.depth < DEPTH.toast - 1 && v.visible) {
+          v.setVisible(false);
+          this.tucked.push(o);
+        }
+      }
+    } else {
+      for (const o of this.tucked) if (o.active) (o as unknown as Phaser.GameObjects.Components.Visible).setVisible(true);
+      this.tucked = [];
+    }
   }
 
   private build(): void {

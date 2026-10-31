@@ -1,8 +1,18 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'node:url';
 
+// Social crawlers need an absolute og:image. On Vercel the production host is
+// exposed at build time; elsewhere the relative path stays.
+const site = process.env.SITE_URL || (process.env.VERCEL_PROJECT_PRODUCTION_URL ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}` : '');
+
 export default defineConfig({
   base: './',
+  plugins: [
+    {
+      name: 'absolute-og-image',
+      transformIndexHtml: (html) => (site ? html.replace(/content="\.\/social\.png"/g, `content="${site}/social.png"`) : html),
+    },
+  ],
   resolve: {
     alias: { '@': fileURLToPath(new URL('./src', import.meta.url)) },
   },

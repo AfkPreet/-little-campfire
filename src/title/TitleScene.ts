@@ -6,7 +6,7 @@
 import Phaser from 'phaser';
 import { directLaunch } from '@/core/debug';
 import { DEPTH, SCENES } from '@/config';
-import { markReady } from '@/core/debug';
+import { anyParam, markReady } from '@/core/debug';
 import { continueTrip, openOverlay, startTrip } from '@/core/flow';
 import { layout, setupCamera } from '@/core/layout';
 import { applyDebugOnce } from '@/core/presets';
@@ -94,9 +94,14 @@ export default class Title extends Phaser.Scene {
       b.setScrollFactor(0).setDepth(DEPTH.ui);
       x += widths[i] + gap;
     });
-    txt(this, l.w / 2, l.h - l.safe.bottom - 22, STR.title.footer, 'small', { color: mix(P.cream, P.lavender, 0.3), size: 18 })
+    const footer = txt(this, l.w / 2, l.h - l.safe.bottom - 22, STR.title.footer, 'small', { color: mix(P.cream, P.lavender, 0.3), size: 18 })
       .setScrollFactor(0)
       .setDepth(DEPTH.ui);
+    // `?shot=social` (npm run icons): the share card is the scene without its controls.
+    if (anyParam('shot') === 'social') {
+      btns.forEach((b) => b.setVisible(false));
+      footer.setVisible(false);
+    }
     void sub;
 
     setAmbience({ scene: 'title', p: TITLE_P, raining: false, inTent: false, nearFire: 0.8, nearWater: 0.2 });

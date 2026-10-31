@@ -16,9 +16,8 @@ try {
   }
   await context.close();
   if (errors.length) console.log('icon errors:', errors.join('\n'));
-  const soc = await openGame(browser, server.base, 'scene=title&debug=1&shot=1', { width: 1200, height: 630, deviceScaleFactor: 1, isMobile: false, hasTouch: false });
+  const soc = await openGame(browser, server.base, 'scene=title&debug=1&shot=social', { width: 1200, height: 630, deviceScaleFactor: 1, isMobile: false, hasTouch: false });
   await soc.page.waitForTimeout(2500);
-  // Hide buttons for the social card: shoot the title scene as-is.
   await soc.page.screenshot({ path: path.join(ROOT, 'public', 'social.png') });
   console.log('wrote public/social.png');
   await soc.context.close();

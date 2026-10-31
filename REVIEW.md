@@ -84,3 +84,33 @@ Shots reviewed at 1x on iPad landscape during M0 (the box renders WebGL in softw
 - Decor light: every decor glow (lanterns, string lights, jars) sits just below the actor layer, so Tuki occludes it instead of being washed out by it.
 - Journal: entry lines stack top-down by measured height and wrap clear of the stamp; mystery clue text is top-aligned; the HUD hides while the journal is open.
 - Style board: world thumbnails fill the page height; UI page uses the world's fish name.
+
+### Round 2
+
+| Shot | Scores | Problems |
+| --- | --- | --- |
+| Style board · world | 5/5/5/5/5/4/5/4 | Fills the page now; narrower thumbnails were dominated by the big tree (re-anchored left) |
+| Camp · day (clouds) | 5/5/5/5/5/5/5/5 | Rounded cloud bases |
+| Camp · rain | 4/5/5/5/5/3/5/4 | No more seams, but the solid band overlapped the cloud body where its gradient is lighter (horizontal line) |
+| Cooking result (iPad, phone) | 4/5/5/–/5/3/4/4 | Now captured (the `cook` shot handler was missing). The result card landed on the cookware tabs (labels clipped behind it); HUD pills and toast showed through the scrim, close button over the day pill |
+| Decorated night | 5/5/5/5/5/5/5/5 | Tuki lit by the fire only |
+| Journal · fish | 5/5/5/–/5/5/5/5 | Clean rows, HUD tucked away |
+| Mystery finale | 5/5/4/5/5/4/5/5 | Ceiling dissolves; the moon shows as a bright smudge inside the moonbow (acceptable) |
+
+### Fixes (round 2 → 3)
+
+- Rain band moved behind the cloud tiles and ends just under their top edge, where both are exactly the same colour.
+- Cooking: registered the `cook` screenshot handler; the cookware tabs fade out while the result card is up; the HUD tucks its pills and buttons away under the cooking pot and the journal (toasts and banners stay visible as the visual cue).
+- Style board thumbnails anchored to the camp's left edge.
+- Album cover: Tuki sits beside the logo.
+
+### Round 3
+
+| Shot | Scores | Problems |
+| --- | --- | --- |
+| Style board · world | 5/5/5/5/5/5/5/5 | — |
+| Camp · rain | 5/5/5/5/5/5/5/5 | One continuous monsoon ceiling |
+| Cooking result | 5/5/5/–/5/4/5/5 | Toasts stay visible (dimmed) above the pot by design |
+| Trip Album · cover | 5/5/5/–/5/5/5/5 | — |
+
+M1 passes: every shot scores 4 or more on every line.
