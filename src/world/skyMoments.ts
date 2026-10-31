@@ -159,19 +159,19 @@ export async function highlightGurans(
     const big = p.centre ? 1.15 : 1;
     const halo = skyImg(scene, p.x, p.y, 'glowSmall', depth, sf).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setAlpha(0).setScale(0.3 * K);
     const star = skyImg(scene, p.x, p.y, 'sky_starGlow', depth, sf).setBlendMode(Phaser.BlendModes.ADD).setTint(mixInt(P.cream, A['moon-gurans'], 0.5)).setAlpha(0).setScale(0.1 * K);
-    const warm = skyImg(scene, p.x, p.y, 'dot', depth, sf).setTint(mixInt(P.glow, P.cream, 0.5)).setAlpha(0).setScale(0.36 * K * big);
+    const warm = skyImg(scene, p.x, p.y, 'dot', depth, sf).setTint(mixInt(P.glow, P.cream, 0.5)).setAlpha(0).setScale(0.3 * K * big);
     made.push(halo, star, warm);
-    scene.tweens.add({ targets: halo, alpha: 0.6, scale: 0.72 * big * K, duration: 700, ease: 'Sine.easeOut' });
+    scene.tweens.add({ targets: halo, alpha: 0.55, scale: 0.42 * big * K, duration: 700, ease: 'Sine.easeOut' });
     scene.tweens.add({ targets: warm, alpha: 1, duration: 400, ease: 'Sine.easeOut' });
     scene.tweens.add({
       targets: star,
       alpha: 1,
-      scale: 0.62 * K * big,
+      scale: 0.38 * K * big,
       angle: 45,
       duration: 520,
       ease: 'Back.easeOut',
       onComplete: () => {
-        scene.tweens.add({ targets: star, scale: 0.4 * K * big, angle: 0, alpha: 0.9, duration: 900, ease: 'Sine.easeInOut' });
+        scene.tweens.add({ targets: star, scale: 0.22 * K * big, angle: 0, alpha: 0.9, duration: 900, ease: 'Sine.easeInOut' });
         scene.tweens.add({ targets: [star, halo], alpha: '-=0.25', duration: 1600 + Math.random() * 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 900 });
       },
     });

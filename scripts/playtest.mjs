@@ -128,6 +128,8 @@ try {
   await page.waitForTimeout(800);
   const card = await page.evaluate(() => window.__phaser.scene.getScene('Camp').children.list.some((o) => o.constructor && o.constructor.name === 'CatchCard'));
   check('catch card shows', card);
+  await until(() => { const c = window.__phaser.scene.getScene('Camp').children.list.find((o) => o.constructor && o.constructor.name === 'CatchCard'); return c && Math.abs(c.scaleX - 1) < 0.01; }, 30000).catch(() => {});
+  await page.waitForTimeout(500);
   check('tap Keep on the catch card', await tapButton('Camp', 'Keep'));
   await page.waitForTimeout(1200);
   st = await g('state');

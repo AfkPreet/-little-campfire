@@ -649,7 +649,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.aura.setAlpha(Math.min(1, g * (0.44 + 0.05 * br + 0.1 * this.gleamA)));
     this.heartGlow.setAlpha(0.3 + 0.06 * br + (this.happy ? 0.08 : 0));
     this.heartCore.setAlpha((0.14 + 0.06 * br + (this.happy ? 0.06 : 0)) * g);
-    this.waterGlow.setAlpha(g * (0.06 + 0.12 * up));
+    this.waterGlow.setAlpha(g * (0.05 + 0.09 * up));
     this.waterGlow.y = 24 + oy * 0.22;
     this.waterGlow.setScale((K * (620 + 160 * (1 - up))) / 256, (K * (110 + 30 * (1 - up))) / 256);
     this.gleam.setAlpha(this.gleamA * above * (0.85 + 0.15 * br));
