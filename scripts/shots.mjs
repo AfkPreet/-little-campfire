@@ -44,16 +44,19 @@ try {
   for (const shot of SHOTS) {
     if (only.length && !only.includes(shot.name)) continue;
     for (const vp of vps) {
-      const { page, errors, context } = await openGame(browser, server.base, shot.q, VIEWPORTS[vp], { timeout: 30000 });
+      const { page, errors, context } = await openGame(browser, server.base, shot.q, VIEWPORTS[vp], { timeout: 180000 });
       const notReady = errors.some((e) => e.startsWith('timeout waiting'));
-      if (notReady) {
+      const sceneMissing = await page.evaluate(() => !window.__phaser || window.__phaser.scene.getScenes(true).every((sc) => sc.scene.key === 'Boot'));
+      if (notReady && sceneMissing) {
         report.push({ shot: shot.name, vp, status: 'skipped (not available yet)', errors });
         await context.close();
         continue;
       }
+      // Slow software rendering can miss the ready flag; shoot anyway, but say so.
+      if (notReady) errors.splice(errors.findIndex((e) => e.startsWith('timeout waiting')), 1, 'slow: ready flag timed out (shot taken anyway)');
       if (shot.wait) await page.waitForTimeout(shot.wait);
       const file = path.join(outDir, `${shot.name}_${vp}.png`);
-      await page.screenshot({ path: file });
+      await page.screenshot({ path: file, timeout: 180000 });
       report.push({ shot: shot.name, vp, status: errors.length ? 'ok with console errors' : 'ok', file: path.relative(ROOT, file), errors });
       await context.close();
       console.log(`${errors.length ? '!' : '✓'} ${shot.name} [${vp}]${errors.length ? ' errors: ' + errors.join(' | ') : ''}`);
@@ -64,6 +67,6 @@ try {
   await server.stop();
 }
 writeFileSync(path.join(outDir, 'report.json'), JSON.stringify(report, null, 2));
-const bad = report.filter((r) => r.errors && r.errors.length && !r.status.startsWith('skipped'));
+const bad = report.filter((r) => r.errors && r.errors.filter((e) => !e.startsWith('slow:')).length && !r.status.startsWith('skipped'));
 console.log(`\n${report.filter((r) => r.status.startsWith('ok')).length} shots saved to shots/${milestone}/, ${report.filter((r) => r.status.startsWith('skipped')).length} skipped, ${bad.length} with console errors.`);
 if (bad.length) process.exitCode = 1;

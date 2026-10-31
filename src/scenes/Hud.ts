@@ -8,7 +8,7 @@ import Phaser from 'phaser';
 import { DEPTH, SCENES } from '@/config';
 import { bus } from '@/core/bus';
 import { layout, onLayout, setupCamera } from '@/core/layout';
-import { reduceMotion } from '@/core/settings';
+import { reduceMotion, settingsGet } from '@/core/settings';
 import { S } from '@/core/state';
 import { closeOverlay, isActive, openOverlay } from '@/core/flow';
 import { STR } from '@/data/dialogue';
@@ -72,6 +72,14 @@ export default class Hud extends Phaser.Scene {
       if (e.tierChanged) this.bounce('lamp');
     });
     bus.onScene(this, 'state:changed', () => this.refresh(true));
+    // Large text: rebuild the HUD so every label picks up the new size.
+    let large = settingsGet().largeText;
+    bus.onScene(this, 'settings:changed', () => {
+      if (settingsGet().largeText !== large) {
+        large = settingsGet().largeText;
+        this.scene.restart();
+      }
+    });
     const off = onLayout(() => this.layoutAll());
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, () => {
       off();
