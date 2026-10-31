@@ -60,6 +60,7 @@ export default class Hud extends Phaser.Scene {
 
   create(): void {
     setupCamera(this);
+    this.tucked = [];
     this.shownMoney = S().money;
     this.build();
     new ToastManager(this, { depth: DEPTH.toast });
