@@ -162,3 +162,21 @@ Peak 249 live particles (budget ~400). Baked textures ≈ 227 MB RGBA at art sca
 **Accessibility.** Reduce motion (no camera easing or shake, fewer particles, stir becomes hold, finale beats shortened), Large text (every label rebuilds, HUD included), a visual cue for every audio cue (bite "!" bubble and bobber dip, toasts and banners for discoveries, which stay visible above the cooking pot and journal), nothing by colour alone (stars plus a rarity word, locked entries as "???" silhouettes with hints, labelled tabs).
 
 **Icons and share card.** `npm run icons`: 32/180/192/512 from Tuki's portrait; `public/social.png` (1200 x 630) is the title scene without its controls. `og:image` becomes absolute on Vercel builds.
+
+### Final screenshot set (`shots/m4/`, 36 shots, iPad + phone @2x, 0 console errors)
+
+| Shot | Scores |
+| --- | --- |
+| Style board · cast / world / UI | 5/5/5/5/5/5/5/5 |
+| Title | 5/5/5/5/5/4/5/5 |
+| Shop | 5/5/4/4/5/5/5/4 |
+| Camp · dawn / day / golden / dusk / night | 5/5/5/5/5/5/5/5 |
+| Camp · rain | 5/5/5/5/5/5/5/5 |
+| Fishing bite · catch card | 5/5/5/5/5/5/5/5 |
+| Cooking result | 5/5/5/–/5/4/5/5 |
+| Decorated night | 5/5/5/5/5/5/5/5 |
+| Journal · fish | 5/5/5/–/5/5/5/5 |
+| Mystery finale | 5/5/4/5/5/4/5/5 |
+| Trip Album · cover | 5/5/5/–/5/5/5/5 |
+
+Every final screenshot scores 4 or more on all 8 lines.

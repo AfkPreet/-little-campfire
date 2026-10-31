@@ -1,0 +1,256 @@
+[
+  {
+    "shot": "styleboard_cast",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/styleboard_cast_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "styleboard_cast",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/styleboard_cast_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "styleboard_world",
+    "vp": "ipad",
+    "status": "ok with console errors",
+    "file": "shots/m4/styleboard_world_ipad.png",
+    "errors": [
+      "slow: ready flag timed out (shot taken anyway)"
+    ]
+  },
+  {
+    "shot": "styleboard_world",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/styleboard_world_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "styleboard_ui",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/styleboard_ui_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "styleboard_ui",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/styleboard_ui_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "title",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/title_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "title",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/title_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "shop",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/shop_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "shop",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/shop_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_dawn",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/camp_dawn_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_dawn",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/camp_dawn_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_day",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/camp_day_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_day",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/camp_day_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_golden",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/camp_golden_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_golden",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/camp_golden_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_dusk",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/camp_dusk_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_dusk",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/camp_dusk_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_night",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/camp_night_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_night",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/camp_night_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_rain",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/camp_rain_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "camp_rain",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/camp_rain_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "fishing_bite",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/fishing_bite_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "fishing_bite",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/fishing_bite_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "catch_card",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/catch_card_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "catch_card",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/catch_card_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "cooking_result",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/cooking_result_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "cooking_result",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/cooking_result_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "decorated_night",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/decorated_night_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "decorated_night",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/decorated_night_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "journal_fish",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/journal_fish_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "journal_fish",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/journal_fish_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "mystery_finale",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/mystery_finale_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "mystery_finale",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/mystery_finale_phone.png",
+    "errors": []
+  },
+  {
+    "shot": "trip_album",
+    "vp": "ipad",
+    "status": "ok",
+    "file": "shots/m4/trip_album_ipad.png",
+    "errors": []
+  },
+  {
+    "shot": "trip_album",
+    "vp": "phone",
+    "status": "ok",
+    "file": "shots/m4/trip_album_phone.png",
+    "errors": []
+  }
+]
