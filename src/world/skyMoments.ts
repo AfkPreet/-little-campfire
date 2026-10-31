@@ -202,15 +202,25 @@ export async function cloudPartingPlume(
   const rm = reduceMotion();
   const pd = opts.plumeDepth ?? DEPTH.water + 2;
   const mistTint = mixInt(P.cream, A['fish-glow'], 0.35);
-  // The column.
+  // The column: a soft mist body plus an additive twin so it glows with Kuhiro's light.
   const col = scene.add.image(x, fromY + 6, 'sky_plume').setOrigin(0.5, 1).setDepth(pd).setTint(mistTint).setAlpha(0);
+  const colGlow = scene.add.image(x, fromY + 6, 'sky_plume').setOrigin(0.5, 1).setDepth(pd + 0.05).setTint(hexToInt(A['fish-glow'])).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0);
   const fullH = fromY + 140;
-  col.setScale(K * 1.2, K * 0.04);
+  col.setScale(K * 1.6, K * 0.04);
+  colGlow.setScale(K * 1.9, K * 0.04);
   const colScaleY = (K * fullH) / 300;
-  tw(scene, col, { alpha: 0.75 }, 600, 'Sine.easeOut');
-  tw(scene, col, { scaleY: colScaleY, scaleX: K * 2.1 }, 2600, 'Sine.easeOut').then(() =>
-    tw(scene, col, { alpha: 0, scaleX: K * 4.2 }, 4200, 'Sine.easeInOut').then(() => col.destroy()),
+  tw(scene, col, { alpha: 0.62 }, 600, 'Sine.easeOut');
+  tw(scene, colGlow, { alpha: 0.4 }, 900, 'Sine.easeOut');
+  tw(scene, colGlow, { scaleY: colScaleY, scaleX: K * 3.6 }, 2600, 'Sine.easeOut').then(() =>
+    tw(scene, colGlow, { alpha: 0, scaleX: K * 6.5 }, 3600, 'Sine.easeInOut').then(() => colGlow.destroy()),
   );
+  tw(scene, col, { scaleY: colScaleY, scaleX: K * 3.1 }, 2600, 'Sine.easeOut').then(() =>
+    tw(scene, col, { alpha: 0, scaleX: K * 5.8 }, 4200, 'Sine.easeInOut').then(() => col.destroy()),
+  );
+  // Breath light over the head while it breathes out.
+  const breath = scene.add.image(x, fromY - 40, 'glow').setDepth(pd + 0.06).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setAlpha(0);
+  breath.setScale((K * 220) / 256, (K * 300) / 256);
+  tw(scene, breath, { alpha: 0.35 }, 900, 'Sine.easeOut').then(() => tw(scene, breath, { alpha: 0 }, 2600, 'Sine.easeInOut', 900).then(() => breath.destroy()));
   // Billows riding up the column.
   const life = ((fromY + 120) / 230) * 1000;
   const billows = scene.add.particles(x, fromY - 10, 'puff', {
@@ -218,9 +228,9 @@ export async function cloudPartingPlume(
     speedX: { min: -18, max: 18 },
     accelerationX: { min: -8, max: 8 },
     lifespan: life,
-    scale: { start: 0.45 * K * 1.5, end: 3.4 * K * 1.5 },
+    scale: { start: 0.6 * K * 1.5, end: 4.6 * K * 1.5 },
     // Clear as they leave the mouth, gathering as they climb past the head.
-    alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.42 * Math.min(1, t * t * 9) * (1 - t) },
+    alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.5 * Math.min(1, t * t * 9) * (1 - t) },
     rotate: { min: 0, max: 360 },
     tint: mistTint,
     frequency: rm ? 220 : 70,
@@ -239,7 +249,10 @@ export async function cloudPartingPlume(
   const left = skyImg(scene, cx + 60, -24, 'sky_curtain', cd).setOrigin(1, 0).setScale(sc).setTint(cloudTint).setAlpha(0);
   const right = skyImg(scene, cx - 60, -24, 'sky_curtain', cd).setOrigin(0, 0).setScale(sc).setFlipX(true).setTint(cloudTint).setAlpha(0);
   const wash = skyImg(scene, cx, 40, 'glow', cd + 0.1).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['moon-snow'])).setScale((K * 520) / 256, (K * 300) / 256).setAlpha(0);
-  tw(scene, [left, right], { alpha: 0.85 }, 1400, 'Sine.easeOut');
+  // Moonlight pouring down through the gap as the curtains open.
+  const shaft = skyImg(scene, cx, 150, 'glow', cd + 0.05).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['moon-snow'])).setAlpha(0);
+  shaft.setScale((K * 180) / 256, (K * 760) / 256);
+  tw(scene, [left, right], { alpha: 0.78 }, 1400, 'Sine.easeOut');
   await wait(scene, 2300);
   const spread = l.w * 0.62;
   tw(scene, left, { x: cx + 60 - spread, alpha: 0 }, 5600, 'Sine.easeInOut');
@@ -247,6 +260,9 @@ export async function cloudPartingPlume(
     left.destroy();
     right.destroy();
   });
-  tw(scene, wash, { alpha: 0.14 }, 2200, 'Sine.easeOut').then(() => tw(scene, wash, { alpha: 0 }, 3800, 'Sine.easeInOut').then(() => wash.destroy()));
+  tw(scene, wash, { alpha: 0.2 }, 2200, 'Sine.easeOut').then(() => tw(scene, wash, { alpha: 0 }, 4200, 'Sine.easeInOut').then(() => wash.destroy()));
+  tw(scene, shaft, { alpha: 0.16, scaleX: (K * 420) / 256 }, 3000, 'Sine.easeOut').then(() =>
+    tw(scene, shaft, { alpha: 0, scaleX: (K * 620) / 256 }, 4800, 'Sine.easeInOut').then(() => shaft.destroy()),
+  );
   await wait(scene, 4200);
 }

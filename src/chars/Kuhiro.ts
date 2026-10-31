@@ -283,20 +283,21 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     });
 
     this.motes = scene.add.particles(0, 0, 'glowSmall', {
-      emitZone: { type: 'random', source: new Phaser.Geom.Rectangle(-230, -40, 680, 44) } as Phaser.Types.GameObjects.Particles.EmitZoneData,
-      speedY: { min: -26, max: -10 },
-      speedX: { min: -6, max: 6 },
+      emitZone: { type: 'random', source: new Phaser.Geom.Rectangle(-330, -60, 860, 60) } as Phaser.Types.GameObjects.Particles.EmitZoneData,
+      speedY: { min: -30, max: -12 },
+      speedX: { min: -8, max: 8 },
       accelerationX: { min: -3, max: 3 },
-      lifespan: { min: 4200, max: 6800 },
-      scale: { min: 0.1 * K, max: 0.24 * K },
-      alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.8 * Math.sin(Math.PI * t) },
+      lifespan: { min: 5000, max: 8000 },
+      scale: { min: 0.14 * K, max: 0.34 * K },
+      alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.75 * Math.sin(Math.PI * t) },
       tint: [hexToInt(A['fish-glow']), hexToInt(A['lake-glow']), hexToInt(P.glow)],
       blendMode: Phaser.BlendModes.ADD,
-      frequency: 240,
+      frequency: 200,
       emitting: false,
     });
 
-    this.add([this.halo, this.tail, this.liftC, this.veil, this.reflA, this.reflB, this.reflWarm, this.waterGlow, this.waterline, ...this.wisps, this.motes, this.drops, this.mist, this.plume]);
+    // Motes sit behind the body so they glimmer around its edges, never as specks on the face.
+    this.add([this.halo, this.motes, this.tail, this.liftC, this.veil, this.reflA, this.reflB, this.reflWarm, this.waterGlow, this.waterline, ...this.wisps, this.drops, this.mist, this.plume]);
     this.setDepth(DEPTH.water + 1);
     this.setAlpha(0);
     this.setVisible(false);
@@ -645,7 +646,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     // Glow.
     const g = this.glowLevel;
     this.halo.setAlpha(0.35 * g * (0.9 + 0.1 * br));
-    this.aura.setAlpha(Math.min(1, g * (0.62 + 0.06 * br + 0.12 * this.gleamA)));
+    this.aura.setAlpha(Math.min(1, g * (0.44 + 0.05 * br + 0.1 * this.gleamA)));
     this.heartGlow.setAlpha(0.3 + 0.06 * br + (this.happy ? 0.08 : 0));
     this.heartCore.setAlpha((0.14 + 0.06 * br + (this.happy ? 0.06 : 0)) * g);
     this.waterGlow.setAlpha(g * (0.06 + 0.12 * up));

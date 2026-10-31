@@ -62,6 +62,7 @@ export class Fishing {
       near: 160,
     });
     registerDebug('fishCast', () => this.begin('dock', CAMP.fishFrom.dock.x + 160));
+    registerDebug('fishPhase', () => this.phase);
   }
 
   destroy(): void {

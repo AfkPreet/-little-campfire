@@ -115,10 +115,7 @@ try {
   const t0 = Date.now();
   let hooked = false;
   while (Date.now() - t0 < 60000) {
-    const bite = await page.evaluate(() => {
-      const camp = window.__phaser.scene.getScene('Camp');
-      return camp.children.list.some((o) => o.texture && o.texture.key === 'fish_bang');
-    });
+    const bite = await page.evaluate(() => window.__game.fishPhase() === 'bite');
     if (bite) {
       await page.touchscreen.tap(400, 300);
       hooked = true;
@@ -159,8 +156,23 @@ try {
   check('tapping the tent at night offers Rest / Sleep / Decorate', info.bubbles.includes('Sleep'), JSON.stringify(info.bubbles));
   // Tap Sleep, then confirm the dialog, then wait for Day 2.
   await tapButton('Camp', 'Sleep');
-  await page.waitForTimeout(1500);
-  await tapButton('Camp', 'Sleep');
+  await until(() => window.__phaser.scene.getScene('Camp').children.list.some((o) => o.constructor && o.constructor.name === 'Dialog'), 30000).catch(() => {});
+  await page.waitForTimeout(800);
+  const confirm = await page.evaluate(() => {
+    const camp = window.__phaser.scene.getScene('Camp');
+    const d = camp.children.list.find((o) => o.constructor && o.constructor.name === 'Dialog');
+    if (!d) return null;
+    const btns = [];
+    const walk = (list) => { for (const o of list) { if (o.constructor && o.constructor.name === 'Button') btns.push(o); if (o.list) walk(o.list); } };
+    walk(d.list);
+    const b = btns.find((x) => (x.o && x.o.label === 'Sleep') || (x.list && x.list.some((c) => c.text === 'Sleep')));
+    if (!b) return { n: btns.length };
+    const m = b.getWorldTransformMatrix();
+    const z = camp.cameras.main.zoom / (window.devicePixelRatio || 1);
+    return { x: m.tx * z, y: m.ty * z };
+  });
+  check('the sleep dialog shows its Sleep button', !!(confirm && confirm.x), JSON.stringify(confirm));
+  if (confirm && confirm.x) await page.touchscreen.tap(confirm.x, confirm.y);
   await until(() => window.__game.state().day === 2, 120000).catch(() => {});
   check('sleeping through the dialog reaches Day 2', (await g('state')).day === 2);
   check('no console errors', errors.length === 0, errors.slice(0, 3).join(' | '));

@@ -316,9 +316,45 @@ export default function preview(scene: Phaser.Scene): void {
     void runFinale();
   } else if (beat === 'moments') {
     void runMoments();
+  } else if (beat === 'sky') {
+    // Straight to the plume and the sky opening (finale 30-37 s), for quick checks.
+    const ug = new UnderGlow(scene, kx + 60, WATER_Y);
+    ug.set(0.5, 10);
+    rainAmt = 0.55;
+    rain.set(0.4, true);
+    relight();
+    void kuhiro.rise(10).then(async () => {
+      kuhiro.setHappy(true);
+      await kuhiro.lightFreckles();
+      kuhiro.once('plume', skyReveal);
+      await kuhiro.breathePlume();
+    });
   }
   // Setup above can block for a long time on software GL: do not count it as game time.
   if (stops.length) scene.game.loop.resetDelta();
+
+  /** The great plume parts the clouds: stars, the Gurans and a moonbow (finale 30-37 s). */
+  function skyReveal(px: number, py: number): void {
+    void cloudPartingPlume(scene, px, py);
+    const s = { v: 0 };
+    const r0 = rainAmt;
+    scene.tweens.add({
+      targets: s,
+      v: 1,
+      duration: 5000,
+      delay: 2200,
+      onUpdate: () => {
+        skyOpen = s.v;
+        rainAmt = r0 * (1 - s.v);
+        relight();
+      },
+    });
+    rain.set(0);
+    scene.time.delayedCall(3200, () => void highlightGurans(scene, bd.gurans.x, bd.gurans.y));
+    scene.time.delayedCall(4200, () => showMoonbow(scene, { centerX: kx + 40, hold: true }));
+    scene.time.delayedCall(2600, () => ff.swirl(kx - 120, 420));
+    ff.setAmount(1);
+  }
 
   async function runFinale(): Promise<void> {
     const ug = new UnderGlow(scene, kx + 60, WATER_Y);
@@ -351,26 +387,7 @@ export default function preview(scene: Phaser.Scene): void {
     await eatP;
     await wait(400);
     // 30-37 s: the great plume parts the clouds; the Gurans and a moonbow appear.
-    kuhiro.once('plume', (px: number, py: number) => {
-      void cloudPartingPlume(scene, px, py);
-      const s = { v: 0 };
-      scene.tweens.add({
-        targets: s,
-        v: 1,
-        duration: 5000,
-        delay: 2200,
-        onUpdate: () => {
-          skyOpen = s.v;
-          rainAmt = 0.55 * (1 - s.v);
-          relight();
-        },
-      });
-      rain.set(0);
-      scene.time.delayedCall(3200, () => void highlightGurans(scene, bd.gurans.x, bd.gurans.y));
-      scene.time.delayedCall(4200, () => showMoonbow(scene, { centerX: kx + 40, hold: true }));
-      scene.time.delayedCall(2600, () => ff.swirl(kx - 120, 420));
-      ff.setAmount(1);
-    });
+    kuhiro.once('plume', skyReveal);
     await kuhiro.breathePlume();
     await wait(500);
     // 37-42 s: one freckle-light drifts to the dock; a last slow blink.

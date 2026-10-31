@@ -73,18 +73,31 @@ function cloudBank(ctx: Ctx, w: number, h: number, seed: number): void {
   }
   // A dense sheet across the top so the curtain reads as one mass.
   ctx.fillStyle = vGrad(ctx, 0, h, [
-    [0, '#FFFFFF', 0.92],
-    [0.4, '#FFFFFF', 0.82],
-    [0.62, '#FFFFFF', 0.3],
-    [0.78, '#FFFFFF', 0],
+    [0, mix(P.cream, P.lavender, 0.45), 0.92],
+    [0.4, mix(P.cream, P.lavender, 0.35), 0.8],
+    [0.62, mix(P.cream, P.lavender, 0.3), 0.28],
+    [0.78, mix(P.cream, P.lavender, 0.3), 0],
   ]);
   ctx.fillRect(0, 0, w, h);
+  // Lumps are moon-lit from above: cream crowns turning lavender underneath,
+  // so the tinted bank has form instead of reading as a flat sheet.
+  const under = mix(P.cream, P.lavender, 0.55);
   for (const [x, y, r] of lumps) {
-    ctx.fillStyle = rGrad(ctx, x, y, 0, r, [
-      [0, '#FFFFFF', 0.9],
-      [0.65, '#FFFFFF', 0.7],
-      [1, '#FFFFFF', 0],
-    ]);
+    ctx.fillStyle = rGrad(
+      ctx,
+      x,
+      y,
+      0,
+      r,
+      [
+        [0, P.cream, 0.95],
+        [0.55, mix(P.cream, under, 0.5), 0.8],
+        [0.85, under, 0.45],
+        [1, under, 0],
+      ],
+      x,
+      y - r * 0.45,
+    );
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
