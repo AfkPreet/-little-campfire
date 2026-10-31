@@ -130,8 +130,10 @@ function build(c: AudioContext): Engine {
     n.gain.value = v;
     return n;
   };
-  // Master: gentle high/low trims -> soft compressor -> out.
-  const masterIn = g(1);
+  // Master: gentle high/low trims -> soft compressor -> out. The input trim
+  // lifts the (deliberately soft) mix ~3 dB so the bed is comfortable on iPad
+  // speakers at normal volume; the compressor only touches fanfare peaks.
+  const masterIn = g(1.4);
   const hp = c.createBiquadFilter();
   hp.type = 'highpass';
   hp.frequency.value = 32;

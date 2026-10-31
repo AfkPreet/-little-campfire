@@ -187,11 +187,13 @@ export function bake(b: Baker): void {
       ctx.fill();
     }
     ctx.globalCompositeOperation = 'destination-in';
+    // The foot is nearly clear: the column gathers above the breather's head, never over its face.
     ctx.fillStyle = vGrad(ctx, 0, h, [
       [0, '#FFFFFF', 0],
       [0.18, '#FFFFFF', 1],
-      [0.92, '#FFFFFF', 1],
-      [1, '#FFFFFF', 0.4],
+      [0.64, '#FFFFFF', 1],
+      [0.84, '#FFFFFF', 0.18],
+      [1, '#FFFFFF', 0],
     ]);
     ctx.fillRect(0, 0, w, h);
     ctx.globalCompositeOperation = 'source-over';

@@ -108,7 +108,7 @@ try {
   await g('walk', 2300);
   await until(() => Math.abs(window.__game.heroX() - 2300) < 8, 90000).catch(() => {});
   await page.waitForTimeout(1500);
-  await tapWorld(2620, 650);
+  await tapWorld(2560, 612);
   await until(() => window.__game.campInfo().activity === 'fish', 90000).catch(() => {});
   check('tap the water walks to the dock and fishes', (await g('campInfo')).activity === 'fish');
   // Poll for the "!" (bite) by watching the fishing phase via a debug read of the bang image.

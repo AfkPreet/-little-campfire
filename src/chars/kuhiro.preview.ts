@@ -242,8 +242,16 @@ export default function preview(scene: Phaser.Scene): void {
     .filter((n) => n > 0)
     .sort((a, b) => a - b);
   win.__pvSlept = -1;
+  if (stops.length) {
+    // Software GL: run the loop, timers and tweens all on the same wall clock
+    // (no delta smoothing), and let tweens swallow the screenshot pauses.
+    (scene.game.loop as unknown as { smoothStep: boolean }).smoothStep = false;
+    // Tweens normally run on Date.now(); drive them from the loop delta instead.
+    (scene.tweens as unknown as { getDelta: () => number }).getDelta = () => scene.game.loop.delta;
+  }
   win.__pvWake = () => {
     win.__pvSlept = -1;
+    scene.game.loop.resetDelta(); // the screenshot pause must not count as game time
     scene.game.loop.wake();
   };
   let beatMs = 0;
@@ -309,6 +317,8 @@ export default function preview(scene: Phaser.Scene): void {
   } else if (beat === 'moments') {
     void runMoments();
   }
+  // Setup above can block for a long time on software GL: do not count it as game time.
+  if (stops.length) scene.game.loop.resetDelta();
 
   async function runFinale(): Promise<void> {
     const ug = new UnderGlow(scene, kx + 60, WATER_Y);

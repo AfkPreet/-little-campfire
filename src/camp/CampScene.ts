@@ -389,6 +389,8 @@ export default class Camp extends Phaser.Scene {
     const wy = wp.y;
     if (this.tapInterceptor && this.tapInterceptor(wx, wy)) return;
     if (this.bubbleGroup) {
+      // A tap on a bubble belongs to the bubble (its own handler acts on release).
+      if (this.bubbleGroup.bubbles.some((b) => b.active && b.getBounds().contains(wx, wy))) return;
       this.closeBubbles();
     }
     // Leave sitting/resting with any tap.

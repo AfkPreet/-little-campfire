@@ -340,8 +340,8 @@ function drawSkin(ctx: Ctx, details: boolean): void {
     // Bounce light from the glowing lake along the waterline.
     ctx.fillStyle = vGrad(ctx, -96, 6, [
       [0, A['lake-glow'], 0],
-      [0.6, A['lake-glow'], 0.22],
-      [1, A['lake-glow'], 0.5],
+      [0.6, A['lake-glow'], 0.16],
+      [1, A['lake-glow'], 0.34],
     ]);
     ctx.fillRect(-260, -96, 720, 110);
     // Turning shade down the rear flank so the bean reads round, not flat.
@@ -627,16 +627,22 @@ export function bake(b: Baker): void {
   b.tex('kuhiro_glint', 90, 90, (ctx) => {
     ctx.translate(45, 45);
     ctx.lineCap = 'round';
+    // Soft light along the scallop's edge, fading out toward its tips.
     for (const [w, a] of [
-      [14, 0.18],
-      [8, 0.4],
-      [3, 1],
+      [16, 0.14],
+      [9, 0.3],
+      [3.5, 0.55],
+      [1.6, 0.8],
     ] as [number, number][]) {
-      ctx.strokeStyle = rgba('#FFFFFF', a);
-      ctx.lineWidth = w;
-      ctx.beginPath();
-      ctx.arc(0, 0, 30, -1.2, 1.2);
-      ctx.stroke();
+      for (let k = 0; k < 6; k++) {
+        const a0 = -1.2 + (k * 2.4) / 6;
+        const mid = (k + 0.5) / 6 - 0.5;
+        ctx.strokeStyle = rgba('#FFFFFF', a * (1 - 3.2 * mid * mid));
+        ctx.lineWidth = w;
+        ctx.beginPath();
+        ctx.arc(0, 0, 30, a0, a0 + 2.4 / 6 + 0.02);
+        ctx.stroke();
+      }
     }
   });
 

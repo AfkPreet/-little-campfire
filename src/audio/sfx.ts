@@ -156,6 +156,7 @@ export function glide(p: AudioParam, t: number, from: number, to: number, dur: n
 }
 
 let liveVoices = 0;
+/** Cap on simultaneous voices per synth (the SFX synth drops new sounds beyond it). */
 const MAX_VOICES = 40;
 export function voiceCount(): number {
   return liveVoices;
@@ -179,8 +180,10 @@ export class Voice {
     out: Out,
     readonly noiseBank: NoiseBank,
     o: { vol?: number; pan?: number; wet?: number } = {},
+    private readonly owner: { live: number } | null = null,
   ) {
     liveVoices++;
+    if (owner) owner.live++;
     this.input = ctx.createGain();
     this.input.gain.value = o.vol ?? 1;
     this.nodes.push(this.input);
@@ -283,6 +286,7 @@ export class Voice {
     if (this.finished) return;
     this.finished = true;
     liveVoices = Math.max(0, liveVoices - 1);
+    if (this.owner) this.owner.live = Math.max(0, this.owner.live - 1);
     for (const { from, to } of this.params) {
       try {
         from.disconnect(to);
@@ -303,6 +307,9 @@ export class Voice {
 
 /** Builds voices on one output pair. */
 export class Synth {
+  /** Voices of this synth still sounding (score and ambience voices never block SFX). */
+  live = 0;
+
   constructor(
     readonly ctx: BaseAudioContext,
     readonly out: Out,
@@ -310,11 +317,11 @@ export class Synth {
   ) {}
 
   voice(vol: number, pan = 0, wet = 0.15): Voice {
-    return new Voice(this.ctx, this.out, this.noise, { vol, pan, wet });
+    return new Voice(this.ctx, this.out, this.noise, { vol, pan, wet }, this);
   }
 
   busy(): boolean {
-    return liveVoices >= MAX_VOICES;
+    return this.live >= MAX_VOICES;
   }
 }
 
@@ -504,7 +511,7 @@ const R: Record<SfxId, Recipe> = {
 
   // Splash: a falling band of noise, a soft body and a few droplets.
   splash(s, t, p, pan, vol) {
-    const v = s.voice(0.3 * vol, pan, 0.25);
+    const v = s.voice(0.42 * vol, pan, 0.25);
     const a = v.gain(0, v.filter('lowpass', 3200, 0.6));
     perc(a.gain, t, 1, 0.014, 0.55);
     const bp = v.filter('bandpass', 1400 * p, 0.8, a);
@@ -517,7 +524,7 @@ const R: Record<SfxId, Recipe> = {
     const n = 3 + Math.floor(Math.random() * 3);
     for (let i = 0; i < n; i++) {
       const f = rand(700, 1400) * p;
-      bloop(s, t + rand(0.08, 0.45), f, f * 1.6, { vol: 0.045 * vol, pan: pan + rand(-0.3, 0.3), wet: 0.3, rise: 0.04, decay: 0.07 });
+      bloop(s, t + rand(0.08, 0.45), f, f * 1.6, { vol: 0.06 * vol, pan: pan + rand(-0.3, 0.3), wet: 0.3, rise: 0.04, decay: 0.07 });
     }
   },
 
@@ -610,19 +617,19 @@ const R: Record<SfxId, Recipe> = {
 
   // Tent peg: a hollow wooden tok.
   tok(s, t, p, pan, vol) {
-    const v = s.voice(0.17 * vol, pan, 0.1);
+    const v = s.voice(0.15 * vol, pan, 0.1);
     const a = v.gain(0);
-    const end = perc(a.gain, t, 1, 0.002, 0.09);
+    const end = perc(a.gain, t, 1, 0.004, 0.09);
     const o = v.osc('sine', 820 * p, t, end, a);
     glide(o.frequency, t, 820 * p, 760 * p, 0.08);
     const b = v.gain(0);
-    perc(b.gain, t, 0.3, 0.002, 0.035);
+    perc(b.gain, t, 0.22, 0.004, 0.035);
     v.osc('sine', 820 * 2.1 * p, t, end, b);
     const k = v.gain(0);
-    perc(k.gain, t, 0.45, 0.003, 0.06);
+    perc(k.gain, t, 0.45, 0.005, 0.06);
     v.osc('sine', 260 * p, t, end, k);
     const c = v.gain(0);
-    perc(c.gain, t, 0.2, 0.001, 0.012);
+    perc(c.gain, t, 0.1, 0.003, 0.012);
     v.noise('white', t, t + 0.03, v.filter('bandpass', 2500, 1.5, c));
     v.done();
   },
@@ -647,7 +654,7 @@ const R: Record<SfxId, Recipe> = {
 
   // Page flip: a papery swish and a soft flap.
   page(s, t, p, pan, vol) {
-    const v = s.voice(0.2 * vol, pan, 0.06);
+    const v = s.voice(0.26 * vol, pan, 0.06);
     const a = v.gain(0);
     swell(a.gain, t, 1, 0.06, 0.08, 0.16);
     const bp = v.filter('bandpass', 800, 0.9, a);
@@ -778,7 +785,7 @@ const R: Record<SfxId, Recipe> = {
 
   // Cast swish: a soft rising and falling band of air.
   whoosh(s, t, p, pan, vol) {
-    const v = s.voice(0.2 * vol, pan, 0.05);
+    const v = s.voice(0.4 * vol, pan, 0.05);
     const a = v.gain(0);
     swell(a.gain, t, 1, 0.12, 0.04, 0.24);
     const bp = v.filter('bandpass', 400, 1.4, a);
@@ -793,7 +800,7 @@ const R: Record<SfxId, Recipe> = {
   stir(s, t, p, pan, vol) {
     const dur = 1.1;
     const end = t + dur + 0.1;
-    const v = s.voice(0.2 * vol, pan, 0.06);
+    const v = s.voice(0.28 * vol, pan, 0.06);
     const a = v.gain(0);
     swell(a.gain, t, 1, 0.2, dur - 0.55, 0.35);
     const bp = v.filter('bandpass', 700 * p, 2, a);
@@ -808,7 +815,7 @@ const R: Record<SfxId, Recipe> = {
   rumble(s, t, p, pan, vol) {
     const dur = 2.4;
     const end = t + dur + 0.2;
-    const v = s.voice(0.11 * vol, pan, 0.3);
+    const v = s.voice(0.065 * vol, pan, 0.3);
     const env = v.gain(0, v.filter('lowpass', 700, 0.6));
     swell(env.gain, t, 1, 0.5, dur - 1.3, 0.8);
     const purr = v.gain(0.7, env);
@@ -851,7 +858,7 @@ const R: Record<SfxId, Recipe> = {
     const n = 6 + Math.floor(Math.random() * 5);
     for (let i = 0; i < n; i++) {
       const k = 1 - i / (n + 2);
-      const v = s.voice(0.07 * vol * k, pan, 0.08);
+      const v = s.voice(0.22 * vol * k, pan, 0.08);
       const a = v.gain(0);
       perc(a.gain, tt, 1, 0.002, 0.03);
       v.noise('pink', tt, tt + 0.05, v.filter('bandpass', rand(1900, 2600) * p, 1.6, a));
@@ -878,7 +885,7 @@ const R: Record<SfxId, Recipe> = {
 
   // Doko-tuck rustle: a soft wicker crinkle and a tiny settle.
   rustle(s, t, p, pan, vol) {
-    const v = s.voice(0.11 * vol, pan, 0.05);
+    const v = s.voice(0.18 * vol, pan, 0.05);
     const a = v.gain(0, v.filter('lowpass', 4500, 0.6));
     swell(a.gain, t, 1, 0.03, 0.18, 0.14);
     const jit = v.gain(0.5, a);
@@ -913,7 +920,7 @@ const R: Record<SfxId, Recipe> = {
 
   // Kopila's curl "tuck": a tiny soft tuck.
   tuck(s, t, p, pan, vol) {
-    const v = s.voice(0.11 * vol, pan, 0.06);
+    const v = s.voice(0.15 * vol, pan, 0.06);
     const a = v.gain(0, v.filter('lowpass', 1800, 0.7));
     const end = perc(a.gain, t, 1, 0.003, 0.08);
     const o = v.osc('triangle', 620 * p, t, end, a);

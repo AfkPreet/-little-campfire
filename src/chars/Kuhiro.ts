@@ -268,7 +268,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       speedX: { min: -14, max: 14 },
       lifespan: { min: 1900, max: 2500 },
       scale: { start: 0.3 * K * 1.5, end: 2.6 * K * 1.5 },
-      alpha: { start: 0.5, end: 0 },
+      // Fade in as it leaves the mouth so it never piles up as a blob on the face.
+      alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.5 * Math.min(1, t * t * 7) * (1 - t) },
       tint: hexToInt(P.cream),
       frequency: 60,
       emitting: false,
@@ -471,7 +472,8 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     await this.tw(this, { tilt: 7, mouthOpen: 1, breathBoost: 1 }, 1300, 'Sine.easeInOut');
     const p = this.plumePoint();
     this.emit('plume', p.x, p.y);
-    this.plume.setPosition(0, 0);
+    // The emitter is a child of this container: emit from the mouth, in local space.
+    this.plume.setPosition((p.x - this.x) / (this.scaleX || 1) - 6, (p.y - this.y) / (this.scaleY || 1) - 14);
     this.plume.start();
     this.tw(this, { breathBoost: -0.6 }, 1600, 'Sine.easeOut');
     this.gillBreath(5);
@@ -617,13 +619,14 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     const tl = this.tailLift;
     this.tail.y = 150 - 150 * tl + oy * 0.4 + Math.sin(t * 0.9) * 3;
     this.tail.setAngle(this.tailAngle + Math.sin((t * TAU) / 4.2) * 2.5);
+    this.tail.setAlpha(smooth((tl + 0.25) / 0.35));
 
     // Glow.
     const g = this.glowLevel;
     this.halo.setAlpha(0.35 * g * (0.9 + 0.1 * br));
     this.heartGlow.setAlpha(0.3 + 0.06 * br + (this.happy ? 0.08 : 0));
     this.heartCore.setAlpha((0.14 + 0.06 * br + (this.happy ? 0.06 : 0)) * g);
-    this.waterGlow.setAlpha(g * (0.1 + 0.2 * up));
+    this.waterGlow.setAlpha(g * (0.06 + 0.12 * up));
     this.waterGlow.y = 24 + oy * 0.22;
     this.waterGlow.setScale((K * (620 + 160 * (1 - up))) / 256, (K * (110 + 30 * (1 - up))) / 256);
     this.gleam.setAlpha(this.gleamA * above * (0.85 + 0.15 * br));
@@ -641,7 +644,7 @@ export class Kuhiro extends Phaser.GameObjects.Container {
     this.reflWarm.setAlpha(ra * (0.08 + 0.3 * (fl / 6)) * (0.85 + 0.15 * sh));
     this.blushes[0].setAlpha(this.blushA * 0.85);
     this.blushes[1].setAlpha(this.blushA);
-    this.waterline.setAlpha(above * (0.22 + 0.07 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
+    this.waterline.setAlpha(above * (0.16 + 0.06 * Math.sin(t * 2.3)) * (0.4 + 0.6 * g));
     for (let i = 0; i < this.wisps.length; i++) {
       const w = this.wisps[i];
       w.x = (w.getData('x') as number) + Math.sin(t * 0.11 + i * 2.1) * 34;
@@ -667,12 +670,12 @@ export class Kuhiro extends Phaser.GameObjects.Container {
       const s = (this.sweepT / 1.7) * 1.5 - 0.25;
       for (const gl of this.glints) {
         const d = (s - gl.p) / 0.16;
-        gl.img.setAlpha(0.42 * Math.exp(-d * d) * above);
+        gl.img.setAlpha(0.3 * Math.exp(-d * d) * above);
       }
       for (const tw of this.twinkles) {
         const d = (s - (tw.getData('p') as number)) / 0.1;
         const a = Math.exp(-d * d) * above;
-        tw.setAlpha(0.8 * a).setScale(K * (0.25 + 0.35 * a)).setAngle(this.sweepT * 60);
+        tw.setAlpha(0.6 * a).setScale(K * (0.2 + 0.28 * a)).setAngle(this.sweepT * 60);
       }
       if (this.sweepT > 1.8) {
         this.sweepT = -1;
@@ -779,7 +782,7 @@ export class UnderGlow {
 
   private apply(k: number): void {
     this.broad.setAlpha(this.level * k);
-    this.core.setAlpha(this.level * 0.4 * k);
+    this.core.setAlpha(this.level * 0.26 * k);
   }
 
   /** Fade to alpha (0..0.5) over ms. */

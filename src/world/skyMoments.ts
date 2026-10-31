@@ -150,23 +150,28 @@ export async function highlightGurans(
   const depth = opts.depth ?? DEPTH.celestial + 0.3;
   const pts = gurans(x, y, opts.ring ?? 18);
   const made: Img[] = [];
+  // One soft bloom over the whole flower, growing as the stars light.
+  const bloom = skyImg(scene, x, y, 'glow', depth - 0.05, sf).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['moon-gurans'])).setAlpha(0);
+  bloom.setScale((K * 130) / 256);
+  made.push(bloom);
+  scene.tweens.add({ targets: bloom, alpha: 0.32, scale: (K * 170) / 256, duration: 3200, ease: 'Sine.easeInOut' });
   for (const p of pts) {
     const big = p.centre ? 1.15 : 1;
-    const halo = skyImg(scene, p.x, p.y, 'glowSmall', depth, sf).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setAlpha(0).setScale(0.4 * K);
+    const halo = skyImg(scene, p.x, p.y, 'glowSmall', depth, sf).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['fish-glow'])).setAlpha(0).setScale(0.3 * K);
     const star = skyImg(scene, p.x, p.y, 'sky_starGlow', depth, sf).setBlendMode(Phaser.BlendModes.ADD).setTint(mixInt(P.cream, A['moon-gurans'], 0.5)).setAlpha(0).setScale(0.1 * K);
-    const warm = skyImg(scene, p.x, p.y, 'dot', depth, sf).setTint(mixInt(P.glow, P.cream, 0.5)).setAlpha(0).setScale(0.5 * K * big);
+    const warm = skyImg(scene, p.x, p.y, 'dot', depth, sf).setTint(mixInt(P.glow, P.cream, 0.5)).setAlpha(0).setScale(0.36 * K * big);
     made.push(halo, star, warm);
-    scene.tweens.add({ targets: halo, alpha: 0.7, scale: 1.25 * big * K, duration: 700, ease: 'Sine.easeOut' });
+    scene.tweens.add({ targets: halo, alpha: 0.6, scale: 0.72 * big * K, duration: 700, ease: 'Sine.easeOut' });
     scene.tweens.add({ targets: warm, alpha: 1, duration: 400, ease: 'Sine.easeOut' });
     scene.tweens.add({
       targets: star,
       alpha: 1,
-      scale: 0.95 * K * big,
+      scale: 0.62 * K * big,
       angle: 45,
       duration: 520,
       ease: 'Back.easeOut',
       onComplete: () => {
-        scene.tweens.add({ targets: star, scale: 0.62 * K * big, angle: 0, alpha: 0.85, duration: 900, ease: 'Sine.easeInOut' });
+        scene.tweens.add({ targets: star, scale: 0.4 * K * big, angle: 0, alpha: 0.9, duration: 900, ease: 'Sine.easeInOut' });
         scene.tweens.add({ targets: [star, halo], alpha: '-=0.25', duration: 1600 + Math.random() * 900, yoyo: true, repeat: -1, ease: 'Sine.easeInOut', delay: 900 });
       },
     });
@@ -214,7 +219,8 @@ export async function cloudPartingPlume(
     accelerationX: { min: -8, max: 8 },
     lifespan: life,
     scale: { start: 0.45 * K * 1.5, end: 3.4 * K * 1.5 },
-    alpha: { start: 0.42, end: 0 },
+    // Clear as they leave the mouth, gathering as they climb past the head.
+    alpha: { onEmit: () => 0, onUpdate: (_p: unknown, _k: string, t: number) => 0.42 * Math.min(1, t * t * 9) * (1 - t) },
     rotate: { min: 0, max: 360 },
     tint: mistTint,
     frequency: rm ? 220 : 70,
@@ -225,14 +231,15 @@ export async function cloudPartingPlume(
 
   // Cloud curtains at the top of the sky, centred over the plume on screen.
   const cd = opts.cloudDepth ?? DEPTH.celestial + 0.5;
-  const cloudTint = opts.cloudTint ?? mixInt(A['cloud-sea'], LIGHT.night.haze, 0.55);
+  // Rain-cloud grey-indigo, a touch lighter than the night sky so the parting reveals deeper, starry sky.
+  const cloudTint = opts.cloudTint ?? mixInt(LIGHT.night.horizon, A['cloud-sea'], 0.22);
   const sx = x - scene.cameras.main.scrollX;
   const cx = skyX(scene, sx);
   const sc = 2 * K * 1.35;
   const left = skyImg(scene, cx + 60, -24, 'sky_curtain', cd).setOrigin(1, 0).setScale(sc).setTint(cloudTint).setAlpha(0);
   const right = skyImg(scene, cx - 60, -24, 'sky_curtain', cd).setOrigin(0, 0).setScale(sc).setFlipX(true).setTint(cloudTint).setAlpha(0);
-  const wash = skyImg(scene, cx, 40, 'glow', cd + 0.1).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['moon-snow'])).setScale((K * 900) / 256, (K * 360) / 256).setAlpha(0);
-  tw(scene, [left, right], { alpha: 0.95 }, 1400, 'Sine.easeOut');
+  const wash = skyImg(scene, cx, 40, 'glow', cd + 0.1).setBlendMode(Phaser.BlendModes.ADD).setTint(hexToInt(A['moon-snow'])).setScale((K * 520) / 256, (K * 300) / 256).setAlpha(0);
+  tw(scene, [left, right], { alpha: 0.85 }, 1400, 'Sine.easeOut');
   await wait(scene, 2300);
   const spread = l.w * 0.62;
   tw(scene, left, { x: cx + 60 - spread, alpha: 0 }, 5600, 'Sine.easeInOut');
@@ -240,6 +247,6 @@ export async function cloudPartingPlume(
     left.destroy();
     right.destroy();
   });
-  tw(scene, wash, { alpha: 0.22 }, 2200, 'Sine.easeOut').then(() => tw(scene, wash, { alpha: 0 }, 3800, 'Sine.easeInOut').then(() => wash.destroy()));
+  tw(scene, wash, { alpha: 0.14 }, 2200, 'Sine.easeOut').then(() => tw(scene, wash, { alpha: 0 }, 3800, 'Sine.easeInOut').then(() => wash.destroy()));
   await wait(scene, 4200);
 }

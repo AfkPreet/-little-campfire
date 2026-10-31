@@ -1,8 +1,10 @@
 /**
  * Generative lo-fi fallback score (spec section 9), used for any mood whose
- * music file is missing. D major, Imaj9 - vi9 - IVmaj9 - V6/9, soft FM keys,
- * sparse kalimba plucks on the pentatonic, an optional breathy flute lead,
- * faint vinyl, brushed drums by day only.
+ * music file is missing. D major, Dmaj7 - Bm7 - Gmaj7 - A (Imaj7 - vi7 -
+ * IVmaj7 - V, voiced rootless with soft 9ths), soft FM keys, sparse kalimba
+ * plucks and a breathy bansuri-style flute lead on D major pentatonic, faint
+ * vinyl; brushes and light madal pats by day, a soft shaker in rain, no
+ * drums at night (docs/WORLD.md section 6).
  *
  * Scheduling is a lookahead scheduler: the engine calls tick(until) from a
  * setTimeout loop and every note is placed on the AudioContext clock. No
@@ -51,8 +53,8 @@ interface VariantCfg {
 
 const CFG: Record<ScoreVariant, VariantCfg> = {
   day: { bpm: 76, barsPerChord: 1, drums: true, bass: 1, keys: 1, keysLP: 2300, kalimba: 0.15, lead: 0.24, leadLow: false, wet: 0.22, swing: 0.16, comp: 1, vinyl: 1, arps: false, shaker: 1, pad: false },
-  rain: { bpm: 72, barsPerChord: 1, drums: false, bass: 0.7, keys: 0.85, keysLP: 1500, kalimba: 0.11, lead: 0.16, leadLow: false, wet: 0.48, swing: 0.14, comp: 0.55, vinyl: 1.25, arps: false, shaker: 0.55, pad: false },
-  night: { bpm: 66, barsPerChord: 2, drums: false, bass: 0.55, keys: 0.82, keysLP: 1300, kalimba: 0.07, lead: 0.13, leadLow: true, wet: 0.4, swing: 0.12, comp: 0.3, vinyl: 0.8, arps: false, shaker: 0, pad: false },
+  rain: { bpm: 72, barsPerChord: 1, drums: false, bass: 0.7, keys: 0.85, keysLP: 1500, kalimba: 0.11, lead: 0.16, leadLow: true, wet: 0.48, swing: 0.14, comp: 0.55, vinyl: 1.25, arps: false, shaker: 0.8, pad: false },
+  night: { bpm: 68, barsPerChord: 2, drums: false, bass: 0.65, keys: 0.88, keysLP: 1300, kalimba: 0.07, lead: 0.13, leadLow: true, wet: 0.4, swing: 0.12, comp: 0.3, vinyl: 0.8, arps: false, shaker: 0, pad: false },
   finale: { bpm: 64, barsPerChord: 2, drums: false, bass: 0.8, keys: 1, keysLP: 2000, kalimba: 0.12, lead: 0.42, leadLow: false, wet: 0.52, swing: 0.1, comp: 0.5, vinyl: 0.5, arps: true, shaker: 0, pad: true },
 };
 
@@ -423,11 +425,11 @@ export class Score {
     // --- Kalimba ------------------------------------------------------------
     if (c.arps && cycle % 2 === 1) {
       const notes = [...chord.keys.map((m) => m + 12), chord.keys[1] + 24];
-      notes.forEach((m, i) => this.queue(base + i * 2 + 2, (tt) => this.kalimba(tt, nearestPenta(m), 0.045)));
+      notes.forEach((m, i) => this.queue(base + i * 2 + 2, (tt) => this.kalimba(tt, nearestPenta(m), 0.09)));
     } else {
       for (let s = 0; s < 16; s += 2) {
         if (Math.random() < c.kalimba * (s % 4 === 0 ? 1.2 : 0.8)) {
-          this.queue(base + s, (tt) => this.kalimba(tt, this.nextKalimba(chord.tones, s % 4 === 0), rand(0.035, 0.055)));
+          this.queue(base + s, (tt) => this.kalimba(tt, this.nextKalimba(chord.tones, s % 4 === 0), rand(0.075, 0.11)));
         }
       }
     }
@@ -498,7 +500,7 @@ export class Score {
         if (ct.length) m = ct.reduce((a, b) => (Math.abs(b - m) < Math.abs(a - m) ? b : a));
       }
       const dur = durSteps * sixteenth * 0.92;
-      const vel = (last ? 0.05 : 0.055) * (this.variant === 'rain' ? 0.8 : 1);
+      const vel = (last ? 0.085 : 0.095) * (this.variant === 'rain' ? 0.85 : this.variant === 'night' ? 0.88 : 1);
       const prev = i > 0 ? prevNote : null;
       this.queue(step, (tt) => this.flute(tt, m, dur, vel, prev));
       prevNote = m;
@@ -613,7 +615,7 @@ export class Score {
 
   /** Madal pat: a short pitched body thump plus a filtered slap (day only). */
   private madal(t: number, k: number, low: boolean): void {
-    const v = this.drumSyn.voice(0.075 * k, low ? -0.15 : 0.15, 0.4);
+    const v = this.drumSyn.voice(0.18 * k, low ? -0.15 : 0.15, 0.4);
     const amp = v.gain(0);
     const end = perc(amp.gain, t, 1, 0.003, low ? 0.2 : 0.14);
     const f = low ? 96 : 124;
@@ -655,7 +657,7 @@ export class Score {
   }
 
   private brush(t: number, k: number): void {
-    const v = this.drumSyn.voice(0.045 * k, 0.1, 1);
+    const v = this.drumSyn.voice(0.3 * k, 0.1, 1);
     const amp = v.gain(0);
     swell(amp.gain, t, 1, 0.014, 0.02, 0.17);
     v.noise('pink', t, t + 0.25, v.filter('bandpass', 2300, 0.6, amp));
@@ -663,7 +665,7 @@ export class Score {
   }
 
   private shaker(t: number, k: number): void {
-    const v = this.drumSyn.voice(0.02 * k, -0.2, 0);
+    const v = this.drumSyn.voice(0.08 * k, -0.2, 0);
     const amp = v.gain(0, v.filter('lowpass', 9000, 0.5));
     perc(amp.gain, t, 1, 0.008, 0.05);
     v.noise('white', t, t + 0.08, v.filter('highpass', 6000, 0.6, amp));
