@@ -6,3 +6,6 @@ test-results
 *.log
 .DS_Store
 scripts/.*.tmp.mjs
+# Only the final milestone screenshots are committed.
+shots/*
+!shots/m4/

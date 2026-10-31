@@ -9,6 +9,7 @@ Read this first when you pick the project back up. The locked spec is `docs/SPEC
 - **The world:** Junkiri Danda, a fictional monsoon ridge in Sikkim/Darjeeling-style hills; the lake Jun Pokhari; the Snow Grannies behind a sea of cloud. Hero **Tuki** (a large-eared pika with a doko basket), shopkeeper **Boju** (a grandmother yak who knits horn cosies), companion **Kopila** (a pangolin pup that hides as a rhododendron bud), guardian **Kuhiro** (a great glowing mist-fish). Money is rupees, written `₹120`.
 - **The loop:** title → storybook intro → Boju's shop (Day-1 essentials) → camp: pitch the tent by tapping pegs, forage 7 spots, fish from the dock or shore (tap timing, catch cards, bait), cook at the fire (drag up to 3 ingredients, stir in circles, 16 recipes + Mystery Mush), eat / save / share, decorate (11 items on snap points), rest in the doorway in rain, sit by the fire, sleep → day summary → dawn.
 - **Systems:** soft 8-minute clock (pauses in menus), weather with its guarantees (Day 1 clear, Night 4 rains, rain after the dumplings), positive-only Contentment with tiers, the journal (36 stamps across Fish/Recipes/Moments/Friends/Mystery/Trip, badges), the companion (peek → share on 3 days → befriended), rare moments, the 5-clue mystery and the ~45 s finale, the Trip Album, free play and new trips.
+- **Verified:** `npm run smoke`, `npm run playtest` and `npm run trip` pass with no console errors; every final screenshot scores 4+ (see `REVIEW.md`); `shots/m4/` holds the final set.
 - **Audio:** fully synthesised SFX, ambience beds and a generative lo-fi fallback score (bansuri-like flute lead, D major pentatonic). Optional music files in `public/audio/` are detected at boot (see `MUSIC_BRIEF.md`).
 
 ## 2. Where each system lives
@@ -71,8 +72,9 @@ On Vercel builds `og:image` becomes absolute automatically (`VERCEL_PROJECT_PROD
 3. **iOS Safari specifics** (audio unlock on first tap, safe areas, Add to Home Screen) were exercised in Chromium's iPad emulation only.
 4. **Balance is untested by a human.** `npm run trip` proves the whole trip flows (all 5 clues, finale, Album, free play, reload) but fast-forwards the night timer and tops Contentment up if it is short of 70 on the finale night.
 5. **Phone landscape is secondary:** journal body text is about 10 CSS px on a 390 px-tall phone. Large text helps.
-6. **Cosmetic:** in the finale the moon shows as a bright smudge inside the moonbow; the shop's warm-wood room is pale behind the cream catalog.
-7. **No music files yet.** The generated score plays; drop the four files from `MUSIC_BRIEF.md` into `public/audio/`.
+6. **Texture memory:** about 227 MB of baked textures at art scale 2.25 (iPad Retina). Fine on current iPads; on an older one that reloads under memory pressure, cap `ART_SCALE` at 2 in `src/core/layout.ts` (about 20% less).
+7. **Cosmetic:** in the finale the moon shows as a bright smudge inside the moonbow; the shop's warm-wood room is pale behind the cream catalog.
+8. **No music files yet.** The generated score plays; drop the four files from `MUSIC_BRIEF.md` into `public/audio/`.
 
 ## 6. Top 5 next ideas
 
