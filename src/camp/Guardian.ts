@@ -165,8 +165,16 @@ export class Guardian {
 
     // 30-37 s: one great plume of mist parts the clouds: stars, the Gurans, a moonbow.
     const plume = k.plumePoint();
+    let parted = false;
+    const part = () => {
+      if (parted) return;
+      parted = true;
+      void cloudPartingPlume(sc, plume.x, plume.y);
+    };
+    // The clouds part when the mist actually leaves Kuhiro's mouth.
+    k.once('plume', part);
+    sc.time.delayedCall(2500, part);
     void k.breathePlume();
-    void cloudPartingPlume(sc, plume.x, plume.y);
     const o = { a: 0 };
     sc.tweens.add({ targets: o, a: 1, duration: 4000, ease: 'Sine.easeInOut', onUpdate: () => ctx.landscape.setSkyOpen(o.a) });
     await wait(sc, 2600);
