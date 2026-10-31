@@ -58,7 +58,8 @@ export default class Summary extends Phaser.Scene {
     g.fillCircle(0, 0, 14 * open + 4);
     g.lineStyle(2.5, hexToInt(shade(P.butter, 0.3)), 1);
     g.strokeCircle(0, 0, 14 * open + 4);
-    const glow = this.add.image(0, 0, 'glow').setTint(hexToInt(P.glow)).setBlendMode(Phaser.BlendModes.ADD).setAlpha(0.25 + 0.5 * (peak / 100)).setScale(0.6 + 0.5 * open);
+    // Normal blend: added onto the cream card the halo clamped to pure white.
+    const glow = this.add.image(0, 0, 'glow').setTint(hexToInt(P.glow)).setAlpha(0.3 + 0.4 * (peak / 100)).setScale(0.6 + 0.5 * open);
     bloom.add([glow, g]);
     c.add(bloom);
     bloom.setScale(0.2);

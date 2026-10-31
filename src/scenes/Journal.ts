@@ -28,6 +28,7 @@ import { stampCount, TOTAL_STAMPS } from '@/systems/journal';
 import { hearts } from '@/systems/companion';
 import { dishName } from '@/systems/inventory';
 import { IconButton, fmt, iconObj, txtObj } from '@/ui';
+import { Kopila } from '@/chars/Kopila';
 import { pressable, setHitSize } from '@/ui/Button';
 import { A, P, hexToInt, mix } from '@/palette';
 import { registerShot } from '@/camp/registry';
@@ -327,7 +328,13 @@ export default class Journal extends Phaser.Scene {
     const known = s.journal.friend || s.companion.shareDays.length > 0;
     this.header(0, STR.journal.tabs.friends);
     const portrait = this.add.container(this.pageX(0), -20);
-    if (this.textures.exists('kopila_ball')) {
+    if (s.journal.friend) {
+      // Befriended: Kopila stands up and says hello instead of hiding in a ball.
+      const k = new Kopila(this, 0, 70).setMode('stand').setExpression('happy');
+      k.setScale(2.6);
+      portrait.add(k);
+      this.events.on('update', (t: number, dt: number) => k.active && k.tick(t, dt));
+    } else if (this.textures.exists('kopila_ball')) {
       const img = this.add.image(0, 0, 'kopila_ball').setScale(2.6 / ART_SCALE);
       if (!known) img.setTintFill(hexToInt(mix(A.lokta, P.lavender, 0.55))).setAlpha(0.7);
       portrait.add(img);
@@ -392,7 +399,20 @@ export default class Journal extends Phaser.Scene {
     if (d.moments.length) lines.push('Moments: ' + d.moments.map((m) => MOMENTS[m].name).join(', '));
     if (d.shared) lines.push(STR.summary.shared);
     if (d.sold) lines.push(fmt(STR.summary.sold, { money: WORLD.money(d.sold) }));
-    lines.forEach((ln, i) => this.content.add(txtObj(this, x - 190, -190 + i * 52, ln, 'hand', { align: 'left', size: 24, color: i === 0 ? PAGE_INK : SOFT_INK, wrap: 380 })));
+    let ly = -205;
+    lines.forEach((ln, i) => {
+      const t = txtObj(this, x - 190, ly, ln, 'hand', { align: 'left', size: 24, color: i === 0 ? PAGE_INK : SOFT_INK, wrap: 380 }).setOrigin(0, 0);
+      this.content.add(t);
+      ly += t.height + 8;
+    });
+    // Little stickers of the day: best catch and what was cooked.
+    const stickers = [...(d.bestCatch ? [d.bestCatch.id as string] : []), ...cooked.map(([id]) => id)].slice(0, 4);
+    stickers.forEach((id, i) => {
+      const k = `item_${id}`;
+      if (!this.textures.exists(k)) return;
+      const ic = iconObj(this, x - 140 + i * 96, Math.min(110, ly + 60), k, 76).setAngle(i % 2 ? 6 : -6);
+      this.content.add(ic);
+    });
     // Contentment bloom for the day's peak.
     const g = this.add.graphics();
     const open = 0.35 + 0.65 * Math.min(1, d.peak / 100);

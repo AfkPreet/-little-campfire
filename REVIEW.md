@@ -114,3 +114,26 @@ Shots reviewed at 1x on iPad landscape during M0 (the box renders WebGL in softw
 | Trip Album · cover | 5/5/5/–/5/5/5/5 | — |
 
 M1 passes: every shot scores 4 or more on every line.
+
+---
+
+## M2 / M3 — systems, mystery and trip end (1x review of the screens the milestone list doesn't cover)
+
+Rendered with a scratch driver over the debug hooks (journal tabs via `?shot=journal&tab=`, shop tabs via `?tab=`, settings, intro, the summary card via a real sleep, every album page via `albumTurn`).
+
+| Screen | Scores | Problems → fixes |
+| --- | --- | --- |
+| Journal · recipes | 5/5/5/–/5/5/5/5 | — |
+| Journal · moments | 5/5/5/–/5/5/5/5 | — |
+| Journal · mystery | 5/5/5/–/5/5/5/5 | (clue text top-aligned in M1 round 1) |
+| Journal · friends | 4/3/5/–/5/5/5/4 | Befriended Kopila still shown as a curled ball → now stands, smiling |
+| Journal · trip | 4/4/5/–/5/5/5/3 | Pages nearly empty → lines stack by height and the day's best catch and dishes appear as little stickers; preset days now carry real catches and dishes |
+| Shop · sell | 5/5/5/–/5/5/5/5 | — |
+| Shop · pantry | 5/5/5/–/5/5/5/5 | — |
+| Settings | 5/5/5/–/5/5/5/5 | — |
+| Intro · page 1 | 4/5/5/–/5/5/5/4 | Illustration is simple (Tuki and a big rupee coin); kept |
+| Summary card | 5/5/5/–/5/3/5/4 | Additive halo clamped to pure white on the cream card → normal-blend warm halo |
+| Album · day page | 5/5/5/–/5/5/5/5 | — |
+| Album · friend | 5/5/5/–/5/5/5/5 | — |
+| Album · mystery (unmet) | 3/4/4/–/4/2/5/3 | Near-white additive glow on an empty page → a night-lake snapshot with the glow out on the water (freckle flower above it once met) |
+| Album · postcard | 5/5/5/–/5/5/5/5 | — |

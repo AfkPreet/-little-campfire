@@ -190,18 +190,42 @@ export default class Album extends Phaser.Scene {
   private mystery(c: Phaser.GameObjects.Container): void {
     const met = S().mystery.step >= 5;
     c.add(txtObj(this, 0, -200, met ? MYSTERY.albumDone : MYSTERY.albumNotDone, 'handBig', { size: 40, color: INK, align: 'center', wrap: 640 }));
-    // The guardian's freckle flower (or a faint glow if unmet).
+    // A snapshot of the lake at night: the glow far out on the water, or (once
+    // met) the guardian's freckle flower shining over it.
     const cx = 0;
-    const cy = 30;
-    const glow = this.add.image(cx, cy, 'glow').setTint(hexToInt(A['fish-glow'])).setBlendMode(Phaser.BlendModes.ADD).setAlpha(met ? 0.6 : 0.25).setScale(1.2);
+    const cy = 10;
+    const ps = 1.5;
+    const photo = this.add.image(cx, cy, 'album_photo').setScale(ps / ART_SCALE).setAngle(-2);
+    c.add(photo);
+    const pw = 184 * ps;
+    const ph = 132 * ps;
+    const px = cx - pw / 2;
+    const py = cy - 16 * ps - ph / 2;
+    const night = lightAt(1.0);
+    const g = this.add.graphics().setAngle(-2);
+    // Plain rects: a gradient on a rounded rect shows its triangle seam.
+    g.fillGradientStyle(night.skyTop, night.skyTop, night.horizon, night.horizon, 1);
+    g.fillRect(px, py, pw, ph * 0.62);
+    // Far ridges, kept inside the picture; the lake covers their lower halves.
+    g.fillStyle(hexToInt(mix(A['ridge-far'], P.ink, 0.4)), 1);
+    g.fillEllipse(px + pw * 0.3, py + ph * 0.62, pw * 0.56, ph * 0.24);
+    g.fillEllipse(px + pw * 0.76, py + ph * 0.62, pw * 0.46, ph * 0.17);
+    g.fillStyle(hexToInt(mix(A['lake-deep'], P.ink, 0.35)), 1);
+    g.fillRect(px, py + ph * 0.62, pw, ph * 0.38);
+    for (let k = 0; k < 14; k++) g.fillStyle(hexToInt(P.cream), 0.5 + (k % 3) * 0.15).fillCircle(px + ((k * 71) % 100) / 100 * pw, py + ((k * 37) % 50) / 100 * ph, k % 4 ? 1.4 : 2.2);
+    g.fillStyle(hexToInt(P.cream), 0.9).fillCircle(px + pw * 0.8, py + ph * 0.18, 9);
+    c.add(g);
+    const gx = cx + 20;
+    const gy = py + ph * 0.8;
+    const glow = this.add.image(gx, gy, 'glow').setTint(hexToInt(A['fish-glow'])).setBlendMode(Phaser.BlendModes.ADD).setAlpha(met ? 0.7 : 0.5).setScale(met ? 0.9 : 0.55, met ? 0.5 : 0.3);
     c.add(glow);
     if (met) {
       for (let k = 0; k < 6; k++) {
         const a = (k / 5) * Math.PI * 2 - Math.PI / 2;
-        const x = k === 5 ? cx : cx + Math.cos(a) * 46;
-        const y = k === 5 ? cy : cy + Math.sin(a) * 46;
-        c.add(this.add.image(x, y, 'glowSmall').setTint(hexToInt(P.glow)).setBlendMode(Phaser.BlendModes.ADD).setScale(k === 5 ? 1.4 : 1.1));
-        c.add(this.add.image(x, y, 'dot').setTint(hexToInt(P.butter)).setScale(k === 5 ? 1.1 : 0.9));
+        const x = k === 5 ? gx : gx + Math.cos(a) * 26;
+        const y = k === 5 ? gy - 40 : gy - 40 + Math.sin(a) * 26;
+        c.add(this.add.image(x, y, 'glowSmall').setTint(hexToInt(P.glow)).setBlendMode(Phaser.BlendModes.ADD).setScale(k === 5 ? 1 : 0.8));
+        c.add(this.add.image(x, y, 'dot').setTint(hexToInt(P.butter)).setScale(k === 5 ? 0.9 : 0.7));
       }
     }
     if (!reduceMotion()) this.tweens.add({ targets: glow, alpha: glow.alpha * 0.6, duration: 2400, yoyo: true, repeat: -1, ease: 'Sine.easeInOut' });

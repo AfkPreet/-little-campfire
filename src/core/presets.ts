@@ -3,7 +3,7 @@
  * ?state=fresh|midtrip|decorated|finale, ?time=, ?weather=, ?day=, ?seed=.
  */
 import { param } from '@/core/debug';
-import { freshState, newDayLog, setState, S, type GameState } from '@/core/state';
+import { freshState, newDayLog, setState, S, type DayLog, type GameState } from '@/core/state';
 import { TIME_PRESETS } from '@/data/time';
 import type { WeatherKind } from '@/data/ids';
 import { resetForDawn } from '@/systems/contentment';
@@ -93,7 +93,12 @@ export function presetFinale(): GameState {
   s.contentment.value = 78;
   s.companion = { shareDays: [2, 4, 5], befriended: true, seenToday: true };
   s.journal.friend = true;
-  for (let d = 4; d <= 6; d++) s.days.push({ ...newDayLog(d, d === 6 ? 'rain' : 'clear'), peak: 50 + d * 4, fishCaught: d, rainyNight: d === 6 });
+  const later: Partial<DayLog>[] = [
+    { cooked: { grilled_fish: 1, honey_tea: 1 }, bestCatch: { id: 'blushing_trout', cm: 27.2 }, shared: true },
+    { cooked: { mushroom_soup: 1 }, bestCatch: { id: 'bubble_carp', cm: 21.0 }, shared: true, sold: 30 },
+    { cooked: { moon_dumplings: 1, herb_tea: 1 }, bestCatch: { id: 'rain_loach', cm: 18.4 } },
+  ];
+  for (let d = 4; d <= 6; d++) s.days.push({ ...newDayLog(d, d === 6 ? 'rain' : 'clear'), peak: 50 + d * 4, fishCaught: d, rainyNight: d === 6, ...later[d - 4] });
   return s;
 }
 
