@@ -505,9 +505,20 @@ function bakeSky(b: Baker): void {
           c.arc(x, y, r + grow, 0, Math.PI * 2);
         }
       };
+      // Flat base with rounded ends at the cloud's real extent: a square cut
+      // through the end lobes read as a hard vertical edge.
+      const x0 = Math.max(1, Math.min(...cs.map(([x, , r]) => x - r)) - 2);
+      const x1 = Math.min(w - 1, Math.max(...cs.map(([x, , r]) => x + r)) + 2);
+      const cr = 16;
       withState(ctx, () => {
         ctx.beginPath();
-        ctx.rect(0, 0, w, base);
+        ctx.moveTo(x0, 0);
+        ctx.lineTo(x1, 0);
+        ctx.lineTo(x1, base - cr);
+        ctx.quadraticCurveTo(x1, base, x1 - cr, base);
+        ctx.lineTo(x0 + cr, base);
+        ctx.quadraticCurveTo(x0, base, x0, base - cr);
+        ctx.closePath();
         ctx.clip();
         // soft outline: the union grown by 1.2 px in a darker shade
         ctx.beginPath();

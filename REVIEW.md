@@ -49,3 +49,38 @@ Shots reviewed at 1x on iPad landscape during M0 (the box renders WebGL in softw
 - Landscape (agent pass): worn path, moss and pebbles in the clearing; sturdier rhododendron trunks with root flares; soft rock wedges; rain no longer leaves snow outlines.
 - Title: buttons below the walk line.
 - HUD: settings button moved beside the lamp (it collided with toasts).
+
+---
+
+## M1 — vertical slice (milestone set at 2x, `shots/m1/`)
+
+`npm run smoke` and `npm run playtest` pass with no console errors. Shots at iPad 1180 x 820 @2x and phone 844 x 390 @2x.
+
+### Round 1
+
+| Shot | Scores | Problems |
+| --- | --- | --- |
+| Style board · cast | 5/5/5/–/5/5/5/5 | — |
+| Style board · world | 5/5/5/5/5/3/5/4 | Rain thumbnail: vertical step in the cloud ceiling; empty lower third on iPad |
+| Style board · UI | 5/5/5/–/4/5/5/5 | Preview text still said "Pebble Minnow" (the world name is Pebble Garra) |
+| Title (iPad, phone) | 5/5/5/5/5/4/5/5 | Faint white rim along the snow peaks |
+| Shop (iPad, phone) | 5/5/4/4/5/5/5/4 | Warm-wood room is pale behind a cream catalog (low contrast, not a bug: no overlay found); phone Camp tab leaves an empty lower half (3 items) |
+| Camp · dawn / day / golden | 5/5/5/5/5/3/5/5 | Pillow clouds ended in a square vertical stub where the flat base cut the end lobes |
+| Camp · dusk | 5/5/5/5/5/4/5/5 | Kopila peeking + toast read well |
+| Camp · night (fire) | 5/5/5/5/5/5/5/5 | — |
+| Camp · rain | 4/5/5/5/5/3/5/4 | Ceiling alternated two cloud tiles baked in different tones (vertical step at every seam); the solid band above was lighter than the cloud body (horizontal line) |
+| Fishing bite (iPad, phone) | 5/5/5/5/5/5/5/5 | — |
+| Catch card | 5/5/5/–/5/5/5/5 | — |
+| Cooking result | – | Not captured: under load the overlay had not opened when the shot fired (camp at dusk instead). Re-shot alone in round 2 |
+| Decorated night | 5/5/5/5/5/2/5/4 | Tuki blown out to a glowing blob: the paper lantern's additive halo on the tent drew above the actor layer |
+| Journal · fish (iPad, phone) | 4/5/5/–/5/4/2/3 | Wrapped flavor lines overlapped the "Best · Caught" line; flavor ran under the stamp; HUD pills peeked out between the journal tabs and under the close button |
+| Mystery finale | 5/5/4/5/5/3/5/5 | Parting the rain ceiling slid its tiles apart, exposing square tile ends as a hard vertical edge in the sky |
+| Trip Album · cover (iPad, phone) | 5/4/5/–/5/5/5/4 | Cover is a little plain (title + logo only) |
+
+### Fixes (round 1 → 2)
+
+- Rain ceiling: one self-tiling cloud texture (no seams); the solid band above takes the cloud body's colour; when the sky opens the ceiling dissolves instead of splitting.
+- Pillow clouds: the flat base now has rounded ends at the cloud's real extent.
+- Decor light: every decor glow (lanterns, string lights, jars) sits just below the actor layer, so Tuki occludes it instead of being washed out by it.
+- Journal: entry lines stack top-down by measured height and wrap clear of the stamp; mystery clue text is top-aligned; the HUD hides while the journal is open.
+- Style board: world thumbnails fill the page height; UI page uses the world's fish name.

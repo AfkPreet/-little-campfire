@@ -150,16 +150,19 @@ export default class StyleBoard extends Phaser.Scene {
     const cols = 3;
     const gap = 16;
     const tw = (l.w - 40 - gap * (cols - 1)) / cols;
-    const th = tw * (720 / 1280);
+    // Fill the page height: a taller thumbnail shows a narrower slice of camp.
+    const thFit = (l.h - 80 - 2 * 46 - 16) / 2;
+    const viewW = Math.min(1280, Math.max(760, (tw * 720) / thFit));
+    const th = (tw * 720) / viewW;
     keys.forEach(([name, fn], i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const x = 20 + col * (tw + gap);
       const y = 80 + row * (th + 46);
       const holder = this.add.container(x, y);
-      const land = new Landscape(this, { container: holder, viewW: 1280, viewX: 980 });
+      const land = new Landscape(this, { container: holder, viewW, viewX: 980 });
       land.applyLight(fn());
-      const k = tw / 1280;
+      const k = tw / viewW;
       holder.setScale(k);
       const mask = this.make.graphics({}, false).fillStyle(0xffffff).fillRoundedRect(x, y, tw, th, 14);
       holder.setMask(mask.createGeometryMask());

@@ -72,6 +72,15 @@ export default class Hud extends Phaser.Scene {
       if (e.tierChanged) this.bounce('lamp');
     });
     bus.onScene(this, 'state:changed', () => this.refresh(true));
+    // The journal is a full-screen book: tuck the HUD away so its pills don't
+    // peek out between the journal's tabs.
+    bus.onScene(this, 'overlay:open', (e) => {
+      if (e.key === SCENES.journal) this.cameras.main.setAlpha(0);
+    });
+    bus.onScene(this, 'overlay:close', (e) => {
+      if (e.key === SCENES.journal) this.cameras.main.setAlpha(1);
+    });
+    if (this.scene.isActive(SCENES.journal)) this.cameras.main.setAlpha(0);
     // Large text: rebuild the HUD so every label picks up the new size.
     let large = settingsGet().largeText;
     bus.onScene(this, 'settings:changed', () => {

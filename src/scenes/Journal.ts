@@ -225,7 +225,15 @@ export default class Journal extends Phaser.Scene {
     const tx = -w / 2 + isz + 16;
     c.add(txtObj(this, tx, -22, o.known ? o.title : STR.journal.locked, 'hand', { align: 'left', size: 26, color: PAGE_INK }));
     const lines = o.known ? o.lines : [o.hint];
-    lines.forEach((ln, i) => c.add(txtObj(this, tx, 6 + i * 22, ln, 'hand', { align: 'left', size: 19, color: SOFT_INK, wrap: w - isz - 24 })));
+    // Stack lines top-down by their real height (a wrapped flavor line used to
+    // overlap the line above), and keep text clear of the stamp on the right.
+    const wrap = w - isz - 24 - (o.known ? 58 : 0);
+    let ly = -6;
+    for (const ln of lines) {
+      const t = txtObj(this, tx, ly, ln, 'hand', { align: 'left', size: 19, color: SOFT_INK, wrap }).setOrigin(0, 0);
+      c.add(t);
+      ly += t.height - 6;
+    }
     if (o.known && o.stars) {
       for (let s = 0; s < 3; s++) c.add(iconObj(this, w / 2 - 70 + s * 22, -24, s < o.stars ? 'icon.star' : 'icon.starEmpty', 20));
     }
@@ -345,7 +353,7 @@ export default class Journal extends Phaser.Scene {
       const y = -170 + row * 150;
       const x = this.pageX(side);
       this.content.add(txtObj(this, x - 190, y - 30, `${c.n}. ${known ? c.title : STR.journal.locked}`, 'hand', { align: 'left', size: 27, color: PAGE_INK }));
-      this.content.add(txtObj(this, x - 190, y + 18, known ? c.text : c.hint, 'hand', { align: 'left', size: 20, color: SOFT_INK, wrap: 360 }));
+      this.content.add(txtObj(this, x - 190, y - 4, known ? c.text : c.hint, 'hand', { align: 'left', size: 20, color: SOFT_INK, wrap: known ? 330 : 360 }).setOrigin(0, 0));
       if (known) this.content.add(this.add.image(x + 180, y - 22, 'journal_stamp').setScale(0.6 / ART_SCALE).setAngle(10));
     });
   }

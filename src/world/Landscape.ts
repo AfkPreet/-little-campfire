@@ -14,7 +14,7 @@ import { CAMP, PARALLAX } from '@/data/camp';
 import { DEPTH } from '@/config';
 import type { ResolvedLight } from '@/fx/lighting';
 import { windAt } from '@/world/wind';
-import { A, P, hexToInt } from '@/palette';
+import { A, P, hexToInt, mix } from '@/palette';
 import { BAND, BX0, ELDEST, GURANS, LAKE_Y, MIST_F, SPILL, STEAM, THREADS, VIEW_MAX, WINDOWS, bandW } from '@/art/landscape-geo';
 import { SEA_TILE } from '@/art/landscape-far';
 import { BAMBOO, CHIMNEY, DOCK, SHOP, SHOP_WINDOW, TREES } from '@/art/landscape-ground';
@@ -36,6 +36,8 @@ const S = ART_SCALE;
 const K = 1 / ART_SCALE;
 const WHITE = 0xffffff;
 const SKY_W = VIEW_MAX + 80;
+/** Colour at the flat body of the cloud-sea tile A (top of the flipped rain ceiling). */
+const SEA_LOW = hexToInt(mix(A['cloud-sea'], P.lavender, 0.3));
 
 interface Band {
   imgs: Img[];
@@ -617,7 +619,8 @@ export class Landscape {
     const ceilTop = mulInt(lerpInt(pewter, l.skyTop, 0.35), lerpInt(WHITE, l.skyTop, 0.3 + night * 0.4));
     const ceilBot = mulInt(lerpInt(pewter, l.horizon, 0.25), lerpInt(WHITE, l.skyMid, 0.2 + night * 0.4));
     for (const c of this.ceiling) c.o.setTint(ceilBot, ceilBot, ceilTop, ceilTop);
-    this.ceilFill.setTint(ceilTop);
+    // Match the flipped tile's body so the solid band above it has no seam.
+    this.ceilFill.setTint(mulInt(SEA_LOW, ceilTop));
     this.ceilAlpha = rain;
 
     // --- Snow Grannies
@@ -828,16 +831,14 @@ export class Landscape {
       this.appliedSkyOpen = 0;
     }
 
-    // Rain ceiling parts around the Gurans when the sky opens.
-    const ca = this.ceilAlpha * (1 - open * 0.75);
+    // Rain ceiling thins away when the sky opens (the plume moment does the
+    // parting). Sliding the tiles apart exposed their square ends in the sky.
+    const ca = this.ceilAlpha * (1 - open * 0.92);
     if (ca > 0.001 || this.ceiling[0].o.alpha > 0) {
-      const gx = this.viewW * GURANS.fx;
       const drift = (t * 2) % SEA_TILE.w;
       for (const c of this.ceiling) {
         let x = c.bx + drift;
         if (x > SKY_W) x -= SEA_TILE.w * 4;
-        const mid = x + SEA_TILE.w / 2;
-        x += (mid < gx ? -1 : 1) * open * 260;
         c.o.x = x;
         c.o.setAlpha(ca);
       }

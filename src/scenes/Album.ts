@@ -25,6 +25,7 @@ import { heartBurst, sparkleBurst } from '@/fx/particles';
 import { playSfx, setAmbience, setMusicMood } from '@/audio/engine';
 import { dawn } from '@/systems/day';
 import { hearts } from '@/systems/companion';
+import { Hero } from '@/chars/Hero';
 import { dishName } from '@/systems/inventory';
 import { Button, IconButton, fmt, iconObj, txtObj } from '@/ui';
 import { A, P, hexToInt, mix } from '@/palette';
@@ -122,8 +123,13 @@ export default class Album extends Phaser.Scene {
   private cover(c: Phaser.GameObjects.Container): void {
     const s = S();
     c.add(txtObj(this, 0, -170, fmt(STR.album.cover, { n: s.trip }), 'handBig', { size: 56, color: INK }));
-    const logo = this.add.image(0, 10, 'logo_main').setScale(0.55 / ART_SCALE);
+    const logo = this.add.image(40, 10, 'logo_main').setScale(0.55 / ART_SCALE);
     c.add(logo);
+    // Tuki, sitting happily beside the title like a sticker.
+    const tuki = new Hero(this, -250, 130).setPose('sit').setExpression('happy');
+    tuki.setScale(1.15).setAngle(-4);
+    c.add(tuki);
+    this.events.on('update', (t: number, d: number) => tuki.active && tuki.tick(t, d));
     c.add(txtObj(this, 0, 190, `${WORLD.place} · ${WORLD.water}`, 'hand', { size: 28, color: SOFT }));
     this.tape(c, -300, -230, -20, P.rose);
     this.tape(c, 300, 230, -20, A['lake-jade']);

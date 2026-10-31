@@ -20,6 +20,7 @@ type Box = Phaser.GameObjects.Container;
 
 const BULB_INTS = [GLOW_INT, hexToInt(mix(P.butter, P.cream, 0.3)), hexToInt(mix(P.glow, P.peach, 0.35))];
 const FISH_GLOW = hexToInt(A['fish-glow']);
+const DECOR_GLOW_DEPTH = DEPTH.actors - 0.5;
 const WARM_RUG = mix(P.glow, P.peach, 0.35);
 const JUTE = hexToInt(A.jute);
 const JUTE_DARK = hexToInt(mix(A.jute, P.bark, 0.45));
@@ -125,7 +126,9 @@ export class DecorProp implements Lightable {
   }
 
   private worldGlow(w: number, h: number, colour: number, key = 'glow'): Img {
-    const g = glowSprite(this.scene, this.x, this.y, w, h, colour, DEPTH.light, key);
+    // Decor sits behind the actors, so its light does too: an additive halo
+    // above Tuki blew the face out whenever Tuki stood in front of a lantern.
+    const g = glowSprite(this.scene, this.x, this.y, w, h, colour, DECOR_GLOW_DEPTH, key);
     this.glows.push(g);
     return g;
   }
@@ -208,7 +211,7 @@ export class DecorProp implements Lightable {
       const [bx, by] = pt((i + 0.5) / n);
       const img = this.add(pimg(s, 'prop_dec_bulb', bx, by - 1));
       img.angle = ((i * 37) % 11) - 5;
-      const glow = glowSprite(s, this.x + bx, this.y + by + 9, 34, 34, BULB_INTS[i % 3], DEPTH.light, 'glowSmall');
+      const glow = glowSprite(s, this.x + bx, this.y + by + 9, 34, 34, BULB_INTS[i % 3], DECOR_GLOW_DEPTH, 'glowSmall');
       this.glows.push(glow);
       this.bulbs.push({ img, glow, speed: 1.1 + ((i * 53) % 17) / 10, phase: (i * 2.399) % (Math.PI * 2) });
     }
