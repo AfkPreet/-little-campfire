@@ -142,7 +142,7 @@ Rendered with a scratch driver over the debug hooks (journal tabs via `?shot=jou
 
 ## M4 — polish, performance, audio mix, ship
 
-**Tests.** `npm run smoke` PASSED, `npm run playtest` PASSED, `npm run trip` PASSED (Day 1 → all 5 clues → full finale → Night 7 → Trip Album → postcard → free play → mid-day reload; no console errors). The trip run found two real bugs, both fixed: a per-visit shop `update` listener that ticked a destroyed Boju, and scene switches that stopped a scene inside its own frame. It also showed that one uncaught error froze Phaser's loop for good; the game step now logs and carries on.
+**Tests.** `npm run smoke` PASSED, `npm run playtest` PASSED, `npm run trip` PASSED (Day 1 → all 5 clues → full finale → Night 7 → Trip Album → postcard → free play → mid-day reload; no console errors). The trip run found two real bugs, both fixed: a per-visit shop `update` listener that ticked a destroyed Boju, and scene switches that stopped a scene inside its own frame. It also showed that one uncaught error froze Phaser's loop for good; the game step now logs and carries on. `npm run smoke` also passes against the production build (`vite preview` of `dist/`).
 
 **Performance (`npm run perf`, iPad 1180 x 820 @2x, art scale 2.25).**
 
