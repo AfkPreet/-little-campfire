@@ -34,7 +34,7 @@ const py = `
 import sys
 from PIL import Image
 src, dst = sys.argv[1], sys.argv[2]
-Image.open(src).convert('RGB').save(dst, 'JPEG', quality=82, optimize=True, progressive=True)
+Image.open(src).convert('RGB').save(dst, 'JPEG', quality=82, optimize=True, progressive=False)
 `;
 for (const slot of slots) {
   const from = path.join(FRAMES, `${PICK[slot] ?? slot}.jpg`);
