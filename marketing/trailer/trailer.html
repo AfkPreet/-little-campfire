@@ -51,6 +51,9 @@
   }
   .shots, .shots img, .fx, .shade, .caps, .endcard, .poster { position: absolute; inset: 0; }
   .shots img {
+    /* The viewer's reset caps images at max-width: 100%; frames are wider than the stage by design. */
+    max-width: none;
+    max-height: none;
     inset: auto;
     left: 0;
     top: 0;
