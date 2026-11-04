@@ -2,7 +2,7 @@
 // marketing/trailer/site/: the game's audio engine as an inlined IIFE, the
 // capture anchors inlined, and only the frames the cut uses, recompressed.
 // Run scripts/trailer-frames.mjs first.
-import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { build } from 'vite';
@@ -14,9 +14,10 @@ const SITE = path.join(DIR, 'site');
 
 // Which captured frame plays each slot of the cut (slot name → capture name).
 const PICK = {
-  finale_a: 'finale_04',
-  finale_b: 'finale_07',
-  finale_c: 'finale_10',
+  finale_a: 'finale_11',
+  finale_b: 'finale_13',
+  finale_c: 'finale_15',
+  finale_d: 'finale_16',
 };
 
 await build({ configFile: path.join(DIR, 'vite.audio.config.ts'), logLevel: 'warn' });
@@ -29,7 +30,6 @@ html = html.replace('/*@@AUDIO@@*/', () => audio).replace('/*@@ANCHORS@@*/ {}', 
 rmSync(SITE, { recursive: true, force: true });
 mkdirSync(path.join(SITE, 'frames'), { recursive: true });
 const slots = new Set([...html.matchAll(/src: '([a-z0-9_]+)'/g)].map((m) => m[1]));
-slots.add('title');
 const py = `
 import sys
 from PIL import Image
@@ -40,6 +40,13 @@ for (const slot of slots) {
   const from = path.join(FRAMES, `${PICK[slot] ?? slot}.jpg`);
   execFileSync('python3', ['-I', '-c', py, from, path.join(SITE, 'frames', `${slot}.jpg`)]);
 }
-copyFileSync(path.join(FRAMES, 'logo.png'), path.join(SITE, 'frames', 'logo.png'));
+execFileSync('python3', ['-I', '-c', `
+import sys
+from PIL import Image
+im = Image.open(sys.argv[1])
+w = 1000
+im = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
+im.save(sys.argv[2], optimize=True)
+`, path.join(FRAMES, 'logo.png'), path.join(SITE, 'frames', 'logo.png')]);
 writeFileSync(path.join(SITE, 'index.html'), html);
 console.log(`trailer built: ${slots.size} frames + logo → ${path.relative(ROOT, SITE)}`);

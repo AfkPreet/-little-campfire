@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <title>Moonlight Momos Trailer</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="description" content="A 90-second vertical trailer for Moonlight Momos, a tiny camping trip.">
@@ -62,15 +63,16 @@
   .shade {
     pointer-events: none;
     background:
-      linear-gradient(to bottom, rgba(27, 29, 51, 0.38) 0%, rgba(27, 29, 51, 0) 18%, rgba(27, 29, 51, 0) 58%, rgba(27, 29, 51, 0.62) 100%),
+      linear-gradient(to bottom, rgba(27, 29, 51, 0.55) 0%, rgba(27, 29, 51, 0.22) 22%, rgba(27, 29, 51, 0) 38%, rgba(27, 29, 51, 0) 72%, rgba(27, 29, 51, 0.35) 100%),
       radial-gradient(130% 90% at 50% 45%, rgba(0, 0, 0, 0) 60%, rgba(18, 16, 30, 0.35) 100%);
   }
   .caps { pointer-events: none; }
+  /* Captions sit in the upper third: Reels covers the bottom fifth with its own UI. */
   .cap {
     position: absolute;
     left: 9cqw;
     right: 9cqw;
-    bottom: 15cqh;
+    top: 15cqh;
     margin: 0;
     font-family: var(--story);
     font-size: clamp(18px, 7.4cqw, 44px);
@@ -82,9 +84,8 @@
     opacity: 0;
     will-change: opacity, transform;
   }
-  .cap.top { bottom: auto; top: 11cqh; }
-  .cap.low { bottom: 5cqh; }
-  .endcard { display: grid; align-content: center; justify-items: center; gap: 2.4cqh; pointer-events: none; padding-bottom: 18cqh; }
+  .cap.top { top: 11cqh; }
+  .endcard { display: grid; align-content: start; justify-items: center; gap: 2.4cqh; pointer-events: none; padding-top: 13cqh; }
   .endcard img { width: 82cqw; max-width: 100%; opacity: 0; will-change: transform, opacity; }
   .endcard p { margin: 0; opacity: 0; text-align: center; }
   .endcard .tag { font-family: var(--story); font-size: clamp(18px, 7cqw, 42px); text-shadow: 0 2px 0 rgba(42, 36, 54, 0.55); }
@@ -110,7 +111,7 @@
     padding: 0 8cqw 9cqh;
     background:
       linear-gradient(to bottom, rgba(27, 29, 51, 0.05) 0%, rgba(27, 29, 51, 0.25) 45%, rgba(27, 29, 51, 0.85) 100%),
-      var(--poster-img, none) center / cover no-repeat;
+      var(--poster-img, none) 44% 50% / cover no-repeat;
     text-align: center;
     z-index: 5;
   }
@@ -220,23 +221,24 @@
   // fx: live layers drawn over the frame.
   var SHOTS = [
     { src: 'lake_glow_3', t0: 0, dur: 7400, fade: 900, from: { cx: 0.66, cy: 0.64, z: 1.2 }, to: { cx: 0.84, cy: 0.6, z: 1.4 }, fx: [{ k: 'glow', at: 'lake_glow.glow', r: 0.035 }, { k: 'fireflies', n: 10, y0: 0.5, y1: 0.85 }] },
-    { src: 'intro', t0: 7000, dur: 7400, fade: 900, from: { cx: 0.525, cy: 0.42, z: 1.42 }, to: { cx: 0.525, cy: 0.41, z: 1.52 }, fx: [{ k: 'sparkles', at: [0.59, 0.56], n: 6 }] },
+    { src: 'intro', t0: 7000, dur: 7400, fade: 900, from: { cx: 0.525, cy: 0.5, z: 1.36 }, to: { cx: 0.525, cy: 0.52, z: 1.46 }, fx: [{ k: 'sparkles', at: [0.59, 0.56], n: 6 }] },
     { src: 'shop', t0: 14000, dur: 8400, fade: 900, from: { cx: 0.2, cy: 0.45, z: 1.18 }, to: { cx: 0.23, cy: 0.42, z: 1.32 }, fx: [{ k: 'motes', n: 12 }] },
     { src: 'dawn', t0: 22000, dur: 10400, fade: 1000, from: { cx: 0.34, cy: 0.52, z: 1.06 }, to: { cx: 0.55, cy: 0.55, z: 1.14 }, fx: [{ k: 'motes', n: 18 }] },
     { src: 'bite', t0: 32000, dur: 3400, fade: 400, from: { cx: 0.75, cy: 0.64, z: 1.2 }, to: { cx: 0.77, cy: 0.66, z: 1.32 }, fx: [] },
     { src: 'catch', t0: 35000, dur: 3400, fade: 300, from: { cx: 0.5, cy: 0.5, z: 0.995 }, to: { cx: 0.5, cy: 0.5, z: 1.03 }, fx: [{ k: 'sparkles', at: [0.5, 0.3], n: 14 }] },
-    { src: 'forage', t0: 38000, dur: 3400, fade: 400, from: { cx: 0.42, cy: 0.6, z: 1.25 }, to: { cx: 0.46, cy: 0.6, z: 1.32 }, fx: [{ k: 'motes', n: 10 }] },
-    { src: 'kopila', t0: 41000, dur: 3400, fade: 400, from: { cx: 0.36, cy: 0.6, z: 1.4 }, to: { cx: 0.38, cy: 0.6, z: 1.52 }, fx: [] },
-    { src: 'fire', t0: 44000, dur: 8400, fade: 1000, from: { cx: 0.5, cy: 0.55, z: 1.05 }, to: { cx: 0.5, cy: 0.6, z: 1.3 }, fx: [{ k: 'fireflies', n: 26, y0: 0.35, y1: 0.85 }, { k: 'embers', at: 'fire.fire' }] },
-    { src: 'rain', t0: 52000, dur: 3900, fade: 900, from: { cx: 0.55, cy: 0.55, z: 1.1 }, to: { cx: 0.56, cy: 0.58, z: 1.2 }, fx: [{ k: 'rain', n: 90 }] },
-    { src: 'scale', t0: 55500, dur: 3100, fade: 900, from: { cx: 0.62, cy: 0.62, z: 1.35 }, to: { cx: 0.66, cy: 0.64, z: 1.5 }, fx: [{ k: 'glow', at: 'scale.scale', r: 0.05, tint: '220,232,245' }, { k: 'sparkles', at: 'scale.scale', n: 8 }] },
-    { src: 'legend', t0: 58200, dur: 6200, fade: 800, from: { cx: 0.2, cy: 0.52, z: 1.05 }, to: { cx: 0.22, cy: 0.5, z: 1.2 }, fx: [] },
-    { src: 'momos', t0: 64000, dur: 6400, fade: 800, from: { cx: 0.5, cy: 0.45, z: 1.0 }, to: { cx: 0.5, cy: 0.42, z: 1.12 }, fx: [{ k: 'sparkles', at: 'center', n: 16 }] },
-    { src: 'finale_a', t0: 70000, dur: 3000, fade: 1000, from: { cx: 0.6, cy: 0.58, z: 1.2 }, to: { cx: 0.64, cy: 0.58, z: 1.28 }, fx: [{ k: 'rain', n: 60 }] },
-    { src: 'finale_b', t0: 72600, dur: 3000, fade: 900, from: { cx: 0.7, cy: 0.56, z: 1.15 }, to: { cx: 0.72, cy: 0.52, z: 1.2 }, fx: [{ k: 'rain', n: 50 }] },
-    { src: 'finale_c', t0: 75200, dur: 3000, fade: 900, from: { cx: 0.74, cy: 0.5, z: 1.15 }, to: { cx: 0.74, cy: 0.48, z: 1.22 }, fx: [{ k: 'rain', n: 40 }] },
-    { src: 'finale_still', t0: 77800, dur: 4800, fade: 1100, from: { cx: 0.72, cy: 0.45, z: 1.12 }, to: { cx: 0.66, cy: 0.4, z: 1.0 }, fx: [{ k: 'fireflies', n: 20, y0: 0.2, y1: 0.8 }] },
-    { src: 'title', t0: 82000, dur: 8000, fade: 1400, from: { cx: 0.52, cy: 0.62, z: 1.12 }, to: { cx: 0.54, cy: 0.66, z: 1.2 }, fx: [{ k: 'fireflies', n: 30, y0: 0.4, y1: 0.95 }] },
+    { src: 'forage', t0: 38000, dur: 3400, fade: 400, from: { cx: 0.42, cy: 0.64, z: 1.3 }, to: { cx: 0.45, cy: 0.64, z: 1.38 }, fx: [{ k: 'motes', n: 10 }] },
+    { src: 'kopila', t0: 41000, dur: 3400, fade: 400, from: { cx: 0.48, cy: 0.66, z: 1.45 }, to: { cx: 0.47, cy: 0.64, z: 1.58 }, fx: [] },
+    { src: 'fire', t0: 44000, dur: 8400, fade: 1000, from: { cx: 0.42, cy: 0.6, z: 1.12 }, to: { cx: 0.42, cy: 0.66, z: 1.34 }, fx: [{ k: 'fireflies', n: 26, y0: 0.35, y1: 0.85 }, { k: 'embers', at: 'fire.fire' }] },
+    { src: 'rain', t0: 52000, dur: 3900, fade: 900, from: { cx: 0.38, cy: 0.6, z: 1.15 }, to: { cx: 0.38, cy: 0.63, z: 1.26 }, fx: [{ k: 'rain', n: 90 }] },
+    { src: 'scale', t0: 55500, dur: 3100, fade: 900, from: { cx: 0.42, cy: 0.68, z: 1.4 }, to: { cx: 0.45, cy: 0.7, z: 1.55 }, fx: [{ k: 'glow', at: 'scale.scale', r: 0.03, tint: '220,232,245' }, { k: 'sparkles', at: 'scale.scale', n: 8 }] },
+    { src: 'legend', t0: 58200, dur: 6200, fade: 800, from: { cx: 0.22, cy: 0.42, z: 1.35 }, to: { cx: 0.22, cy: 0.38, z: 1.55 }, fx: [{ k: 'motes', n: 10 }] },
+    { src: 'momos', t0: 64000, dur: 6400, fade: 800, from: { cx: 0.5, cy: 0.5, z: 0.93 }, to: { cx: 0.5, cy: 0.5, z: 0.96 }, fx: [{ k: 'sparkles', at: [0.5, 0.36], n: 16 }] },
+    { src: 'finale_a', t0: 70000, dur: 2900, fade: 1000, from: { cx: 0.66, cy: 0.7, z: 1.3 }, to: { cx: 0.68, cy: 0.7, z: 1.38 }, lift: 1.15, fx: [{ k: 'rain', n: 60 }] },
+    { src: 'finale_b', t0: 72400, dur: 2900, fade: 450, from: { cx: 0.74, cy: 0.72, z: 1.25 }, to: { cx: 0.77, cy: 0.72, z: 1.3 }, lift: 1.15, fx: [{ k: 'rain', n: 50 }, { k: 'glow', at: [0.86, 0.86], r: 0.06, tint: '207,230,226' }] },
+    { src: 'finale_c', t0: 74800, dur: 2700, fade: 400, from: { cx: 0.78, cy: 0.66, z: 1.12 }, to: { cx: 0.8, cy: 0.62, z: 1.14 }, lift: 1.12, fx: [{ k: 'rain', n: 40 }] },
+    { src: 'finale_d', t0: 77000, dur: 2700, fade: 350, from: { cx: 0.8, cy: 0.5, z: 1.15 }, to: { cx: 0.81, cy: 0.47, z: 1.2 }, fx: [{ k: 'fireflies', n: 12, y0: 0.4, y1: 0.8 }] },
+    { src: 'finale_still', t0: 79200, dur: 3800, fade: 350, from: { cx: 0.75, cy: 0.5, z: 1.15 }, to: { cx: 0.71, cy: 0.42, z: 1.0 }, fx: [{ k: 'fireflies', n: 20, y0: 0.2, y1: 0.8 }] },
+    { src: 'fire', t0: 82000, dur: 8000, fade: 1400, from: { cx: 0.46, cy: 0.5, z: 1.0 }, to: { cx: 0.47, cy: 0.52, z: 1.06 }, fx: [{ k: 'fireflies', n: 30, y0: 0.45, y1: 0.95 }, { k: 'embers', at: 'fire.fire' }] },
   ];
 
   var CAPS = [
@@ -245,7 +247,6 @@
     { t0: 14700, t1: 21500, text: '“No rush,” says Boju. “The mountains have waited ages.”' },
     { t0: 23000, t1: 31200, text: 'A tent, a kettle, a rod. That’s enough.' },
     { t0: 32300, t1: 34800, text: 'Something nibbles…' },
-    { t0: 35400, t1: 37800, text: 'Pink from the cold!', low: true },
     { t0: 38400, t1: 40800, text: 'Berries for the pot.' },
     { t0: 41400, t1: 43800, text: 'Someone small is watching.' },
     { t0: 45000, t1: 51400, text: 'Some nights are just for sitting.' },
@@ -319,13 +320,14 @@
 
   var imgs = SHOTS.map(function (s) {
     var im = new Image();
+    if (s.lift) im.style.filter = 'brightness(' + s.lift + ') saturate(1.05)';
     im.decoding = 'async';
     im.alt = '';
     im.src = 'frames/' + s.src + '.jpg';
     shotsEl.appendChild(im);
     return im;
   });
-  stage.style.setProperty('--poster-img', 'url("frames/title.jpg")');
+  stage.style.setProperty('--poster-img', 'url("frames/fire.jpg")');
   var loaded = 0;
   imgs.forEach(function (im) {
     var done = function () {
@@ -337,7 +339,7 @@
 
   var capEls = CAPS.map(function (c) {
     var p = document.createElement('p');
-    p.className = 'cap' + (c.top ? ' top' : '') + (c.low ? ' low' : '');
+    p.className = 'cap' + (c.top ? ' top' : '');
     p.textContent = c.text;
     capsEl.appendChild(p);
     return p;
@@ -363,8 +365,9 @@
     var cx = lerp(s.from.cx, s.to.cx, k);
     var cy = lerp(s.from.cy, s.to.cy, k);
     var ih = H * z, iw = ih * ASPECT;
-    var x = clamp(W / 2 - cx * iw, W - iw, 0);
-    var y = clamp(H / 2 - cy * ih, H - ih, 0);
+    // z < 1 letterboxes (the frame sits centred on the night field).
+    var x = iw <= W ? (W - iw) / 2 : clamp(W / 2 - cx * iw, W - iw, 0);
+    var y = ih <= H ? (H - ih) / 2 : clamp(H / 2 - cy * ih, H - ih, 0);
     return { x: x, y: y, z: z, iw: iw, ih: ih };
   }
   /** Capture point (CSS px on 1180 x 820) to stage px under a view. */

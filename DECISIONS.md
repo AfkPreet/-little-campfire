@@ -109,3 +109,14 @@ All 74 accents from WORLD.md section 8 were added to `ACCENTS` in `src/palette.t
 | Scene switches | `go()` finishes on the next tick (after the fade, or immediately for no-fade switches) | Stopping the old scene from the fade callback | The fade completes inside the old scene's own step; stopping it there let its `update()` run on torn-down cameras |
 | Title re-check (M4) | Keep "Moonlight Momos" | Renaming | Re-searched before ship (web, Steam, itch.io): no game by that name; nearest are *Momodora: Reverie Under the Moonlight* (a platformer) and pet games whose creatures are called "Momos" (Marimomo, Momoguro). Distinct enough |
 | Screenshots in git | Commit only the final milestone set (`shots/m4/`, ~37 MB); earlier sets stay local, their scores live in `REVIEW.md` | Committing every milestone's PNGs | Each 2x set is ~37 MB; the review text is the record |
+
+## 7. Marketing: the 90-second trailer (`marketing/trailer/`)
+
+| Area | Chosen | Rejected | Why |
+| --- | --- | --- | --- |
+| Medium | An animated page (claude.ai artifact) that pans across real game frames, with live fireflies, rain, glows and the game's own score; screen-record it for Reels | Higgsfield AI video | Free and exactly on-model; AI motion drifts off the hand-drawn style (faces, text) |
+| Shape | 90 s, 9:16, mystery arc: glow hook → storybook → shop → cozy montage → clues → full Kuhiro reveal → "Coming soon" | Day-in-the-life; feature tour | One thread (the glow) holds 90 s; the reveal is the payoff (spoiler accepted by the owner) |
+| Frames | Captured from the running game at iPad 1180 x 820 @2x with the HUD and UI chrome hidden (`scripts/trailer-frames.mjs`); the page crops 9:16 out of each | Re-laying the game out in portrait | The game's landscape art is the real thing; Ken Burns crops keep every pixel genuine |
+| Captions | Storybook lines in Patrick Hand, upper third | Bottom captions | Reels covers the bottom fifth with its own UI |
+| Sound | The game's audio engine built to an IIFE and inlined (`audio-entry.ts`, 58 KB); "Play with sound" starts it inside the tap | Silent with captions | 90 s silent drags; browsers only allow audio after a tap |
+| Finale cuts | 350-450 ms cuts between finale frames | 1 s dissolves | Kuhiro sits in different places frame to frame; long dissolves ghosted a double guardian |

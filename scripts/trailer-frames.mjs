@@ -70,6 +70,18 @@ const SHOTS = {
   // 0:06 storybook page 1.
   async intro(page) {
     await wait(page, 2500);
+    // The trailer sets its own caption: hide the card's text, page dots and Skip.
+    await page.evaluate(() => {
+      const sc = window.__phaser.scene.getScene('Intro');
+      const walk = (list) => {
+        for (const o of list) {
+          if (o.type === 'Text' || (o.texture && o.texture.key === 'dot')) o.setVisible(false);
+          if (o.list) walk(o.list);
+        }
+      };
+      walk(sc.children.list);
+    });
+    await wait(page, 400);
     await snap(page, 'intro');
   },
   // 0:14 Boju's shop (bubble, header, catalog and buttons hidden).
