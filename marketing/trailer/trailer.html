@@ -1,0 +1,600 @@
+<title>Moonlight Momos Trailer</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A 90-second vertical trailer for Moonlight Momos, a tiny camping trip.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Patrick+Hand&display=swap">
+<style>
+  /* Layout: one 9:16 film frame centred on a night field; the game's own art pans inside it. */
+  :root {
+    --field: #1b1d33;
+    --night: #2f3558;
+    --dusk: #5b5e86;
+    --cream: #f6efe6;
+    --ink: #4a4250;
+    --glow: #ffd59a;
+    --rose: #c07a84;
+    --lav: #b9aacb;
+    --shade: rgba(28, 24, 40, 0.55);
+    --display: 'Baloo 2', 'Nunito', 'Trebuchet MS', system-ui, sans-serif;
+    --story: 'Patrick Hand', 'Comic Neue', 'Segoe Print', 'Bradley Hand', cursive;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: radial-gradient(120% 80% at 50% 30%, var(--night) 0%, var(--field) 70%);
+    color: var(--cream);
+    font-family: var(--display);
+    display: grid;
+    place-items: center;
+    box-sizing: border-box;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 12px;
+    overflow: hidden;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .stage {
+    position: relative;
+    height: min(100%, calc((100vw - 32px) * 16 / 9));
+    aspect-ratio: 9 / 16;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 18px;
+    background: var(--night);
+    box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+    container-type: size;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .shots, .shots img, .fx, .shade, .caps, .endcard, .poster { position: absolute; inset: 0; }
+  .shots img {
+    inset: auto;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    opacity: 0;
+    will-change: transform, opacity;
+    pointer-events: none;
+  }
+  .fx { width: 100%; height: 100%; pointer-events: none; }
+  .shade {
+    pointer-events: none;
+    background:
+      linear-gradient(to bottom, rgba(27, 29, 51, 0.38) 0%, rgba(27, 29, 51, 0) 18%, rgba(27, 29, 51, 0) 58%, rgba(27, 29, 51, 0.62) 100%),
+      radial-gradient(130% 90% at 50% 45%, rgba(0, 0, 0, 0) 60%, rgba(18, 16, 30, 0.35) 100%);
+  }
+  .caps { pointer-events: none; }
+  .cap {
+    position: absolute;
+    left: 9cqw;
+    right: 9cqw;
+    bottom: 15cqh;
+    margin: 0;
+    font-family: var(--story);
+    font-size: clamp(18px, 7.4cqw, 44px);
+    line-height: 1.18;
+    text-align: center;
+    text-wrap: balance;
+    color: var(--cream);
+    text-shadow: 0 2px 0 rgba(42, 36, 54, 0.55), 0 0 18px rgba(28, 24, 40, 0.65);
+    opacity: 0;
+    will-change: opacity, transform;
+  }
+  .cap.top { bottom: auto; top: 11cqh; }
+  .cap.low { bottom: 5cqh; }
+  .endcard { display: grid; align-content: center; justify-items: center; gap: 2.4cqh; pointer-events: none; padding-bottom: 18cqh; }
+  .endcard img { width: 82cqw; max-width: 100%; opacity: 0; will-change: transform, opacity; }
+  .endcard p { margin: 0; opacity: 0; text-align: center; }
+  .endcard .tag { font-family: var(--story); font-size: clamp(18px, 7cqw, 42px); text-shadow: 0 2px 0 rgba(42, 36, 54, 0.55); }
+  .endcard .soon {
+    font-family: var(--display);
+    font-weight: 800;
+    font-size: clamp(14px, 5.2cqw, 30px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink);
+    background: var(--glow);
+    border-radius: 999px;
+    padding: 0.35em 1.1em 0.25em;
+    box-shadow: 0 0 0 3px rgba(255, 213, 154, 0.35), 0 8px 24px rgba(255, 213, 154, 0.25);
+  }
+
+  /* Poster: the page at rest, before anyone presses play. */
+  .poster {
+    display: grid;
+    align-content: end;
+    justify-items: center;
+    gap: 2.2cqh;
+    padding: 0 8cqw 9cqh;
+    background:
+      linear-gradient(to bottom, rgba(27, 29, 51, 0.05) 0%, rgba(27, 29, 51, 0.25) 45%, rgba(27, 29, 51, 0.85) 100%),
+      var(--poster-img, none) center / cover no-repeat;
+    text-align: center;
+    z-index: 5;
+  }
+  .poster img.logo { width: 84cqw; max-width: 100%; filter: drop-shadow(0 6px 14px rgba(20, 18, 34, 0.45)); }
+  .poster .kicker { margin: 0; font-family: var(--story); font-size: clamp(16px, 6cqw, 34px); }
+  .poster .meta { margin: 0; font-size: clamp(11px, 3.6cqw, 18px); letter-spacing: 0.06em; text-transform: uppercase; color: var(--lav); font-weight: 700; }
+  .poster .row { display: flex; flex-wrap: wrap; gap: 3cqw; justify-content: center; }
+  .btn {
+    font: inherit;
+    font-weight: 800;
+    font-size: clamp(14px, 4.6cqw, 22px);
+    border: 0;
+    border-radius: 999px;
+    padding: 0.7em 1.4em 0.6em;
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--glow);
+    box-shadow: 0 4px 0 #d9a861, 0 10px 24px rgba(255, 213, 154, 0.25);
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 #d9a861; }
+  .btn.quiet { background: rgba(246, 239, 230, 0.14); color: var(--cream); box-shadow: inset 0 0 0 2px rgba(246, 239, 230, 0.35); }
+  .btn:focus-visible, .ctl:focus-visible, .scrub:focus-visible { outline: 3px solid var(--glow); outline-offset: 3px; }
+  .loading { margin: 0; font-size: clamp(11px, 3.4cqw, 16px); color: var(--lav); font-variant-numeric: tabular-nums; min-height: 1.3em; }
+
+  /* Controls: hide while the film plays so a screen recording stays clean. */
+  .controls {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: 2.4cqw;
+    padding: 3cqh 4cqw 2.4cqh;
+    background: linear-gradient(to top, rgba(20, 18, 34, 0.75), rgba(20, 18, 34, 0));
+    opacity: 0;
+    transition: opacity 0.35s ease;
+    z-index: 4;
+  }
+  .stage.show-ui .controls { opacity: 1; }
+  .ctl {
+    flex: none;
+    width: max(36px, 9cqw);
+    height: max(36px, 9cqw);
+    border-radius: 50%;
+    border: 0;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    color: var(--ink);
+    background: var(--cream);
+  }
+  .ctl svg { width: 55%; height: 55%; fill: currentColor; }
+  .scrub { flex: 1; min-width: 0; accent-color: var(--glow); }
+  .time { flex: none; font-size: clamp(11px, 3.2cqw, 15px); font-variant-numeric: tabular-nums; font-weight: 700; color: var(--cream); }
+  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) {
+    .btn, .controls { transition: none; }
+  }
+</style>
+
+<main class="stage" id="stage" aria-label="Moonlight Momos trailer">
+  <div class="shots" id="shots"></div>
+  <canvas class="fx" id="fx"></canvas>
+  <div class="shade"></div>
+  <div class="caps" id="caps" aria-live="polite"></div>
+  <div class="endcard" id="endcard" aria-hidden="true">
+    <img id="endLogo" src="frames/logo.png" alt="Moonlight Momos">
+    <p class="tag" id="endTag">A tiny camping trip.</p>
+    <p class="soon" id="endSoon">Coming soon</p>
+  </div>
+
+  <section class="poster" id="poster">
+    <img class="logo" src="frames/logo.png" alt="Moonlight Momos">
+    <p class="kicker">A tiny camping trip, in 90 seconds.</p>
+    <div class="row">
+      <button class="btn" id="playSound" type="button">Play with sound</button>
+      <button class="btn quiet" id="playMuted" type="button">Play muted</button>
+    </div>
+    <p class="loading" id="loading">Loading the camp…</p>
+    <p class="meta">Every frame is the real game</p>
+  </section>
+
+  <div class="controls" id="controls">
+    <button class="ctl" id="btnPlay" type="button" aria-label="Pause"><svg viewBox="0 0 24 24" id="icoPlay"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg></button>
+    <button class="ctl" id="btnRestart" type="button" aria-label="Restart"><svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a5 5 0 1 1-5 5H5a7 7 0 1 0 7-7z"/></svg></button>
+    <input class="scrub" id="scrub" type="range" min="0" max="90000" step="100" value="0" aria-label="Position">
+    <span class="time" id="time">0:00 / 1:30</span>
+    <button class="ctl" id="btnMute" type="button" aria-label="Mute"><svg viewBox="0 0 24 24" id="icoMute"><path d="M4 9h4l5-4v14l-5-4H4zM16 8.5a5 5 0 0 1 0 7l-1.4-1.4a3 3 0 0 0 0-4.2zM18.4 6a8.5 8.5 0 0 1 0 12L17 16.6a6.5 6.5 0 0 0 0-9.2z"/></svg></button>
+  </div>
+</main>
+
+<script>
+/*@@AUDIO@@*/
+</script>
+<script>
+(function () {
+  'use strict';
+  // Anchor points (CSS px on the 1180 x 820 capture) recorded by scripts/trailer-frames.mjs.
+  var ANCHORS = /*@@ANCHORS@@*/ {};
+  var CAP_W = 1180, CAP_H = 820, ASPECT = 2360 / 1640;
+  var TOTAL = 90000;
+
+  // ---- The cut -------------------------------------------------------------
+  // cx, cy: where the frame's centre sits on the image (0..1); z: zoom (1 = fill height).
+  // fx: live layers drawn over the frame.
+  var SHOTS = [
+    { src: 'lake_glow_3', t0: 0, dur: 7400, fade: 900, from: { cx: 0.66, cy: 0.64, z: 1.2 }, to: { cx: 0.84, cy: 0.6, z: 1.4 }, fx: [{ k: 'glow', at: 'lake_glow.glow', r: 0.035 }, { k: 'fireflies', n: 10, y0: 0.5, y1: 0.85 }] },
+    { src: 'intro', t0: 7000, dur: 7400, fade: 900, from: { cx: 0.525, cy: 0.42, z: 1.42 }, to: { cx: 0.525, cy: 0.41, z: 1.52 }, fx: [{ k: 'sparkles', at: [0.59, 0.56], n: 6 }] },
+    { src: 'shop', t0: 14000, dur: 8400, fade: 900, from: { cx: 0.2, cy: 0.45, z: 1.18 }, to: { cx: 0.23, cy: 0.42, z: 1.32 }, fx: [{ k: 'motes', n: 12 }] },
+    { src: 'dawn', t0: 22000, dur: 10400, fade: 1000, from: { cx: 0.34, cy: 0.52, z: 1.06 }, to: { cx: 0.55, cy: 0.55, z: 1.14 }, fx: [{ k: 'motes', n: 18 }] },
+    { src: 'bite', t0: 32000, dur: 3400, fade: 400, from: { cx: 0.75, cy: 0.64, z: 1.2 }, to: { cx: 0.77, cy: 0.66, z: 1.32 }, fx: [] },
+    { src: 'catch', t0: 35000, dur: 3400, fade: 300, from: { cx: 0.5, cy: 0.5, z: 0.995 }, to: { cx: 0.5, cy: 0.5, z: 1.03 }, fx: [{ k: 'sparkles', at: [0.5, 0.3], n: 14 }] },
+    { src: 'forage', t0: 38000, dur: 3400, fade: 400, from: { cx: 0.42, cy: 0.6, z: 1.25 }, to: { cx: 0.46, cy: 0.6, z: 1.32 }, fx: [{ k: 'motes', n: 10 }] },
+    { src: 'kopila', t0: 41000, dur: 3400, fade: 400, from: { cx: 0.36, cy: 0.6, z: 1.4 }, to: { cx: 0.38, cy: 0.6, z: 1.52 }, fx: [] },
+    { src: 'fire', t0: 44000, dur: 8400, fade: 1000, from: { cx: 0.5, cy: 0.55, z: 1.05 }, to: { cx: 0.5, cy: 0.6, z: 1.3 }, fx: [{ k: 'fireflies', n: 26, y0: 0.35, y1: 0.85 }, { k: 'embers', at: 'fire.fire' }] },
+    { src: 'rain', t0: 52000, dur: 3900, fade: 900, from: { cx: 0.55, cy: 0.55, z: 1.1 }, to: { cx: 0.56, cy: 0.58, z: 1.2 }, fx: [{ k: 'rain', n: 90 }] },
+    { src: 'scale', t0: 55500, dur: 3100, fade: 900, from: { cx: 0.62, cy: 0.62, z: 1.35 }, to: { cx: 0.66, cy: 0.64, z: 1.5 }, fx: [{ k: 'glow', at: 'scale.scale', r: 0.05, tint: '220,232,245' }, { k: 'sparkles', at: 'scale.scale', n: 8 }] },
+    { src: 'legend', t0: 58200, dur: 6200, fade: 800, from: { cx: 0.2, cy: 0.52, z: 1.05 }, to: { cx: 0.22, cy: 0.5, z: 1.2 }, fx: [] },
+    { src: 'momos', t0: 64000, dur: 6400, fade: 800, from: { cx: 0.5, cy: 0.45, z: 1.0 }, to: { cx: 0.5, cy: 0.42, z: 1.12 }, fx: [{ k: 'sparkles', at: 'center', n: 16 }] },
+    { src: 'finale_a', t0: 70000, dur: 3000, fade: 1000, from: { cx: 0.6, cy: 0.58, z: 1.2 }, to: { cx: 0.64, cy: 0.58, z: 1.28 }, fx: [{ k: 'rain', n: 60 }] },
+    { src: 'finale_b', t0: 72600, dur: 3000, fade: 900, from: { cx: 0.7, cy: 0.56, z: 1.15 }, to: { cx: 0.72, cy: 0.52, z: 1.2 }, fx: [{ k: 'rain', n: 50 }] },
+    { src: 'finale_c', t0: 75200, dur: 3000, fade: 900, from: { cx: 0.74, cy: 0.5, z: 1.15 }, to: { cx: 0.74, cy: 0.48, z: 1.22 }, fx: [{ k: 'rain', n: 40 }] },
+    { src: 'finale_still', t0: 77800, dur: 4800, fade: 1100, from: { cx: 0.72, cy: 0.45, z: 1.12 }, to: { cx: 0.66, cy: 0.4, z: 1.0 }, fx: [{ k: 'fireflies', n: 20, y0: 0.2, y1: 0.8 }] },
+    { src: 'title', t0: 82000, dur: 8000, fade: 1400, from: { cx: 0.52, cy: 0.62, z: 1.12 }, to: { cx: 0.54, cy: 0.66, z: 1.2 }, fx: [{ k: 'fireflies', n: 30, y0: 0.4, y1: 0.95 }] },
+  ];
+
+  var CAPS = [
+    { t0: 1200, t1: 6400, text: 'Something glows on Jun Pokhari…' },
+    { t0: 7700, t1: 13500, text: 'Tuki has been saving up for a little camping trip.' },
+    { t0: 14700, t1: 21500, text: '“No rush,” says Boju. “The mountains have waited ages.”' },
+    { t0: 23000, t1: 31200, text: 'A tent, a kettle, a rod. That’s enough.' },
+    { t0: 32300, t1: 34800, text: 'Something nibbles…' },
+    { t0: 35400, t1: 37800, text: 'Pink from the cold!', low: true },
+    { t0: 38400, t1: 40800, text: 'Berries for the pot.' },
+    { t0: 41400, t1: 43800, text: 'Someone small is watching.' },
+    { t0: 45000, t1: 51400, text: 'Some nights are just for sitting.' },
+    { t0: 52700, t1: 55200, text: 'Then one night, it rains.' },
+    { t0: 55900, t1: 58000, text: 'A scale, warm as chiya. Too big for any fish.' },
+    { t0: 58700, t1: 61000, text: 'Boju knows the old story.' },
+    { t0: 61300, t1: 64000, text: 'It rises on rainy nights, for someone truly content.' },
+    { t0: 64700, t1: 69500, text: 'And it is very fond of Moonlight Momos.', top: true },
+  ];
+
+  // Audio: the game's own engine (window.MomoAudio). Ambience uses the game's contexts.
+  function amb(scene, p, rain, fire, water) { return { scene: scene, p: p, raining: rain, inTent: false, nearFire: fire, nearWater: water }; }
+  var SECTIONS = [
+    { t: 0, mood: 'night', amb: amb('camp', 1.05, false, 0, 1) },
+    { t: 7000, mood: 'day', amb: amb('intro', 0.3, false, 0, 0) },
+    { t: 14000, mood: 'day', amb: amb('shop', 0.3, false, 0, 0) },
+    { t: 22000, mood: 'day', amb: amb('camp', 0.06, false, 0.3, 0.3) },
+    { t: 32000, mood: 'day', amb: amb('camp', 0.3, false, 0, 0.9) },
+    { t: 38000, mood: 'day', amb: amb('camp', 0.45, false, 0.1, 0.2) },
+    { t: 41000, mood: 'day', amb: amb('camp', 0.85, false, 0.3, 0.2) },
+    { t: 44000, mood: 'night', amb: amb('camp', 1.1, false, 0.95, 0.1) },
+    { t: 52000, mood: 'rain', amb: amb('camp', 1.1, true, 0.4, 0.2) },
+    { t: 55500, mood: 'rain', amb: amb('camp', 0.04, false, 0, 0.7) },
+    { t: 58200, mood: 'rain', amb: amb('shop', 0.3, false, 0, 0) },
+    { t: 64000, mood: 'rain', amb: amb('camp', 1.1, true, 0.8, 0.2) },
+    { t: 69000, mood: 'finale', amb: amb('camp', 1.1, true, 0, 1) },
+    { t: 82000, mood: 'finale', amb: amb('camp', 1.1, false, 0.8, 0.3) },
+  ];
+  var SFX = [
+    { t: 2400, id: 'twinkle', v: 0.5 },
+    { t: 9400, id: 'coin', v: 0.6 },
+    { t: 15200, id: 'tinkle', v: 0.35 },
+    { t: 24600, id: 'tok', v: 0.7 },
+    { t: 25300, id: 'tok', v: 0.7 },
+    { t: 26100, id: 'spring', v: 0.5 },
+    { t: 33000, id: 'bite', v: 0.9 },
+    { t: 35000, id: 'splash', v: 0.6 },
+    { t: 35400, id: 'fanfare', v: 0.8 },
+    { t: 38700, id: 'basket', v: 0.8 },
+    { t: 41500, id: 'squeak', v: 0.5 },
+    { t: 56300, id: 'chime', v: 0.6 },
+    { t: 58900, id: 'eep', v: 0.5 },
+    { t: 64600, id: 'pop', v: 0.6 },
+    { t: 65000, id: 'sparkle', v: 0.6 },
+    { t: 72800, id: 'splash', v: 0.5 },
+    { t: 76000, id: 'rumble', v: 0.7 },
+    { t: 78400, id: 'chime', v: 0.6 },
+    { t: 82800, id: 'twinkle', v: 0.6 },
+  ];
+
+  // ---- Elements ------------------------------------------------------------
+  var stage = document.getElementById('stage');
+  var shotsEl = document.getElementById('shots');
+  var capsEl = document.getElementById('caps');
+  var canvas = document.getElementById('fx');
+  var ctx = canvas.getContext('2d');
+  var poster = document.getElementById('poster');
+  var loadingEl = document.getElementById('loading');
+  var endLogo = document.getElementById('endLogo');
+  var endTag = document.getElementById('endTag');
+  var endSoon = document.getElementById('endSoon');
+  var scrub = document.getElementById('scrub');
+  var timeEl = document.getElementById('time');
+  var btnPlay = document.getElementById('btnPlay');
+  var btnMute = document.getElementById('btnMute');
+  var icoPlay = document.getElementById('icoPlay');
+  var icoMute = document.getElementById('icoMute');
+
+  var reduced = false;
+  try { reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) {}
+
+  var imgs = SHOTS.map(function (s) {
+    var im = new Image();
+    im.decoding = 'async';
+    im.alt = '';
+    im.src = 'frames/' + s.src + '.jpg';
+    shotsEl.appendChild(im);
+    return im;
+  });
+  stage.style.setProperty('--poster-img', 'url("frames/title.jpg")');
+  var loaded = 0;
+  imgs.forEach(function (im) {
+    var done = function () {
+      loaded++;
+      loadingEl.textContent = loaded < imgs.length ? 'Loading the camp… ' + loaded + ' / ' + imgs.length : 'Ready when you are.';
+    };
+    if (im.complete) done(); else { im.onload = done; im.onerror = done; }
+  });
+
+  var capEls = CAPS.map(function (c) {
+    var p = document.createElement('p');
+    p.className = 'cap' + (c.top ? ' top' : '') + (c.low ? ' low' : '');
+    p.textContent = c.text;
+    capsEl.appendChild(p);
+    return p;
+  });
+
+  // ---- Geometry --------------------------------------------------------------
+  var W = 0, H = 0, DPR = 1;
+  function resize() {
+    var r = stage.getBoundingClientRect();
+    W = r.width; H = r.height;
+    DPR = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(W * DPR);
+    canvas.height = Math.round(H * DPR);
+    imgs.forEach(function (im) { im.style.height = H + 'px'; im.style.width = H * ASPECT + 'px'; });
+    render(t);
+  }
+  function clamp(v, a, b) { return v < a ? a : v > b ? b : v; }
+  function ease(x) { return 0.5 - 0.5 * Math.cos(Math.PI * clamp(x, 0, 1)); }
+  function lerp(a, b, k) { return a + (b - a) * k; }
+  function view(s, tt) {
+    var k = reduced ? 0.5 : ease((tt - s.t0) / s.dur);
+    var z = lerp(s.from.z, s.to.z, k);
+    var cx = lerp(s.from.cx, s.to.cx, k);
+    var cy = lerp(s.from.cy, s.to.cy, k);
+    var ih = H * z, iw = ih * ASPECT;
+    var x = clamp(W / 2 - cx * iw, W - iw, 0);
+    var y = clamp(H / 2 - cy * ih, H - ih, 0);
+    return { x: x, y: y, z: z, iw: iw, ih: ih };
+  }
+  /** Capture point (CSS px on 1180 x 820) to stage px under a view. */
+  function toStage(v, px, py) { return { x: v.x + (px / CAP_W) * v.iw, y: v.y + (py / CAP_H) * v.ih }; }
+  function anchor(name) {
+    if (Array.isArray(name)) return { x: name[0] * CAP_W, y: name[1] * CAP_H };
+    if (name === 'center') return { x: CAP_W / 2, y: CAP_H / 2 };
+    var parts = name.split('.'), a = ANCHORS[parts[0]];
+    var p = a && a[parts[1]];
+    return p ? { x: p.x, y: p.y } : null;
+  }
+
+  // ---- Live layers -----------------------------------------------------------
+  function rnd(i, s) { var x = Math.sin(i * 127.1 + s * 311.7) * 43758.5453; return x - Math.floor(x); }
+  function drawFx(s, v, a, tt) {
+    var local = (tt - s.t0) / 1000;
+    var scale = H / 720;
+    (s.fx || []).forEach(function (f) {
+      var n = reduced ? Math.ceil((f.n || 10) / 2) : f.n || 10;
+      if (f.k === 'fireflies') {
+        for (var i = 0; i < n; i++) {
+          var bx = rnd(i, 1) * W, by = lerp(f.y0, f.y1, rnd(i, 2)) * H;
+          var x = bx + Math.sin(local * (0.3 + rnd(i, 3) * 0.5) + i) * 18 * scale;
+          var y = by + Math.cos(local * (0.25 + rnd(i, 4) * 0.4) + i * 2) * 12 * scale;
+          var pulse = 0.35 + 0.65 * Math.max(0, Math.sin(local * (1 + rnd(i, 5)) + i * 1.7));
+          glowDot(x, y, (3 + rnd(i, 6) * 3) * scale, '255,213,154', a * pulse);
+        }
+      } else if (f.k === 'motes') {
+        for (var j = 0; j < n; j++) {
+          var mx = ((rnd(j, 7) * W + local * (8 + rnd(j, 8) * 10) * scale) % (W + 20)) - 10;
+          var my = (rnd(j, 9) * 0.7 + 0.1) * H + Math.sin(local * 0.6 + j) * 8 * scale;
+          glowDot(mx, my, 1.6 * scale, '255,240,214', a * 0.35);
+        }
+      } else if (f.k === 'rain') {
+        ctx.strokeStyle = 'rgba(214,224,240,' + (0.38 * a).toFixed(3) + ')';
+        ctx.lineWidth = 1.3 * DPR;
+        ctx.beginPath();
+        for (var r = 0; r < n; r++) {
+          var len = (18 + rnd(r, 10) * 16) * scale;
+          var speed = (620 + rnd(r, 11) * 260) * scale;
+          var rx = rnd(r, 12) * (W + 60) - 30;
+          var ry = ((rnd(r, 13) * H + local * speed) % (H + len)) - len;
+          ctx.moveTo(rx * DPR, ry * DPR);
+          ctx.lineTo((rx - len * 0.18) * DPR, (ry + len) * DPR);
+        }
+        ctx.stroke();
+      } else if (f.k === 'glow') {
+        var p = anchor(f.at); if (!p) return;
+        var q = toStage(v, p.x, p.y);
+        var br = 0.7 + 0.3 * Math.sin(local * 1.4);
+        glowDot(q.x, q.y, f.r * W * v.z * (0.9 + 0.2 * br), f.tint || '220,232,245', a * 0.75 * br);
+      } else if (f.k === 'sparkles') {
+        var sp = anchor(f.at); if (!sp) return;
+        var c = toStage(v, sp.x, sp.y);
+        for (var k = 0; k < n; k++) {
+          var ang = rnd(k, 14) * Math.PI * 2, dist = (40 + rnd(k, 15) * 120) * scale * v.z;
+          var tw = Math.max(0, Math.sin(local * (2 + rnd(k, 16) * 2) + k * 2.1));
+          star(c.x + Math.cos(ang) * dist, c.y + Math.sin(ang) * dist * 0.7, (3 + rnd(k, 17) * 4) * scale, a * tw);
+        }
+      } else if (f.k === 'embers') {
+        var e = anchor(f.at); if (!e) return;
+        var o = toStage(v, e.x, e.y);
+        for (var m = 0; m < 14; m++) {
+          var life = (local * (0.5 + rnd(m, 18) * 0.4) + rnd(m, 19)) % 1;
+          var ex = o.x + (rnd(m, 20) - 0.5) * 40 * scale * v.z + Math.sin(life * 6 + m) * 6 * scale;
+          var ey = o.y - life * 150 * scale * v.z;
+          glowDot(ex, ey, 2.2 * scale, '255,190,120', a * (1 - life));
+        }
+      }
+    });
+  }
+  function glowDot(x, y, r, rgb, al) {
+    if (al <= 0.01) return;
+    var g = ctx.createRadialGradient(x * DPR, y * DPR, 0, x * DPR, y * DPR, r * 3 * DPR);
+    g.addColorStop(0, 'rgba(' + rgb + ',' + al.toFixed(3) + ')');
+    g.addColorStop(0.25, 'rgba(' + rgb + ',' + (al * 0.55).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(' + rgb + ',0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x * DPR, y * DPR, r * 3 * DPR, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  function star(x, y, r, al) {
+    if (al <= 0.02) return;
+    ctx.fillStyle = 'rgba(255,240,214,' + al.toFixed(3) + ')';
+    ctx.beginPath();
+    for (var i = 0; i < 8; i++) {
+      var rr = i % 2 ? r * 0.28 : r, an = (i / 8) * Math.PI * 2;
+      ctx.lineTo((x + Math.cos(an) * rr) * DPR, (y + Math.sin(an) * rr) * DPR);
+    }
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // ---- Render ----------------------------------------------------------------
+  var t = 0;
+  function render(tt) {
+    if (!W) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (var i = 0; i < SHOTS.length; i++) {
+      var s = SHOTS[i], next = SHOTS[i + 1];
+      var end = next ? next.t0 + next.fade : TOTAL + 1;
+      var im = imgs[i];
+      if (tt < s.t0 || tt >= end) { if (im.style.opacity !== '0') im.style.opacity = '0'; continue; }
+      var a = i === 0 ? 1 : clamp((tt - s.t0) / s.fade, 0, 1);
+      var v = view(s, tt);
+      im.style.transform = 'translate3d(' + v.x.toFixed(2) + 'px,' + v.y.toFixed(2) + 'px,0) scale(' + v.z.toFixed(4) + ')';
+      im.style.opacity = a.toFixed(3);
+      var fxA = a * (next && tt > next.t0 ? 1 - clamp((tt - next.t0) / next.fade, 0, 1) : 1);
+      drawFx(s, v, fxA, tt);
+    }
+    for (var c = 0; c < CAPS.length; c++) {
+      var cp = CAPS[c], el = capEls[c];
+      var ca = clamp((tt - cp.t0) / 450, 0, 1) * clamp((cp.t1 - tt) / 450, 0, 1);
+      el.style.opacity = ca.toFixed(3);
+      el.style.transform = reduced ? 'none' : 'translateY(' + ((1 - clamp((tt - cp.t0) / 700, 0, 1)) * 10).toFixed(1) + 'px)';
+    }
+    var e0 = 82600;
+    var la = clamp((tt - e0) / 1200, 0, 1);
+    endLogo.style.opacity = la.toFixed(3);
+    endLogo.style.transform = reduced ? 'none' : 'scale(' + (0.92 + 0.08 * ease(la)).toFixed(4) + ')';
+    endTag.style.opacity = clamp((tt - 84200) / 900, 0, 1).toFixed(3);
+    endSoon.style.opacity = clamp((tt - 85800) / 900, 0, 1).toFixed(3);
+    scrub.value = String(Math.round(tt));
+    timeEl.textContent = fmt(tt) + ' / ' + fmt(TOTAL);
+  }
+  function fmt(ms) { var s = Math.floor(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+
+  // ---- Audio -----------------------------------------------------------------
+  var A = window.MomoAudio || null;
+  var soundOn = false, unlocked = false, musicLevel = 0.75;
+  function vol(level) { if (A && unlocked) A.volume(level * musicLevel, level * 0.85, level * 0.6); }
+  function sectionAt(tt) { var s = SECTIONS[0]; for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].t <= tt) s = SECTIONS[i]; return s; }
+  var lastSection = null;
+  function syncAudio(tt, prev) {
+    if (!A || !unlocked || !soundOn) return;
+    var s = sectionAt(tt);
+    if (s !== lastSection) {
+      lastSection = s;
+      A.mood(s.mood);
+      A.ambience(s.amb);
+    }
+    if (prev !== null && tt > prev) for (var i = 0; i < SFX.length; i++) if (SFX[i].t > prev && SFX[i].t <= tt) A.sfx(SFX[i].id, SFX[i].v);
+    // Music fades out over the last few seconds.
+    if (tt > 86500) vol(clamp((TOTAL - tt) / 3500, 0, 1));
+  }
+
+  // ---- Playback --------------------------------------------------------------
+  var playing = false, lastNow = 0, raf = 0, uiTimer = 0;
+  function frame(now) {
+    if (!playing) return;
+    var prev = t;
+    t = Math.min(TOTAL, t + (now - lastNow));
+    lastNow = now;
+    render(t);
+    syncAudio(t, prev);
+    if (t >= TOTAL) { stop(true); return; }
+    raf = requestAnimationFrame(frame);
+  }
+  function play() {
+    if (t >= TOTAL) t = 0;
+    playing = true;
+    poster.hidden = true;
+    lastNow = performance.now();
+    lastSection = null;
+    if (soundOn) vol(1);
+    syncAudio(t, null);
+    setIcon();
+    raf = requestAnimationFrame(frame);
+    pokeUi();
+  }
+  function stop(ended) {
+    playing = false;
+    cancelAnimationFrame(raf);
+    setIcon();
+    if (unlocked) vol(0);
+    stage.classList.add('show-ui');
+    if (ended) {
+      poster.hidden = false;
+      document.getElementById('playSound').textContent = 'Play again';
+      document.getElementById('playMuted').textContent = 'Again, muted';
+    }
+  }
+  function setIcon() {
+    btnPlay.setAttribute('aria-label', playing ? 'Pause' : 'Play');
+    icoPlay.innerHTML = playing ? '<path d="M7 5h4v14H7zM13 5h4v14h-4z"/>' : '<path d="M8 5v14l11-7z"/>';
+    btnMute.setAttribute('aria-label', soundOn ? 'Mute' : 'Unmute');
+    icoMute.innerHTML = soundOn
+      ? '<path d="M4 9h4l5-4v14l-5-4H4zM16 8.5a5 5 0 0 1 0 7l-1.4-1.4a3 3 0 0 0 0-4.2zM18.4 6a8.5 8.5 0 0 1 0 12L17 16.6a6.5 6.5 0 0 0 0-9.2z"/>'
+      : '<path d="M4 9h4l5-4v14l-5-4H4zM16.6 9.4 18 8l2 2 2-2 1.4 1.4-2 2 2 2L22 14.8l-2-2-2 2-1.4-1.4 2-2z"/>';
+  }
+  function start(withSound) {
+    soundOn = withSound;
+    if (withSound && A) { A.unlock(); unlocked = true; }
+    t = t >= TOTAL ? 0 : t;
+    play();
+  }
+  function pokeUi() {
+    stage.classList.add('show-ui');
+    clearTimeout(uiTimer);
+    if (playing) uiTimer = setTimeout(function () { stage.classList.remove('show-ui'); }, 2200);
+  }
+
+  document.getElementById('playSound').addEventListener('click', function () { t = 0; start(true); });
+  document.getElementById('playMuted').addEventListener('click', function () { t = 0; start(false); });
+  btnPlay.addEventListener('click', function (ev) { ev.stopPropagation(); playing ? stop(false) : play(); pokeUi(); });
+  document.getElementById('btnRestart').addEventListener('click', function (ev) { ev.stopPropagation(); t = 0; lastSection = null; if (unlocked && soundOn) vol(1); render(0); if (!playing) play(); pokeUi(); });
+  btnMute.addEventListener('click', function (ev) {
+    ev.stopPropagation();
+    soundOn = !soundOn;
+    if (soundOn && A && !unlocked) { A.unlock(); unlocked = true; }
+    lastSection = null;
+    if (soundOn) { vol(1); syncAudio(t, null); } else vol(0);
+    setIcon();
+    pokeUi();
+  });
+  scrub.addEventListener('input', function () { t = Number(scrub.value); lastSection = null; render(t); if (playing) { lastNow = performance.now(); syncAudio(t, null); } pokeUi(); });
+  stage.addEventListener('pointerdown', function (ev) { if (poster.hidden && !ev.target.closest('.controls')) pokeUi(); });
+  document.addEventListener('keydown', function (ev) {
+    if (ev.target && ev.target.tagName === 'INPUT') return;
+    if (ev.code === 'Space') { ev.preventDefault(); if (poster.hidden) { playing ? stop(false) : play(); } else start(true); pokeUi(); }
+    else if (ev.key === 'r' || ev.key === 'R') { t = 0; lastSection = null; render(0); if (!playing && poster.hidden) play(); }
+    else if (ev.key === 'm' || ev.key === 'M') btnMute.click();
+  });
+  window.addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+  setIcon();
+  resize();
+  render(0);
+  // For review renders: jump to a moment without playing.
+  window.__trailer = { seek: function (ms) { poster.hidden = true; t = ms; render(t); }, total: TOTAL };
+})();
+</script>
