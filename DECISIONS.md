@@ -120,3 +120,4 @@ All 74 accents from WORLD.md section 8 were added to `ACCENTS` in `src/palette.t
 | Captions | Storybook lines in Patrick Hand, upper third | Bottom captions | Reels covers the bottom fifth with its own UI |
 | Sound | The game's audio engine built to an IIFE and inlined (`audio-entry.ts`, 58 KB); "Play with sound" starts it inside the tap | Silent with captions | 90 s silent drags; browsers only allow audio after a tap |
 | Finale cuts | 350-450 ms cuts between finale frames | 1 s dissolves | Kuhiro sits in different places frame to frame; long dissolves ghosted a double guardian |
+| Frames in the artifact | Embedded in the page as data URIs (5.5 MB page) | Separate image files beside the page | The claude.ai viewer did not resolve the page's relative image paths: the first publish showed captions and fireflies over blank frames |

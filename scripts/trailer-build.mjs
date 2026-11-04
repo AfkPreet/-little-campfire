@@ -2,7 +2,7 @@
 // marketing/trailer/site/: the game's audio engine as an inlined IIFE, the
 // capture anchors inlined, and only the frames the cut uses, recompressed.
 // Run scripts/trailer-frames.mjs first.
-import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import { build } from 'vite';
@@ -48,5 +48,12 @@ w = 1000
 im = im.resize((w, round(im.height * w / im.width)), Image.LANCZOS)
 im.save(sys.argv[2], optimize=True)
 `, path.join(FRAMES, 'logo.png'), path.join(SITE, 'frames', 'logo.png')]);
+// Embed every frame as a data URI (the artifact viewer does not resolve relative image paths).
+const frames = {};
+for (const f of readdirSync(path.join(SITE, 'frames'))) {
+  const name = f.replace(/\.(jpg|png)$/, '');
+  frames[name] = `data:image/${f.endsWith('.png') ? 'png' : 'jpeg'};base64,${readFileSync(path.join(SITE, 'frames', f)).toString('base64')}`;
+}
+html = html.replace('/*@@FRAMES@@*/ null', () => JSON.stringify(frames));
 writeFileSync(path.join(SITE, 'index.html'), html);
-console.log(`trailer built: ${slots.size} frames + logo → ${path.relative(ROOT, SITE)}`);
+console.log(`trailer built: ${slots.size} frames + logo embedded, page ${(Buffer.byteLength(html) / 1048576).toFixed(1)} MB → ${path.relative(ROOT, SITE)}`);

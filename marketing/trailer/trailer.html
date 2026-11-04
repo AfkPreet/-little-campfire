@@ -180,13 +180,13 @@
   <div class="shade"></div>
   <div class="caps" id="caps" aria-live="polite"></div>
   <div class="endcard" id="endcard" aria-hidden="true">
-    <img id="endLogo" src="frames/logo.png" alt="Moonlight Momos">
+    <img id="endLogo" data-frame="logo" alt="Moonlight Momos">
     <p class="tag" id="endTag">A tiny camping trip.</p>
     <p class="soon" id="endSoon">Coming soon</p>
   </div>
 
   <section class="poster" id="poster">
-    <img class="logo" src="frames/logo.png" alt="Moonlight Momos">
+    <img class="logo" data-frame="logo" alt="Moonlight Momos">
     <p class="kicker">A tiny camping trip, in 90 seconds.</p>
     <div class="row">
       <button class="btn" id="playSound" type="button">Play with sound</button>
@@ -213,6 +213,11 @@
   'use strict';
   // Anchor points (CSS px on the 1180 x 820 capture) recorded by scripts/trailer-frames.mjs.
   var ANCHORS = /*@@ANCHORS@@*/ {};
+  // Frames are embedded as data URIs by scripts/trailer-build.mjs: the artifact
+  // viewer does not resolve relative image paths. The fallback serves the template locally.
+  var FRAME_SRC = /*@@FRAMES@@*/ null;
+  function frameUrl(name) { return FRAME_SRC && FRAME_SRC[name] ? FRAME_SRC[name] : 'frames/' + name + (name === 'logo' ? '.png' : '.jpg'); }
+  Array.prototype.forEach.call(document.querySelectorAll('img[data-frame]'), function (im) { im.src = frameUrl(im.getAttribute('data-frame')); });
   var CAP_W = 1180, CAP_H = 820, ASPECT = 2360 / 1640;
   var TOTAL = 90000;
 
@@ -323,11 +328,11 @@
     if (s.lift) im.style.filter = 'brightness(' + s.lift + ') saturate(1.05)';
     im.decoding = 'async';
     im.alt = '';
-    im.src = 'frames/' + s.src + '.jpg';
+    im.src = frameUrl(s.src);
     shotsEl.appendChild(im);
     return im;
   });
-  stage.style.setProperty('--poster-img', 'url("frames/fire.jpg")');
+  stage.style.setProperty('--poster-img', 'url("' + frameUrl('fire') + '")');
   var loaded = 0;
   imgs.forEach(function (im) {
     var done = function () {
